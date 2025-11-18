@@ -42,11 +42,7 @@ public final class Constants {
     // Whether simulation should be on red alliance
     public static final boolean simIsRedAlliance = false;
 
-    public static final boolean armEnabled = true;
-    public static final boolean elevatorEnabled = true;
-    public static final boolean wristEnabled = true;
+   
     public static final boolean swerveEnabled = true;
-    public static final boolean hangEnabled = true;
-    public static final boolean intakeEnabled = true;
     public static final boolean visionEnabled = true;
 }
