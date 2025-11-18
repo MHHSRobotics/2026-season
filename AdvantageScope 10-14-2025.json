@@ -1,0 +1,482 @@
+{
+  "hubs": [
+    {
+      "x": 109,
+      "y": 45,
+      "width": 1666,
+      "height": 944,
+      "state": {
+        "sidebar": {
+          "width": 500,
+          "expanded": [
+            "/Shuffleboard/PID Controller",
+            "/SmartDashboard/Elevator",
+            "/DS/joystick0/povs",
+            "/DS/joystick0/buttons",
+            "/NT",
+            "/NT/FMSInfo",
+            "/NT/SmartDashboard",
+            "/NT/SmartDashboard/intake",
+            "/NT/SmartDashboard/Reefs",
+            "/NT/SmartDashboard/Reefs/Scoring",
+            "/NT/SmartDashboard/Field",
+            "/NT/SmartDashboard/Module 0",
+            "/NT/SmartDashboard/Module 0/RootSpeed",
+            "/NT/SmartDashboard/Module 0/RootDirection",
+            "/NT/SmartDashboard/Module 0/dims",
+            "/NT/SmartDashboard/driveState/moduleStates",
+            "/NT/SmartDashboard/driveState/moduleTargets",
+            "/NT/SmartDashboard/driveState/pose",
+            "/NT/SmartDashboard/elevator",
+            "/NT/SmartDashboard/driveState",
+            "/SmartDashboard/wrist/motor",
+            "/SmartDashboard/sim/target/wrist/translation",
+            "/SmartDashboard/sim/target/wrist/rotation",
+            "/SmartDashboard/sim/target/wrist/rotation/q",
+            "/NT/SmartDashboard/wrist",
+            "/NT/SmartDashboard/wrist/controller",
+            "/NT/SmartDashboard/wrist/motor",
+            "/SmartDashboard/elevator/encoder",
+            "/SmartDashboard/elevator/encoder2",
+            "/SmartDashboard/elevator/encoder3",
+            "/SmartDashboard/elevator/encoder1",
+            "/SmartDashboard/elevator/rightMotor",
+            "/SmartDashboard/wrist/encoder",
+            "/SmartDashboard/arm/encoder",
+            "/NT/SmartDashboard/arm/controller",
+            "/NT/SmartDashboard/arm",
+            "/NT/SmartDashboard/arm/encoder",
+            "/NT/SmartDashboard/arm/motor",
+            "/SmartDashboard/elevator/motor1",
+            "/SmartDashboard/elevator/motor2",
+            "/SmartDashboard/driveState/module0/driveMotor",
+            "/SmartDashboard/driveState/module0/steerMotor",
+            "/NT/SmartDashboard/elevator/encoder",
+            "/NT/SmartDashboard/mem",
+            "/Phoenix6",
+            "/Phoenix6/TalonFX-1",
+            "/Pose",
+            "/Pose/robotPose",
+            "/SmartDashboard/Module0",
+            "/SmartDashboard/Module1",
+            "/SmartDashboard/Module2",
+            "/SmartDashboard/Module3",
+            "/SmartDashboard/robotPose",
+            "/SmartDashboard/robotPose/rotation",
+            "/SmartDashboard/robotPose/rotation/q",
+            "/SmartDashboard/driveState",
+            "/SmartDashboard/sim",
+            "/SmartDashboard/sim/real",
+            "/SmartDashboard/sim/real/pose",
+            "/Shuffleboard/.recording",
+            "/Shuffleboard/.metadata",
+            "/LiveWindow/.status",
+            "/SmartDashboard/Alerts",
+            "/SmartDashboard/Alerts/errors",
+            "/SmartDashboard/Alerts/infos",
+            "/SmartDashboard/Alerts/warnings",
+            "/AdvantageKit/Arm/ArmPID",
+            "/AdvantageKit/NetworkInputs/AdvantageKit",
+            "/AdvantageKit/NetworkInputs/AdvantageKit/Arm",
+            "/AdvantageKit/NetworkInputs/Arm/ArmPID",
+            "/AdvantageKit/RealOutputs/Arm/SysId",
+            "/AdvantageKit/RealOutputs/Arm/Mech",
+            "/AdvantageKit/SystemStats/3v3Rail",
+            "/Arm/ArmPID",
+            "/AdvantageKit/Arm/Motor",
+            "/AdvantageKit/Arm/Encoder",
+            "/Arm/Encoder",
+            "/Arm/Motor",
+            "/RealOutputs",
+            "/RealOutputs/Arm",
+            "/NetworkInputs",
+            "/NetworkInputs/Arm",
+            "/NetworkInputs/Arm/ArmPID",
+            "/RealOutputs/Arm/SysId",
+            "/SmartDashboard/Encoders",
+            "/SmartDashboard/Motors",
+            "/SmartDashboard/Swerve Drive",
+            "/SmartDashboard/Swerve Field",
+            "/SmartDashboard/swerve",
+            "/SmartDashboard/swerve/measuredStates",
+            "/NT/AdvantageKit",
+            "/NT/AdvantageKit/Arm",
+            "/NT/AdvantageKit/Arm/Motor",
+            "/AdvantageKit/Drive/Module0",
+            "/AdvantageKit/Drive/Module0/AngleEncoder",
+            "/AdvantageKit/Drive/Module0/AngleMotor",
+            "/AdvantageKit/Drive/Module0/DriveMotor",
+            "/Tuning",
+            "/Tuning/Arm",
+            "/AdvantageKit/RealOutputs/Arm/Mech/DRoot",
+            "/AdvantageKit/SystemStats/CANBus",
+            "/AdvantageKit/SystemStats/5vRail",
+            "/AdvantageKit/SystemStats/6vRail",
+            "/AdvantageKit/Elevator/LeftMotor",
+            "/AdvantageKit/Wrist/Motor",
+            "/AdvantageKit/Wrist/Encoder",
+            "/AdvantageKit/RadioStatus/Status",
+            "/AdvantageKit/Turret/Encoder",
+            "/AdvantageKit/Turret/Motor",
+            "/AdvantageKit/Shooter/Motor",
+            "/AdvantageKit/Drive/LeftMotor1",
+            "/AdvantageKit/Swerve/Gyro",
+            "/AdvantageKit/NetworkInputs/Arm",
+            "/AdvantageKit/RealOutputs/Odometry/Robot",
+            "/AdvantageKit/RealOutputs/Odometry/Robot/rotation",
+            "/AdvantageKit/RealOutputs/Odometry/Robot/translation",
+            "/AdvantageKit/RealOutputs/Arm/Visualization/ArmRoot/Arm",
+            "/AdvantageKit/RealOutputs/Elevator/Visualization",
+            "/AdvantageKit/RealOutputs/Swerve/Visualization",
+            "/AdvantageKit/Swerve/Module0",
+            "/AdvantageKit/Swerve/Module0/DriveMotor",
+            "/AdvantageKit/Swerve/Module0/AngleMotor",
+            "/AdvantageKit/Swerve/Module0/AngleEncoder",
+            "/AdvantageKit/Vision/TestCamera/Poses/0/translation",
+            "/AdvantageKit/Vision/TestCamera/Poses/1/rotation",
+            "/AdvantageKit/Vision/TestCamera/Poses/1/translation",
+            "/AdvantageKit/NetworkInputs/Swerve",
+            "/AdvantageKit/Vision/TestCamera",
+            "/AdvantageKit/Vision/TestCamera/TestPose/rotation",
+            "/AdvantageKit/Vision/TestCamera/TestPose/rotation/q",
+            "/AdvantageKit/Vision/TestCamera/TestPose/translation",
+            "/AdvantageKit/Vision/TestCamera/TestPose",
+            "/AdvantageKit/Vision/TestCamera/Poses",
+            "/AdvantageKit/Vision/TestCamera/Poses/0",
+            "/AdvantageKit/Vision/TestCamera/Poses/0/rotation",
+            "/AdvantageKit/RealOutputs/Arm/Visualization",
+            "/AdvantageKit/Vision/BRAT/Poses/0/rotation",
+            "/AdvantageKit/Vision/BRAT/Poses/0/translation",
+            "/AdvantageKit/Vision/BRAT/TestPose/translation",
+            "/AdvantageKit/Vision/BRAT/TestPose/rotation",
+            "/AdvantageKit/Vision/BRAT/Poses/1/rotation",
+            "/AdvantageKit/Vision/BRAT/Poses/1/translation",
+            "/AdvantageKit/Vision/BRAT/TestPose",
+            "/AdvantageKit/Vision/BRAT/TestPose/rotation/q",
+            "/AdvantageKit/Vision/BRAT/Poses",
+            "/AdvantageKit/Vision/BRAT/Poses/0",
+            "/AdvantageKit/Vision/BLAT/TestPose",
+            "/AdvantageKit/Vision/BLAT/TestPose/translation",
+            "/AdvantageKit/Vision/BLAT/TestPose/rotation",
+            "/AdvantageKit/Vision/BLAT/TestPose/rotation/q",
+            "/AdvantageKit/Vision/BLAT",
+            "/photonvision",
+            "/AdvantageKit",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/Vision",
+            "/AdvantageKit/Vision/BLAT/Poses",
+            "/AdvantageKit/Vision/BLAT/Poses/0",
+            "/AdvantageKit/Vision/BLAT/Poses/0/translation",
+            "/AdvantageKit/Vision/BLAT/Poses/1/translation",
+            "/AdvantageKit/RealOutputs/Elevator",
+            "/AdvantageKit/RealOutputs/Wrist",
+            "/AdvantageKit/RealOutputs/Logger",
+            "/AdvantageKit/RealOutputs/LoggedRobot"
+          ]
+        },
+        "tabs": {
+          "selected": 2,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "8ollye3ktes8gj72s5tar94q3ik8vdkx",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 3,
+              "title": "Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/3DField/Chassis",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "Varsam"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/3DField/ElevatorMiddle",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/3DField/ElevatorInner",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/3DField/Arm",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/3DField/Wrist",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "NT:/AdvantageKit/Vision/TestCamera/TestPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "variant": "Coral"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/Vision/BLAT/Poses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "2025 KitBot",
+                      "color": "#00ff00"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "origin": "blue"
+              },
+              "controllerUUID": "7c84cbql25etra2rrc3iumzvnrapx2bg",
+              "renderer": {
+                "cameraIndex": -2,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  0.5035799023841012,
+                  1.9073479128657538,
+                  -2.3785191703894832
+                ],
+                "cameraTarget": [
+                  -1.1426738184375553,
+                  -0.5562339624997047,
+                  0.4528148381293095
+                ]
+              },
+              "controlsHeight": 360
+            },
+            {
+              "type": 1,
+              "title": "Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Wrist/Motor/Position",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Wrist/Motor/Setpoint",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Wrist/Motor/TorqueCurrent",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "15zyd707o0jbgugb50s90bq6e2kylnf3",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 5,
+              "title": "Console",
+              "controller": "NT:/AdvantageKit/RealOutputs/Console",
+              "controllerUUID": "4f9qwigohqlhyurp00jyxzysa7aqxvtg",
+              "renderer": {
+                "highlight": false
+              },
+              "controlsHeight": 0
+            },
+            {
+              "type": 1,
+              "title": "Performance",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/UserCodeMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/GCTimeMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Arm/Motor/SetpointVelocity",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/Arm/Motor/Velocity",
+                    "logType": "Number",
+                    "visible": false,
+                    "options": {
+                      "color": "#80588e",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "rp149su7x3li070ji1xo7hw7m0g6m9ga",
+              "renderer": null,
+              "controlsHeight": 220
+            },
+            {
+              "type": 10,
+              "title": "Swerve",
+              "controller": [
+                {
+                  "type": "mechanism",
+                  "logKey": "NT:/AdvantageKit/RealOutputs/Swerve/Visualization",
+                  "logType": "Mechanism2d",
+                  "visible": true,
+                  "options": {}
+                }
+              ],
+              "controllerUUID": "ujmioaolp42een40j6973km61hyf8zqu",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 10,
+              "title": "Arm",
+              "controller": [
+                {
+                  "type": "mechanism",
+                  "logKey": "NT:/AdvantageKit/RealOutputs/Arm/Visualization",
+                  "logType": "Mechanism2d",
+                  "visible": true,
+                  "options": {}
+                }
+              ],
+              "controllerUUID": "gdxxfuqk8o0g6p9v61p5kdi9lpdn4qfr",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 10,
+              "title": "Wrist",
+              "controller": [
+                {
+                  "type": "mechanism",
+                  "logKey": "NT:/AdvantageKit/RealOutputs/Wrist/Visualization",
+                  "logType": "Mechanism2d",
+                  "visible": true,
+                  "options": {}
+                }
+              ],
+              "controllerUUID": "5gczk9nuu6dan268b1kkis98ogcn122i",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 10,
+              "title": "Elevator",
+              "controller": [
+                {
+                  "type": "mechanism",
+                  "logKey": "NT:/AdvantageKit/RealOutputs/Elevator/Visualization",
+                  "logType": "Mechanism2d",
+                  "visible": true,
+                  "options": {}
+                }
+              ],
+              "controllerUUID": "i8cy2ltwjbg91bc6fr7cv569nyc09wh2",
+              "renderer": null,
+              "controlsHeight": 200
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.1"
+}
