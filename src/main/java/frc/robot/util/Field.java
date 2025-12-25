@@ -1,6 +1,7 @@
 package frc.robot.util;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 
 public class Field {
     // Field dimensions
@@ -16,12 +17,7 @@ public class Field {
     public static final FieldSymmetry symm = FieldSymmetry.C2;
 
     // Get the april tag field layout for the current season
-    public static AprilTagFieldLayout layout;
+    public static AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
-    public static double botRadius; // Distance from center of bot to edge of the bot (meters)
-
-    // Extra gap between the bot and reef
-
-    // Calculate all scoring poses around the reef
-
+    public static double botRadius = 0.7366; // Distance from center of bot to edge of the bot (meters)
 }
