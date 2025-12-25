@@ -4,13 +4,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
 
 public class SwerveCommands {
@@ -109,31 +107,5 @@ public class SwerveCommands {
     // Command to set pose target
     public Command setPoseTarget(FieldPose2d pose) {
         return new InstantCommand(() -> swerve.setPoseTarget(pose), swerve).withName("swerve set pose target");
-    }
-
-    // side = 0 aligns to left, side = 1 aligns to right
-    public Command alignToSide(int side) {
-        return new InstantCommand(
-                        () -> {
-                            Pose2d pose = swerve.getPose();
-                            FieldPose2d closest = null;
-                            double closestDist = Double.MAX_VALUE;
-                            for (int i = 0; i < Field.scoringPoses.length; i++) {
-                                // Get field pose scoring at the given branch
-                                FieldPose2d scoringPose = Field.scoringPoses[i][side];
-                                // Get the Pose2d that's flipped if on red alliance
-                                Pose2d otherPose = scoringPose.get();
-                                // Get the distance between bot position and the physical Pose2d
-                                double dist = otherPose.getTranslation().getDistance(pose.getTranslation());
-                                // If dist is the new closest set the closest pose to scoringPose
-                                if (dist < closestDist) {
-                                    closestDist = dist;
-                                    closest = scoringPose;
-                                }
-                            }
-                            swerve.setPoseTarget(closest);
-                        },
-                        swerve)
-                .withName(side == 0 ? "align to left" : "align to right");
     }
 }

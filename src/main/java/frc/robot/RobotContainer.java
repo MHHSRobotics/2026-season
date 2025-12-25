@@ -230,10 +230,6 @@ public class RobotContainer {
 
         controller.create().onTrue(swerveCommands.resetGyro());
 
-        controller.povLeft().onTrue(swerveCommands.alignToSide(0));
-
-        controller.povRight().onTrue(swerveCommands.alignToSide(1));
-
         controller
                 .axisMagnitudeGreaterThan(0, Swerve.Constants.moveDeadband)
                 .or(controller.axisMagnitudeGreaterThan(1, Swerve.Constants.moveDeadband))
@@ -286,20 +282,6 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
-
-        // PID down test
-
-        testController
-                .cross()
-                .and(() -> testControllerManual.get().equals("PID"))
-                .and(() -> testControllerChooser.get().equals("Swerve"))
-                .onTrue(swerveCommands.alignToSide(0)); // Align to nearest left reef
-
-        testController
-                .circle()
-                .and(() -> testControllerManual.get().equals("PID"))
-                .and(() -> testControllerChooser.get().equals("Swerve"))
-                .onTrue(swerveCommands.alignToSide(1)); // Align to nearest right reef
     }
 
     // Bindings for manual control of each of the subsystems
