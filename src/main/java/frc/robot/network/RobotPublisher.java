@@ -10,16 +10,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 
 import org.littletonrobotics.junction.Logger;
 
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.hang.Hang;
-import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.subsystems.wrist.Wrist;
 
 // Class that publishes 3D robot data to AdvantageScope
 public class RobotPublisher {
-  
+
     private Swerve swerve;
 
     public RobotPublisher(Swerve swerve) {
@@ -39,8 +34,7 @@ public class RobotPublisher {
         // Convert chassisPos to Pose3d, other links need relative positions
         Pose3d mainPos = new Pose3d(chassisPos.getTranslation(), chassisPos.getRotation());
 
-        
         // Subtract pi/2 because the arm was vertical in Fusion
-        
+
     }
 }

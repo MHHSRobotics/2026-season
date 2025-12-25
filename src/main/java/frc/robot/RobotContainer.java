@@ -7,21 +7,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
-import frc.robot.commands.ArmCommands;
-import frc.robot.commands.ElevatorCommands;
-import frc.robot.commands.HangCommands;
-import frc.robot.commands.IntakeCommands;
-import frc.robot.commands.SuperstructureCommands;
 import frc.robot.commands.SwerveCommands;
-import frc.robot.commands.WristCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -31,20 +23,12 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.arm.ArmSim;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorSubsystemSim;
-import frc.robot.subsystems.hang.Hang;
-import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
-import frc.robot.subsystems.wrist.Wrist;
-import frc.robot.subsystems.wrist.WristSim;
 import frc.robot.util.Alerts;
 
 public class RobotContainer {
@@ -99,12 +83,7 @@ public class RobotContainer {
     private void initSubsystems() {
         // Initialize subsystems in order: arm, elevator, wrist, intake, hang, swerve
         // Each subsystem is created immediately after its motor/encoder initialization
-        
 
-        
-        
-
-        
         if (Constants.swerveEnabled) {
             // Initialize swerve motors, encoders, and gyro
             MotorIO flDriveMotor, flAngleMotor, frDriveMotor, frAngleMotor;
@@ -246,10 +225,8 @@ public class RobotContainer {
 
     private void configureBindings() {
         /* ---- Main controller bindings ---- */
-        
 
         // controller.R2().onTrue(ssCommands.lowAlgaePosition());
-        
 
         controller.create().onTrue(swerveCommands.resetGyro());
 
@@ -293,7 +270,6 @@ public class RobotContainer {
                         () -> Swerve.Constants.swerveFieldCentric.get()));
 
         // Manual duty cycle forward test
-        
 
         testController
                 .cross()
@@ -303,7 +279,7 @@ public class RobotContainer {
                 .onFalse(swerveCommands.stop());
 
         // Manual duty cycle backward test
-        
+
         testController
                 .circle()
                 .and(() -> testControllerManual.get().equals("Manual"))
@@ -312,14 +288,13 @@ public class RobotContainer {
                 .onFalse(swerveCommands.stop());
 
         // PID down test
-        
+
         testController
                 .cross()
                 .and(() -> testControllerManual.get().equals("PID"))
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.alignToSide(0)); // Align to nearest left reef
 
-       
         testController
                 .circle()
                 .and(() -> testControllerManual.get().equals("PID"))
@@ -330,7 +305,7 @@ public class RobotContainer {
     // Bindings for manual control of each of the subsystems
     public void configureManualBindings() {
         // Square + circle control arm
-        
+
     }
 
     // Refresh drive and manual controller disconnect alerts
@@ -352,8 +327,7 @@ public class RobotContainer {
                     .setPositionOutput(-2, 0)
                     .andThen(new WaitCommand(3))
                     .andThen(swerveCommands.setPositionOutput(0, 0));
-        }
-         else {
+        } else {
             Alerts.create("Unknown auto specified", AlertType.kWarning);
             return new InstantCommand();
         }

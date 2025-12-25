@@ -42,7 +42,6 @@ public final class Constants {
     // Whether simulation should be on red alliance
     public static final boolean simIsRedAlliance = false;
 
-   
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = true;
 }
