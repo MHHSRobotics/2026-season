@@ -27,6 +27,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
@@ -60,7 +61,7 @@ public class MotorIOTalonFX extends MotorIO {
     private PositionTorqueCurrentFOC positionCurrent = new PositionTorqueCurrentFOC(0);
     private VelocityVoltage velocityVoltage = new VelocityVoltage(0);
     private VelocityTorqueCurrentFOC velocityCurrent = new VelocityTorqueCurrentFOC(0);
-    private Follower follow = new Follower(0, false);
+    private Follower follow = new Follower(0, MotorAlignmentValue.Aligned);
 
     private enum ControlType {
         NEUTRAL,
@@ -319,7 +320,8 @@ public class MotorIOTalonFX extends MotorIO {
     // Note: Only CTRE motors on the same CAN bus can be followed.
     @Override
     public void follow(int motorId, boolean invert) {
-        follow.withMasterID(motorId).withOpposeMasterDirection(invert);
+        follow.withLeaderID(motorId)
+                .withMotorAlignment(invert ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned);
         currentControl = ControlType.FOLLOW;
     }
 
