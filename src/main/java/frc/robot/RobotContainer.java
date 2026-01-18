@@ -81,7 +81,7 @@ public class RobotContainer {
     }
 
     private void initSubsystems() {
-        // Initialize subsystems in order: arm, elevator, wrist, intake, hang, swerve
+        // Initialize subsystems in order: hopper, swerve, vision
         // Each subsystem is created immediately after its motor/encoder initialization
 
         if (Constants.swerveEnabled) {
