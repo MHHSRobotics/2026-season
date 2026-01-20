@@ -23,6 +23,7 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -33,7 +34,7 @@ import frc.robot.util.Alerts;
 
 public class RobotContainer {
     private Swerve swerve;
-
+    private Hopper hopper;
     private SwerveCommands swerveCommands;
 
     // Main drive controller
@@ -83,6 +84,23 @@ public class RobotContainer {
     private void initSubsystems() {
         // Initialize subsystems in order: hopper, swerve, vision
         // Each subsystem is created immediately after its motor/encoder initialization
+
+        if (Constants.hopperEnabled) {
+            // Initialize hopper motor
+            MotorIO hopperMotor;
+            switch (Constants.currentMode) {
+                case REAL:
+                case SIM:
+                    hopperMotor = new MotorIOTalonFX(Hopper.Constants.motorId, "hopper motor", "Hopper/Motor");
+                    break;
+
+                default:
+                    hopperMotor = new MotorIO("hopper motor", "Hopper/Motor");
+                    break;
+            }
+            // Create hopper subsystem
+            hopper = new Hopper(hopperMotor);
+        }
 
         if (Constants.swerveEnabled) {
             // Initialize swerve motors, encoders, and gyro
