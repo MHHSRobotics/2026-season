@@ -30,7 +30,7 @@ public class Hopper extends SubsystemBase {
         public static final int motorId = 0;
         // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
-        
+
         public static final double statorCurrentLimit = 60; // (amps) limit on motor torque output for intake loads
         public static final double supplyCurrentLimit = 50; // (amps) normal current limit pulled from battery
         public static final double supplyCurrentLowerLimit = 35; // (amps) reduce to this if over limit for some time

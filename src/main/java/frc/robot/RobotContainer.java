@@ -14,6 +14,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
 import frc.robot.commands.SwerveCommands;
+import frc.robot.commands.HopperCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -36,6 +37,8 @@ public class RobotContainer {
     private Swerve swerve;
     private Hopper hopper;
     private SwerveCommands swerveCommands;
+    private HopperCommands hopperCommands;
+
 
     // Main drive controller
     private final CommandPS5Controller controller = new CommandPS5Controller(0);
@@ -239,6 +242,7 @@ public class RobotContainer {
 
     private void initCommands() {
         swerveCommands = new SwerveCommands(swerve);
+        hopperCommands = new HopperCommands(hopper);
     }
 
     private void configureBindings() {
