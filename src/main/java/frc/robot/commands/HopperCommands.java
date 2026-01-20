@@ -12,14 +12,17 @@ public class HopperCommands {
         this.hopper = hopper;
     }
 
+    // Spins hopper motor toward the shooter
     public Command rollForward() {
         return new InstantCommand(() -> hopper.setRollerForward(), hopper);
     }
 
+    // Spins hopper motor toward the intake to keep fuel in
     public Command rollReverse() {
         return new InstantCommand(() -> hopper.setRollerReverse(), hopper);
     }
 
+    // Stops hopper motor from spinning
     public Command stop() {
         return new InstantCommand(() -> hopper.setRollerStop(), hopper);
     }
