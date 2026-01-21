@@ -13,12 +13,20 @@ public class GroundIntakeCommands {
         this.groundIntake = gIntake;
     }
 
-    public Command setSpeed(double radPerSecond) {
-        return new InstantCommand(() -> groundIntake.setForward(radPerSecond));
-    }
-
     // Stops all swerve output
     public Command stop() {
         return new InstantCommand(() -> groundIntake.stop());
+    }
+
+    public Command upSet(double radPerSecond) {
+        return new InstantCommand(() -> groundIntake.setPointUp(radPerSecond));
+    }
+
+    public Command setForward(double radPerSecond) {
+        return new InstantCommand(() -> groundIntake.setForward(radPerSecond));
+    }
+
+    public Command setLocked(boolean brake) {
+        return new InstantCommand(() -> groundIntake.setLocked(brake));
     }
 }
