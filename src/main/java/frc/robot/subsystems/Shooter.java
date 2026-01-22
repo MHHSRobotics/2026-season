@@ -1,20 +1,20 @@
 package frc.robot.subsystems;
 
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
 public class Shooter extends SubsystemBase {
     public static class Constants {
-        //Subsystem Constants
-        public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/locked",true);
-        public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/disabled",true);
+        // Subsystem Constants
+        public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/locked", true);
+        public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/disabled", true);
 
         // feedConstants
         public static final boolean feedBraking = false;
@@ -32,7 +32,7 @@ public class Shooter extends SubsystemBase {
 
         public static final double flyVelocityWithVoltage = 0.0;
 
-        //pitchEncoderConstants
+        // pitchEncoderConstants
         public static final boolean pitchEncoderInverted = false;
         public static final double pitchEncoderGearRatio = 0.0;
 
@@ -44,16 +44,16 @@ public class Shooter extends SubsystemBase {
         public static final double pitchToSensorRatio = 0.0;
         public static final double pitchOffset = 0.0;
 
-        public static final LoggedNetworkNumber pitchMaxAccel = new LoggedNetworkNumber("Pitch/maxAccel" , 0.0);
-        public static final LoggedNetworkNumber pitchMaxVelocity = new LoggedNetworkNumber("Pitch/maxVelocity",0.0);
+        public static final LoggedNetworkNumber pitchMaxAccel = new LoggedNetworkNumber("Pitch/maxAccel", 0.0);
+        public static final LoggedNetworkNumber pitchMaxVelocity = new LoggedNetworkNumber("Pitch/maxVelocity", 0.0);
 
-        public static final LoggedNetworkNumber kP = new LoggedNetworkNumber("Pitch/kP",0.0);
-        public static final LoggedNetworkNumber kI = new LoggedNetworkNumber("Pitch/kI",0.0);
-        public static final LoggedNetworkNumber kD = new LoggedNetworkNumber("Pitch/kD",0.0);
-        public static final LoggedNetworkNumber kG = new LoggedNetworkNumber("Pitch/kG",0.0);
-        public static final LoggedNetworkNumber kS = new LoggedNetworkNumber("Pitch/kS",0.0);
-        public static final LoggedNetworkNumber kV = new LoggedNetworkNumber("Pitch/kV",0.0);
-        public static final LoggedNetworkNumber kA = new LoggedNetworkNumber("Pitch/kA",0.0);
+        public static final LoggedNetworkNumber kP = new LoggedNetworkNumber("Pitch/kP", 0.0);
+        public static final LoggedNetworkNumber kI = new LoggedNetworkNumber("Pitch/kI", 0.0);
+        public static final LoggedNetworkNumber kD = new LoggedNetworkNumber("Pitch/kD", 0.0);
+        public static final LoggedNetworkNumber kG = new LoggedNetworkNumber("Pitch/kG", 0.0);
+        public static final LoggedNetworkNumber kS = new LoggedNetworkNumber("Pitch/kS", 0.0);
+        public static final LoggedNetworkNumber kV = new LoggedNetworkNumber("Pitch/kV", 0.0);
+        public static final LoggedNetworkNumber kA = new LoggedNetworkNumber("Pitch/kA", 0.0);
     }
 
     private MotorIO feed;
@@ -86,7 +86,6 @@ public class Shooter extends SubsystemBase {
         pitch.setStatorCurrentLimit(Constants.pitchStatorCurrentLimit);
         pitch.connectEncoder(pitchEncoder, Constants.pitchToSensorRatio);
         pitch.setOffset(Constants.pitchOffset);
-        
     }
 
     public void setLocked(boolean locked) {
@@ -134,7 +133,7 @@ public class Shooter extends SubsystemBase {
     }
 
     @Override
-    public void periodic(){
+    public void periodic() {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
 
