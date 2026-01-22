@@ -28,19 +28,14 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
-import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
-import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import frc.robot.Constants.Mode;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIO.CameraIOInputs;
 import frc.robot.io.GyroIO;
@@ -59,11 +54,11 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 // - Angular speeds in radians per second (rad/s)
 public class Swerve extends SubsystemBase {
     public static class Constants {
-        // How far the stick must move from center before the robot starts translating (0 to 1 range)
-        public static final double moveDeadband = 0.1;
+        public static final double moveDeadband =
+                0.1; // How far the stick must move from center before the robot starts translating (0 to 1 range)
 
-        // How far the stick must move from center before the robot starts turning (0 to 1 range)
-        public static final double turnDeadband = 0.1;
+        public static final double turnDeadband =
+                0.1; // How far the stick must move from center before the robot starts turning (0 to 1 range)
 
         // Smart shortcut to make small moves easier: raise input to a power.
         // Example: stick = 0.5, movePow = 2 -> 0.5^2 = 0.25 (finer control near center)
@@ -89,7 +84,7 @@ public class Swerve extends SubsystemBase {
 
         // Initial pose of the bot in simulation
         public static final FieldPose2d simInitialPose =
-                new FieldPose2d(new Pose2d(7, Field.fieldWidth / 2, Rotation2d.k180deg));
+                new FieldPose2d(new Pose2d(3.5, Field.fieldWidth / 2, Rotation2d.k180deg));
 
         public static final LoggedNetworkBoolean swerveLocked =
                 new LoggedNetworkBoolean("Swerve/Locked", true); // Toggle to enable braking when stopped
@@ -125,18 +120,6 @@ public class Swerve extends SubsystemBase {
         public static final LoggedNetworkNumber rotationkP = new LoggedNetworkNumber("Swerve/RotKP", 0.4);
         public static final LoggedNetworkNumber rotationkD = new LoggedNetworkNumber("Swerve/RotKD", 0);
         public static final LoggedNetworkNumber rotationkI = new LoggedNetworkNumber("Swerve/RotKI", 0);
-
-        public static final LoggedNetworkNumber drivekP = new LoggedNetworkNumber("Swerve/DriveKP", 0.1);
-        public static final LoggedNetworkNumber drivekD = new LoggedNetworkNumber("Swerve/DriveKD", 0);
-        public static final LoggedNetworkNumber drivekS = new LoggedNetworkNumber("Swerve/DriveKS", 0.18);
-        public static final LoggedNetworkNumber drivekV = new LoggedNetworkNumber("Swerve/DriveKV", 0.124);
-        public static final LoggedNetworkNumber drivekA = new LoggedNetworkNumber("Swerve/DriveKA", 0);
-
-        public static final LoggedNetworkNumber steerkP = new LoggedNetworkNumber("Swerve/SteerKP", 0);
-        public static final LoggedNetworkNumber steerkD = new LoggedNetworkNumber("Swerve/SteerKD", 0);
-        public static final LoggedNetworkNumber steerkS = new LoggedNetworkNumber("Swerve/SteerKS", 0);
-        public static final LoggedNetworkNumber steerkV = new LoggedNetworkNumber("Swerve/SteerKV", 0);
-        public static final LoggedNetworkNumber steerkA = new LoggedNetworkNumber("Swerve/SteerKA", 0);
     }
 
     public static class VisionConstants {
@@ -180,15 +163,6 @@ public class Swerve extends SubsystemBase {
     // On-screen drawing of the drive to show module directions and speeds
     private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
 
-    // Base points for each module drawing
-    private final LoggedMechanismRoot2d[] roots = new LoggedMechanismRoot2d[4];
-
-    // Bars showing the speed (length) and direction (angle) of each module
-    private final LoggedMechanismLigament2d[] speeds = new LoggedMechanismLigament2d[4];
-
-    // Bars showing the target speed and direction of each module
-    private final LoggedMechanismLigament2d[] targets = new LoggedMechanismLigament2d[4];
-
     // Holonomic controller for auto-align
     private final PIDController xController;
     private final PIDController yController;
@@ -222,15 +196,7 @@ public class Swerve extends SubsystemBase {
         this.gyro = gyro;
         this.modules = new SwerveModule[] {fl, fr, bl, br};
 
-        Pose2d initialPose;
-        if (frc.robot.Constants.currentMode != Mode.SIM) {
-            // If we're on a physical robot, initial pose estimate will be in the center of the field, since alliance
-            // probably hasn't loaded yet
-            initialPose = new Pose2d(Field.fieldLength / 2, Field.fieldWidth / 2, Rotation2d.kZero);
-        } else {
-            // If in sim, get Constants.simInitialPose and flip it on red alliance
-            initialPose = Constants.simInitialPose.get();
-        }
+        Pose2d initialPose = new Pose2d(Field.fieldLength / 2, Field.fieldWidth / 2, Rotation2d.kZero);
 
         estimator = new SwerveDrivePoseEstimator(
                 kinematics,
@@ -256,9 +222,6 @@ public class Swerve extends SubsystemBase {
 
         // Send field visual to SmartDashboard
         SmartDashboard.putData("Field", field);
-
-        // Set up the on-screen visualization for the four modules
-        initializeMechs();
 
         // Reset the gyro
         resetGyro();
@@ -350,7 +313,7 @@ public class Swerve extends SubsystemBase {
 
     // Tell the modules to reach a target chassis speed: vx (m/s), vy (m/s), omega (rad/s)
     private void setChassisSpeeds(ChassisSpeeds speeds) {
-        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, frc.robot.Constants.loopTime);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, Constants.maxLinearSpeedMetersPerSec);
         for (int i = 0; i < 4; i++) {
@@ -558,6 +521,21 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/PIDPosition", pidPosition);
         Logger.recordOutput("Swerve/PIDRotation", pidRotation);
 
+        SwerveModuleState[] states = new SwerveModuleState[4];
+        for (int i = 0; i < modules.length; i++) {
+            states[i] = modules[i].getState();
+        }
+        Logger.recordOutput("Swerve/States", states);
+        Logger.recordOutput("Swerve/ChassisSpeeds", kinematics.toChassisSpeeds(states));
+        SwerveModuleState[] targetStates = new SwerveModuleState[4];
+        for (int i = 0; i < modules.length; i++) {
+            targetStates[i] = modules[i].getTargetState();
+        }
+        Logger.recordOutput("Swerve/TargetStates", targetStates);
+        Logger.recordOutput("Swerve/TargetChassisSpeeds", kinematics.toChassisSpeeds(targetStates));
+        Logger.recordOutput("Swerve/EstimatedPose", getPose());
+        Logger.recordOutput("Swerve/Rotation", getRotation());
+
         // Get measurements from all connected cameras and add them to the pose estimator
         for (CameraIO cam : cameras) {
             cam.update();
@@ -584,58 +562,9 @@ public class Swerve extends SubsystemBase {
         // Feed odometry to the pose estimator (time, heading, and wheel distances)
         estimator.updateWithTime(RobotController.getFPGATime() / 1000000., gyroAngle, getModulePositions());
 
-        // Update the module speed/direction drawing
-        refreshVisualization();
-
         Logger.recordOutput("Swerve/Visualization", mech);
 
         // Update field pose
         field.setRobotPose(getPose());
-    }
-
-    // Make a white line between two modules in the visualization so the robot outline is visible
-    private void connect(int firstIndex, int secondIndex) {
-        Translation2d[] moduleTranslations = getModuleTranslations();
-        Translation2d diff = moduleTranslations[secondIndex].minus(moduleTranslations[firstIndex]);
-        roots[firstIndex].append(new LoggedMechanismLigament2d(
-                "Connection" + firstIndex + "" + secondIndex,
-                diff.getNorm(),
-                diff.getAngle().getDegrees(),
-                2,
-                new Color8Bit(Color.kWhite)));
-    }
-
-    private void initializeMechs() {
-        Translation2d[] moduleTranslations = getModuleTranslations();
-        // Create roots at the four corners of the swerve bot drawing
-        for (int i = 0; i < 4; i++) {
-            LoggedMechanismRoot2d newRoot =
-                    mech.getRoot("Root" + i, 1.5 + moduleTranslations[i].getX(), 1.5 + moduleTranslations[i].getY());
-            roots[i] = newRoot;
-            // The speed lines are added below after we draw the connections
-        }
-        // Connect each pair of swerve modules to outline the drivetrain
-        connect(0, 1);
-        connect(0, 2);
-        connect(1, 3);
-        connect(2, 3);
-        for (int i = 0; i < 4; i++) {
-            speeds[i] = roots[i].append(new LoggedMechanismLigament2d("Speed" + i, 0, 0, 8, new Color8Bit(Color.kRed)));
-            targets[i] =
-                    roots[i].append(new LoggedMechanismLigament2d("Target" + i, 0, 0, 3, new Color8Bit(Color.kYellow)));
-        }
-    }
-
-    // Make the visualization match the real module speeds and directions
-    private void refreshVisualization() {
-        SwerveModuleState[] states = getModuleStates();
-        SwerveModuleState[] targetStates = getModuleTargets();
-        for (int i = 0; i < 4; i++) {
-            // Scale length down so it fits nicely on screen
-            speeds[i].setLength(states[i].speedMetersPerSecond / 12);
-            speeds[i].setAngle(states[i].angle);
-            targets[i].setLength(targetStates[i].speedMetersPerSecond / 12);
-            targets[i].setAngle(targetStates[i].angle);
-        }
     }
 }
