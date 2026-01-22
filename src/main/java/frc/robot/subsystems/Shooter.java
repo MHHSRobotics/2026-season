@@ -1,5 +1,10 @@
 package frc.robot.subsystems;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
+
+import com.ctre.phoenix6.signals.GravityTypeValue;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.io.EncoderIO;
@@ -7,6 +12,10 @@ import frc.robot.io.MotorIO;
 
 public class Shooter extends SubsystemBase {
     public static class Constants {
+        //Subsystem Constants
+        public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/locked",true);
+        public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/disabled",true);
+
         // feedConstants
         public static final boolean feedBraking = false;
         public static final double feedGearRatio = 0.0;
@@ -23,20 +32,28 @@ public class Shooter extends SubsystemBase {
 
         public static final double flyVelocityWithVoltage = 0.0;
 
+        //pitchEncoderConstants
+        public static final boolean pitchEncoderInverted = false;
+        public static final double pitchEncoderGearRatio = 0.0;
+
         // pitchConstants
         public static final boolean pitchBraking = false;
+        public static final GravityTypeValue pitchFeedForward = GravityTypeValue.Arm_Cosine;
         public static final double pitchGearRatio = 0.0;
         public static final double pitchStatorCurrentLimit = 0.0;
         public static final double pitchToSensorRatio = 0.0;
         public static final double pitchOffset = 0.0;
 
-        public static final double kP = 0.0;
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
-        public static final double kG = 0.0;
-        public static final double kS = 0.0;
-        public static final double kV = 0.0;
-        public static final double kA = 0.0;
+        public static final LoggedNetworkNumber pitchMaxAccel = new LoggedNetworkNumber("Pitch/maxAccel" , 0.0);
+        public static final LoggedNetworkNumber pitchMaxVelocity = new LoggedNetworkNumber("Pitch/maxVelocity",0.0);
+
+        public static final LoggedNetworkNumber kP = new LoggedNetworkNumber("Pitch/kP",0.0);
+        public static final LoggedNetworkNumber kI = new LoggedNetworkNumber("Pitch/kI",0.0);
+        public static final LoggedNetworkNumber kD = new LoggedNetworkNumber("Pitch/kD",0.0);
+        public static final LoggedNetworkNumber kG = new LoggedNetworkNumber("Pitch/kG",0.0);
+        public static final LoggedNetworkNumber kS = new LoggedNetworkNumber("Pitch/kS",0.0);
+        public static final LoggedNetworkNumber kV = new LoggedNetworkNumber("Pitch/kV",0.0);
+        public static final LoggedNetworkNumber kA = new LoggedNetworkNumber("Pitch/kA",0.0);
     }
 
     private MotorIO feed;
@@ -50,6 +67,9 @@ public class Shooter extends SubsystemBase {
         this.pitch = pitchIO;
         this.pitchEncoder = pitchEncoderIO;
 
+        pitchEncoder.setInverted(Constants.pitchEncoderInverted);
+        pitchEncoder.setGearRatio(Constants.pitchEncoderGearRatio);
+
         feed.setBraking(Constants.feedBraking);
         feed.setGearRatio(Constants.feedGearRatio);
         feed.setStatorCurrentLimit(Constants.feedStatorCurrentLimit);
@@ -61,17 +81,12 @@ public class Shooter extends SubsystemBase {
         fly.setOffset(Constants.flyOffset);
 
         pitch.setBraking(Constants.pitchBraking);
+        pitch.setFeedforwardType(Constants.pitchFeedForward);
         pitch.setGearRatio(Constants.pitchGearRatio);
         pitch.setStatorCurrentLimit(Constants.pitchStatorCurrentLimit);
         pitch.connectEncoder(pitchEncoder, Constants.pitchToSensorRatio);
         pitch.setOffset(Constants.pitchOffset);
-        pitch.setkP(Constants.kP);
-        pitch.setkI(Constants.kI);
-        pitch.setkD(Constants.kD);
-        pitch.setkG(Constants.kG);
-        pitch.setkS(Constants.kS);
-        pitch.setkV(Constants.kV);
-        pitch.setkA(Constants.kA);
+        
     }
 
     public void setLocked(boolean locked) {
@@ -116,5 +131,21 @@ public class Shooter extends SubsystemBase {
 
     public void pitchStop() {
         pitch.setVoltage(0);
+    }
+
+    @Override
+    public void periodic(){
+        setLocked(Constants.shooterLocked.get());
+        setDisabled(Constants.shooterDisabled.get());
+
+        pitch.setkP(Constants.kP.get());
+        pitch.setkI(Constants.kI.get());
+        pitch.setkD(Constants.kD.get());
+        pitch.setkG(Constants.kG.get());
+        pitch.setkS(Constants.kS.get());
+        pitch.setkV(Constants.kV.get());
+        pitch.setkA(Constants.kA.get());
+        pitch.setMaxAccel(Constants.pitchMaxAccel.get());
+        pitch.setMaxVelocity(Constants.pitchMaxVelocity.get());
     }
 }
