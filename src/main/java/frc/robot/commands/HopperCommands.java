@@ -7,6 +7,7 @@ import frc.robot.subsystems.hopper.Hopper;
 
 public class HopperCommands {
     public Hopper hopper;
+
     public HopperCommands(Hopper hopper) {
         this.hopper = hopper;
     }
@@ -17,6 +18,7 @@ public class HopperCommands {
     }
 
     // Spins hopper motor toward the intake to keep fuel in
+
     public Command rollReverse() {
         return new InstantCommand(() -> hopper.setRollerReverse(), hopper);
     }

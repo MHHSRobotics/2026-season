@@ -59,4 +59,7 @@ public class Hopper extends SubsystemBase {
     public RollerState getRollerState() {
         return rollerState;
     }
+
+    @Override
+    public void periodic() {}
 }
