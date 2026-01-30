@@ -40,7 +40,7 @@ public class GroundIntake extends SubsystemBase {
     public void setForward(double radPerSecond) {
         currentState = MechanicalSwitchState.NEUTRAL;
         setLocked(false);
-        while (connectForwardLimitSwitch(id) == false){
+        while (connectForwardLimitSwitch(id) == false) {
             hingeMotor.setDutyCycle(radPerSecond);
         }
         stop();
@@ -51,7 +51,7 @@ public class GroundIntake extends SubsystemBase {
     public void setDown(double radPerSecond) {
         currentState = MechanicalSwitchState.NEUTRAL;
         setLocked(false);
-        while (connectDownLimitSwitch(id1) == false){
+        while (connectDownLimitSwitch(id1) == false) {
             hingeMotor.setDutyCycle(radPerSecond);
         }
         stop();
