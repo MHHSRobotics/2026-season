@@ -18,12 +18,12 @@ public class GroundIntakeCommands {
         return new InstantCommand(() -> groundIntake.stop());
     }
 
-    public Command upSet(double radPerSecond) {
-        return new InstantCommand(() -> groundIntake.setPointUp(radPerSecond));
-    }
-
     public Command setForward(double radPerSecond) {
         return new InstantCommand(() -> groundIntake.setForward(radPerSecond));
+    }
+
+    public Command setDown(double radPerSecond) {
+        return new InstantCommand(() -> groundIntake.setDown(radPerSecond));
     }
 
     public Command setLocked(boolean brake) {

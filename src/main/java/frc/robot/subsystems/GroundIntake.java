@@ -14,6 +14,7 @@ public class GroundIntake extends SubsystemBase {
     public static class Constants {
         public static enum MechanicalSwitchState {
             HIGH_POS,
+            LOW_POS,
             NEUTRAL
         }
     }
@@ -22,15 +23,8 @@ public class GroundIntake extends SubsystemBase {
     private TalonFXConfiguration config = new TalonFXConfiguration();
     private MotorIO hingeMotor;
     private int id = 0;
+    private int id1 = 0;
     private SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
-
-    public void setLocked(boolean brake) {
-        hingeMotor.setBraking(brake);
-    }
-
-    public void setDisabled(boolean brake) {
-        hingeMotor.setBraking(brake);
-    }
 
     public GroundIntake(
             MotorIO hingeMotorIO,
@@ -39,31 +33,47 @@ public class GroundIntake extends SubsystemBase {
         hingeMotor = hingeMotorIO;
     }
 
+    public void setLocked(boolean brake) {
+        hingeMotor.setBraking(brake);
+    }
+
     public void setForward(double radPerSecond) {
-        hingeMotor.setVelocityWithVoltage(radPerSecond);
         currentState = MechanicalSwitchState.NEUTRAL;
-        if (connectForwardLimitSwitch(id) == false) {
-            setLocked(false);
+        setLocked(false);
+        while (connectForwardLimitSwitch(id) == false){
+            hingeMotor.setDutyCycle(radPerSecond);
         }
+        stop();
+        setLocked(true);
+        currentState = MechanicalSwitchState.HIGH_POS;
+    }
+
+    public void setDown(double radPerSecond) {
+        currentState = MechanicalSwitchState.NEUTRAL;
+        setLocked(false);
+        while (connectDownLimitSwitch(id1) == false){
+            hingeMotor.setDutyCycle(radPerSecond);
+        }
+        stop();
+        setLocked(true);
+        currentState = MechanicalSwitchState.LOW_POS;
     }
 
     public void stop() {
-        hingeMotor.setVoltage(0);
+        hingeMotor.setDutyCycle(0);
     }
 
-    public boolean connectForwardLimitSwitch(int id) {
+    public boolean connectForwardLimitSwitch(int i) {
         config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
         config.HardwareLimitSwitch.ForwardLimitEnable = true;
-        config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = id;
+        config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = i;
         return (config.HardwareLimitSwitch.ForwardLimitEnable);
     }
 
-    public void setPointUp(double radiansPerSecond) {
-        setForward(radiansPerSecond);
-        connectForwardLimitSwitch(id);
-        if (connectForwardLimitSwitch(id) == true) {
-            currentState = MechanicalSwitchState.HIGH_POS;
-            setLocked(true);
-        }
+    public boolean connectDownLimitSwitch(int i1) {
+        config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
+        config.HardwareLimitSwitch.ForwardLimitEnable = true;
+        config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = i1;
+        return (config.HardwareLimitSwitch.ForwardLimitEnable);
     }
 }
