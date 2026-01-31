@@ -76,4 +76,7 @@ public class GroundIntake extends SubsystemBase {
         config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = i1;
         return (config.HardwareLimitSwitch.ForwardLimitEnable);
     }
+
+    @Override
+    public void periodic(){}
 }
