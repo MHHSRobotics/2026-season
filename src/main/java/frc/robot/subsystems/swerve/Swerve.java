@@ -160,9 +160,6 @@ public class Swerve extends SubsystemBase {
 
     private List<CameraIO> cameras = new ArrayList<>();
 
-    // On-screen drawing of the drive to show module directions and speeds
-    private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
-
     // Holonomic controller for auto-align
     private final PIDController xController;
     private final PIDController yController;
@@ -560,8 +557,6 @@ public class Swerve extends SubsystemBase {
         }
         // Feed odometry to the pose estimator (time, heading, and wheel distances)
         estimator.updateWithTime(RobotController.getFPGATime() / 1000000., gyroAngle, getModulePositions());
-
-        Logger.recordOutput("Swerve/Visualization", mech);
 
         // Update field pose
         field.setRobotPose(getPose());
