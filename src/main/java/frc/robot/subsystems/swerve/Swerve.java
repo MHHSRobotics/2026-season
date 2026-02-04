@@ -428,8 +428,7 @@ public class Swerve extends SubsystemBase {
 
     // Gets rotation error to the goal in radians
     public double getRotationError() {
-        return Math.abs(getPose().getRotation().getRadians()
-                - targetPose.get().getRotation().getRadians());
+        return Math.abs(getPose().getRotation().minus(targetPose.get().getRotation()).getRadians());
     }
 
     @Override
