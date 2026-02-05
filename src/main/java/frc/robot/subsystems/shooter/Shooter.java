@@ -71,18 +71,18 @@ public class Shooter extends SubsystemBase {
         pitchEncoder.setGearRatio(Constants.pitchEncoderGearRatio);
 
         feed.setBraking(Constants.feedBraking);
-        feed.setGearRatio(Constants.feedGearRatio);
+        feed.connectInternalSensor(Constants.feedGearRatio);
         feed.setStatorCurrentLimit(Constants.feedStatorCurrentLimit);
         feed.setOffset(Constants.feedOffset);
 
         fly.setBraking(Constants.flyBraking);
-        fly.setGearRatio(Constants.flyGearRatio);
+        fly.connectInternalSensor(Constants.flyGearRatio);
         fly.setStatorCurrentLimit(Constants.flyStatorCurrentLimit);
         fly.setOffset(Constants.flyOffset);
 
         pitch.setBraking(Constants.pitchBraking);
         pitch.setFeedforwardType(Constants.pitchFeedForward);
-        pitch.setGearRatio(Constants.pitchGearRatio);
+        pitch.connectInternalSensor(Constants.pitchGearRatio);
         pitch.setStatorCurrentLimit(Constants.pitchStatorCurrentLimit);
         pitch.connectEncoder(pitchEncoder, Constants.pitchToSensorRatio);
         pitch.setOffset(Constants.pitchOffset);
