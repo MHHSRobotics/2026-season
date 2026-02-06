@@ -14,7 +14,6 @@ public class GroundIntake extends SubsystemBase {
     public static class Constants {
         public static enum MechanicalSwitchState {
             HIGH_POS,
-            LOW_POS,
             NEUTRAL
         }
     }
@@ -34,13 +33,12 @@ public class GroundIntake extends SubsystemBase {
     }
 
     public void setLocked(boolean brake) {
+        stop();
         hingeMotor.setBraking(brake);
     }
 
     public void setForward(double radPerSecond) {
-        currentState = MechanicalSwitchState.NEUTRAL;
-        setLocked(false);
-        while (connectForwardLimitSwitch(id) == false) {
+        while (connectForwardLimitSwitch(id) == false || connectForwardLimitSwitch1(id1) == false) {
             hingeMotor.setDutyCycle(radPerSecond);
         }
         stop();
@@ -51,12 +49,15 @@ public class GroundIntake extends SubsystemBase {
     public void setDown(double radPerSecond) {
         currentState = MechanicalSwitchState.NEUTRAL;
         setLocked(false);
-        while (connectDownLimitSwitch(id1) == false) {
-            hingeMotor.setDutyCycle(radPerSecond);
+        hingeMotor.setDutyCycle(radPerSecond);
+
+        try {
+            Thread.sleep(1000); // One second delay
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
         stop();
-        setLocked(true);
-        currentState = MechanicalSwitchState.LOW_POS;
     }
 
     public void stop() {
@@ -70,7 +71,7 @@ public class GroundIntake extends SubsystemBase {
         return (config.HardwareLimitSwitch.ForwardLimitEnable);
     }
 
-    public boolean connectDownLimitSwitch(int i1) {
+    public boolean connectForwardLimitSwitch1(int i1) {
         config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
         config.HardwareLimitSwitch.ForwardLimitEnable = true;
         config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = i1;
@@ -78,5 +79,5 @@ public class GroundIntake extends SubsystemBase {
     }
 
     @Override
-    public void periodic(){}
+    public void periodic() {}
 }
