@@ -2,6 +2,8 @@ package frc.robot.subsystems.hopper;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+
 import frc.robot.io.MotorIO;
 
 public class Hopper extends SubsystemBase {
@@ -31,6 +33,9 @@ public class Hopper extends SubsystemBase {
         // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
 
+        public static final LoggedNetworkBoolean rollerLocked = new LoggedNetworkBoolean("Roller/locked", true);
+        public static final LoggedNetworkBoolean rollerDisabled = new LoggedNetworkBoolean("Roller/disabled", true);
+
         public static final double statorCurrentLimit = 60; // (amps) limit on motor torque output for intake loads
         public static final double supplyCurrentLimit = 50; // (amps) normal current limit pulled from battery
         public static final double supplyCurrentLowerLimit = 35; // (amps) reduce to this if over limit for some time
@@ -58,5 +63,11 @@ public class Hopper extends SubsystemBase {
 
     public RollerState getRollerState() {
         return rollerState;
+    }
+
+    @Override
+    public void periodic() {
+        rollerMotor.setBraking(Constants.rollerLocked.get());
+        rollerMotor.setDisabled(Constants.rollerDisabled.get());
     }
 }
