@@ -12,18 +12,15 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", false);
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
-        // feedConstants
-        public static final double feedGearRatio = 0.0;
-
-        public static final double feedVelocityWithVoltage = 0.0;
+        public static final double feedSpeed = 0.5;
 
         // flyConstants
-        public static final double flyGearRatio = 0.0;
+        public static final double flyGearRatio = 20;
 
-        public static final double flyVelocityWithVoltage = 0.0;
+        public static final double flySpeed = 1;
 
-        public static final int feedID = 14;
-        public static final int flyID = 15;
+        public static final int feedMotorId = 14;
+        public static final int flyMotorId = 15;
     }
 
     private MotorIO feed;
@@ -33,9 +30,7 @@ public class Shooter extends SubsystemBase {
         this.feed = feedIO;
         this.fly = flyIO;
 
-        feed.setGearRatio(Constants.feedGearRatio);
-
-        fly.setGearRatio(Constants.flyGearRatio);
+        fly.connectInternalSensor(Constants.flyGearRatio);
     }
 
     public void setLocked(boolean locked) {
@@ -49,19 +44,19 @@ public class Shooter extends SubsystemBase {
     }
 
     public void feedShoot() {
-        feed.setVelocityWithVoltage(Constants.feedVelocityWithVoltage);
+        feed.setDutyCycle(Constants.feedSpeed);
     }
 
     public void feedStop() {
-        feed.setVelocityWithVoltage(0);
+        feed.setDutyCycle(0);
     }
 
     public void flyShoot() {
-        fly.setVelocityWithVoltage(Constants.flyVelocityWithVoltage);
+        fly.setDutyCycle(Constants.flySpeed);
     }
 
     public void flyStop() {
-        fly.setVelocityWithVoltage(0);
+        fly.setDutyCycle(0);
     }
 
     @Override
