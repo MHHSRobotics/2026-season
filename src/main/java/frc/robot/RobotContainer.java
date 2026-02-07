@@ -23,6 +23,7 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -90,6 +91,9 @@ public class RobotContainer {
             MotorIO blDriveMotor, blAngleMotor, brDriveMotor, brAngleMotor;
             EncoderIO flEncoder, frEncoder, blEncoder, brEncoder;
             GyroIO gyro;
+
+            MotorIO feedMotor, flyMotor, pitchMotor;
+            EncoderIO pitchEncoder;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
@@ -159,6 +163,18 @@ public class RobotContainer {
 
                     gyro = new GyroIOPigeon(
                             TunerConstants.DrivetrainConstants.Pigeon2Id, Constants.swerveBus, "gyro", "Swerve/Gyro");
+
+                    feedMotor = new MotorIOTalonFX(
+                            ShooterConstants.feedID, Constants.defaultBus, "feed motor", "Shooter/Feed/Motor");
+                    flyMotor = new MotorIOTalonFX(
+                            ShooterConstants.flyID, Constants.defaultBus, "fly motor", "Shooter/Fly/Motor");
+                    pitchMotor = new MotorIOTalonFX(
+                            ShooterConstants.pitchID, Constants.defaultBus, "pitch motor", "Shooter/Pitch/Motor");
+                    pitchEncoder = new EncoderIOCANcoder(
+                            ShooterConstants.pitchEncoderID,
+                            Constants.defaultBus,
+                            "pitch encoder",
+                            "Shooter/Pitch/Encoder");
                     break;
                 default:
                     flDriveMotor = new MotorIO("front left drive motor", "Swerve/FrontLeft/Drive");
@@ -178,6 +194,12 @@ public class RobotContainer {
                     brEncoder = new EncoderIO("back right encoder", "Swerve/BackRight/Encoder");
 
                     gyro = new GyroIO("gyro", "Swerve/Gyro");
+
+                    feedMotor = new MotorIO("feed motor", "Shooter/Feed/Motor");
+                    flyMotor = new MotorIO("fly motor", "Shooter/Fly/Motor");
+                    pitchMotor = new MotorIO("pitch motor", "Shooter/Pitch/Motor");
+                    pitchEncoder = new EncoderIO("pitch encoder", "Shooter/Pitch/Encoder");
+
                     break;
             }
             // Create swerve subsystem
