@@ -522,8 +522,8 @@ public class MotorIOTalonFX extends MotorIO {
     public void connectEncoder(EncoderIO encoder, double motorToSensorRatio, boolean fuse) {
         if (encoder instanceof EncoderIOCANcoder cancoder) {
             if (fuse && !motor.getIsProLicensed().getValue()) {
-                Alerts.create("Attempted to use encoder fusion on unlicensed TalonFX " + getName(), AlertType.kWarning);
-                fuse = false;
+                Alerts.create("Attempted to use encoder fusion on unlicensed TalonFX " + getName(),
+            AlertType.kWarning);
             }
             config.Feedback.FeedbackRemoteSensorID = cancoder.getId();
             config.Feedback.FeedbackSensorSource =

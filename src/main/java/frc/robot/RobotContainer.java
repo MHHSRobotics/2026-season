@@ -247,6 +247,7 @@ public class RobotContainer {
         if (Constants.swerveEnabled) {
             controller.create().onTrue(swerveCommands.resetGyro());
 
+            controller.L1().onTrue(swerveCommands.lock());
             /*
              * How this works:
              * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
