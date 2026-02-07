@@ -27,12 +27,4 @@ public class ShooterCommands {
     public Command feedStop() {
         return new InstantCommand(() -> shooter.feedStop());
     }
-
-    public Command pitchSetGoal(double position) {
-        return new InstantCommand(() -> shooter.pitchSetGoal(position));
-    }
-
-    public Command pitchStop() {
-        return new InstantCommand(() -> shooter.pitchStop());
-    }
 }
