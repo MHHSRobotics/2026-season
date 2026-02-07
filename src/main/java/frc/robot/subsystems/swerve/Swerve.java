@@ -24,6 +24,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -327,6 +328,12 @@ public class Swerve extends SubsystemBase {
         locked = true;
     }
 
+    // Disables PID and stops movement
+    public void stop(){
+        setPositionOutput(0, 0);
+        setRotationOutput(0);
+    }
+
     // Set manual control for position
     public void setPositionOutput(double dx, double dy) {
         locked = false;
@@ -439,6 +446,11 @@ public class Swerve extends SubsystemBase {
             module.setLocked(Constants.swerveLocked.get());
             module.setDisabled(Constants.swerveDisabled.get());
             module.periodic();
+        }
+
+        // Stops movement on disable
+        if(DriverStation.isDisabled()){
+            stop();
         }
 
         // Update PID controllers
