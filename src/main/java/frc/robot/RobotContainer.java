@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
@@ -23,6 +24,7 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -35,9 +37,11 @@ import frc.robot.util.Alerts;
 public class RobotContainer {
     // Subsystems
     private Swerve swerve;
+    private Shooter shooter;
 
     // Subsystem commands
     private SwerveCommands swerveCommands;
+    private ShooterCommands shooterCommands;
 
     private final CommandPS5Controller controller = new CommandPS5Controller(0); // Main drive controller
 
@@ -156,6 +160,7 @@ public class RobotContainer {
 
                     gyro = new GyroIOPigeon(
                             TunerConstants.DrivetrainConstants.Pigeon2Id, Constants.swerveBus, "gyro", "Swerve/Gyro");
+
                     break;
                 default:
                     // If in REPLAY, use empty MotorIO objects
@@ -176,6 +181,7 @@ public class RobotContainer {
                     brEncoder = new EncoderIO("back right encoder", "Swerve/BackRight/Encoder");
 
                     gyro = new GyroIO("gyro", "Swerve/Gyro");
+
                     break;
             }
             // Initialize swerve modules
@@ -209,8 +215,6 @@ public class RobotContainer {
                 swerve.addCameraSource(brat);
                 swerve.addCameraSource(blat);
             }
-
-            // If mode is SIM, start the simulations for swerve modules and gyro
             if (Constants.currentMode == Mode.SIM) {
                 SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
                     new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
@@ -227,9 +231,35 @@ public class RobotContainer {
                 }
             }
         }
+        if (Constants.shooterEnabled) {
+
+            MotorIO feedMotor, flyMotor;
+            switch (Constants.currentMode) {
+                case REAL:
+                case SIM:
+                    feedMotor = new MotorIOTalonFX(
+                            Shooter.Constants.feedMotorId, Constants.defaultBus, "feed motor", "Shooter/Feed");
+                    flyMotor = new MotorIOTalonFX(
+                            Shooter.Constants.flyMotorId, Constants.defaultBus, "fly motor", "Shooter/Fly");
+                    break;
+                default:
+                    feedMotor = new MotorIO("feed motor", "Shooter/Feed");
+                    flyMotor = new MotorIO("fly motor", "Shooter/Fly");
+
+                    break;
+            }
+            shooter = new Shooter(feedMotor, flyMotor);
+            // Create swerve subsystem
+        }
+
+        // If mode is SIM, start the simulations for swerve modules and gyro
+
     }
 
     private void initCommands() {
+        if (Constants.shooterEnabled) {
+            shooterCommands = new ShooterCommands(shooter);
+        }
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve);
         }
