@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
@@ -23,15 +23,15 @@ import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.hardware.TalonFXS;
+import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.ReverseLimitSourceValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
-import com.ctre.phoenix6.sim.TalonFXSimState;
+import com.ctre.phoenix6.sim.TalonFXSSimState;
 
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
@@ -42,14 +42,14 @@ import frc.robot.util.Alerts;
 // - Mechanism position in radians (rad) for arms/flywheels, meters (m) for elevators
 // - Speeds in rad/s or m/s
 // - Voltages in volts, currents in amps
-public class MotorIOTalonFX extends MotorIO {
-    private TalonFX motor;
-    private TalonFXConfiguration config = new TalonFXConfiguration();
+public class MotorIOTalonFXS extends MotorIO {
+    private TalonFXS motor;
+    private TalonFXSConfiguration config = new TalonFXSConfiguration();
     private boolean configChanged = true;
     private boolean brakeOnNeutral = false;
     private boolean disabled = false;
 
-    private TalonFXSimState sim;
+    private TalonFXSSimState sim;
 
     // Control objects (one per control mode)
     private CoastOut coast = new CoastOut();
@@ -102,20 +102,20 @@ public class MotorIOTalonFX extends MotorIO {
     private double minLimit = -Double.MAX_VALUE;
     private double maxLimit = Double.MAX_VALUE;
 
-    // Make a TalonFX on the given CAN bus
-    public MotorIOTalonFX(int id, CANBus canBus, String name, String logPath) {
+    // Make a TalonFXS on the given CAN bus
+    public MotorIOTalonFXS(int id, CANBus canBus, String name, String logPath) {
         super(name, logPath);
-        motor = new TalonFX(id, canBus);
+        motor = new TalonFXS(id, canBus);
         sim = motor.getSimState();
     }
 
-    // Make a TalonFX on a named CAN bus (e.g., "rio", "canivore")
-    public MotorIOTalonFX(int id, String canBus, String name, String logPath) {
+    // Make a TalonFXS on a named CAN bus (e.g., "rio", "canivore")
+    public MotorIOTalonFXS(int id, String canBus, String name, String logPath) {
         this(id, new CANBus(canBus), name, logPath);
     }
 
-    // Make a TalonFX on the default CAN bus
-    public MotorIOTalonFX(int id, String name, String logPath) {
+    // Make a TalonFXS on the default CAN bus
+    public MotorIOTalonFXS(int id, String name, String logPath) {
         this(id, new CANBus(), name, logPath);
     }
 
@@ -179,9 +179,7 @@ public class MotorIOTalonFX extends MotorIO {
         inputs.hardwareFault = motor.getFault_Hardware().getValue();
         inputs.tempFault = motor.getFault_DeviceTemp().getValue();
 
-        inputs.rawRotorPosition =
-                Units.rotationsToRadians(motor.getRotorPosition().getValueAsDouble()
-                        / (config.Feedback.RotorToSensorRatio * config.Feedback.SensorToMechanismRatio));
+        inputs.rawRotorPosition = 0;
 
         if (connectedEncoder != null) {
             inputs.encoderDiff = inputs.position - connectedEncoder.getInputs().positionRad;
@@ -524,65 +522,31 @@ public class MotorIOTalonFX extends MotorIO {
     @Override
     public void connectEncoder(EncoderIO encoder, double motorToSensorRatio, boolean fuse) {
         if (encoder instanceof EncoderIOCANcoder cancoder) {
-            config.Feedback.FeedbackRemoteSensorID = cancoder.getId();
-            config.Feedback.FeedbackSensorSource =
-                    fuse ? FeedbackSensorSourceValue.FusedCANcoder : FeedbackSensorSourceValue.RemoteCANcoder;
-            config.Feedback.RotorToSensorRatio = motorToSensorRatio;
-            config.Feedback.SensorToMechanismRatio = cancoder.getRatio();
+            config.ExternalFeedback.FeedbackRemoteSensorID = cancoder.getId();
+            config.ExternalFeedback.ExternalFeedbackSensorSource = fuse
+                    ? ExternalFeedbackSensorSourceValue.FusedCANcoder
+                    : ExternalFeedbackSensorSourceValue.RemoteCANcoder;
+            config.ExternalFeedback.RotorToSensorRatio = motorToSensorRatio;
+            config.ExternalFeedback.SensorToMechanismRatio = cancoder.getRatio();
             connectedEncoder = cancoder;
             configChanged = true;
         } else {
             Alerts.create(
-                    "TalonFX " + getName() + " doesn't support feedback sources other than CANcoders",
+                    "TalonFXS " + getName() + " doesn't support feedback sources other than CANcoders",
                     AlertType.kError);
         }
-    }
-
-    // Tell the motor to use its internal sensor with a gear ratio to the mechanism
-    @Override
-    public void setGearRatio(double motorToMechanismRatio) {
-        config.Feedback.RotorToSensorRatio = 1;
-        config.Feedback.SensorToMechanismRatio = motorToMechanismRatio;
-        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        configChanged = true;
     }
 
     // Use after connectEncoder/setGearRatio. Sets the mechanism offset.
     @Override
     public void setOffset(double offset) {
-        if (config.Feedback.FeedbackSensorSource == FeedbackSensorSourceValue.FusedCANcoder
-                || config.Feedback.FeedbackSensorSource == FeedbackSensorSourceValue.RemoteCANcoder) {
+        if (config.ExternalFeedback.ExternalFeedbackSensorSource == ExternalFeedbackSensorSourceValue.FusedCANcoder
+                || config.ExternalFeedback.ExternalFeedbackSensorSource
+                        == ExternalFeedbackSensorSourceValue.RemoteCANcoder) {
             connectedEncoder.setOffset(offset);
             extraOffset = connectedEncoder.getExtraOffset();
-        } else if (config.Feedback.FeedbackSensorSource == FeedbackSensorSourceValue.RotorSensor) {
-            double ratio = config.Feedback.SensorToMechanismRatio;
-
-            // Convert mechanism offset to mech rotations
-            double rotOffset = Units.radiansToRotations(offset);
-
-            // Wrap to [-0.5, 0.5] range to find the fractional rotation part
-            double remOffset = rotOffset - Math.round(rotOffset);
-
-            double rotorOffset = remOffset * ratio;
-
-            if (Math.abs(rotorOffset) <= 1) {
-                config.Feedback.FeedbackRotorOffset = rotorOffset;
-
-                // extraOffset handles the integer rotations (converted back to mechanism radians)
-                // This will be a multiple of 2π, preserving periodicity
-                extraOffset = Units.rotationsToRadians(rotOffset - remOffset);
-            } else {
-                config.Feedback.FeedbackRotorOffset = 0;
-                extraOffset = offset;
-
-                // Warn because non-2π multiples in extraOffset break gravity compensation assumptions
-                Alerts.create(
-                        "extraOffset is not a multiple of 2pi--if " + getName()
-                                + " is used in an arm mechanism, kG will not account for gravity correctly",
-                        AlertType.kWarning);
-            }
         } else {
-            Alerts.create("Invalid sensor source for TalonFX " + getName(), AlertType.kError);
+            Alerts.create("Invalid sensor source for TalonFXS " + getName(), AlertType.kError);
         }
     }
 
@@ -635,6 +599,16 @@ public class MotorIOTalonFX extends MotorIO {
         configChanged = true;
     }
 
+    @Override
+    public void clearStickyFaults() {
+        motor.clearStickyFaults();
+    }
+
+    @Override
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
     // We apply invert after adding offset because invert is applied before offset in the position reading code
     @Override
     public void setMechPosition(double position) {
@@ -642,11 +616,9 @@ public class MotorIOTalonFX extends MotorIO {
             Alerts.create("Used sim-only method setMechPosition on " + getName(), AlertType.kWarning);
             return;
         }
-        double rotorPos = Units.radiansToRotations(
-                (position + extraOffset) * config.Feedback.RotorToSensorRatio * config.Feedback.SensorToMechanismRatio);
-        if (config.Feedback.FeedbackSensorSource == FeedbackSensorSourceValue.RotorSensor) {
-            rotorPos += config.Feedback.FeedbackRotorOffset;
-        }
+        double rotorPos = Units.radiansToRotations((position + extraOffset)
+                * config.ExternalFeedback.RotorToSensorRatio
+                * config.ExternalFeedback.SensorToMechanismRatio);
         rotorPos = config.MotorOutput.Inverted.equals(InvertedValue.Clockwise_Positive) ? -rotorPos : rotorPos;
         sim.setRawRotorPosition(rotorPos);
     }
@@ -658,19 +630,9 @@ public class MotorIOTalonFX extends MotorIO {
             return;
         }
         double rotorVel = Units.radiansToRotations(
-                velocity * config.Feedback.RotorToSensorRatio * config.Feedback.SensorToMechanismRatio);
+                velocity * config.ExternalFeedback.RotorToSensorRatio * config.ExternalFeedback.SensorToMechanismRatio);
         rotorVel = config.MotorOutput.Inverted.equals(InvertedValue.Clockwise_Positive) ? -rotorVel : rotorVel;
         sim.setRotorVelocity(rotorVel);
-    }
-
-    @Override
-    public void clearStickyFaults() {
-        motor.clearStickyFaults();
-    }
-
-    @Override
-    public void setDisabled(boolean disabled) {
-        this.disabled = disabled;
     }
 
     @Override

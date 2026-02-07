@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -48,13 +49,17 @@ public class MotorIO {
 
         public double dutyCycle; // Duty cycle command (-1 to 1)
 
-        public double encoderDiff;
+        public double encoderDiff; // Difference between encoder and motor measurements, for sync visualization
 
+        // Whether the mechanism has hit the forward or reverse limits (defined in software/hardware)
+        public boolean hitForwardLimit;
+        public boolean hitReverseLimit;
+
+        // Faults
         public boolean hardwareFault;
         public boolean tempFault;
-        public boolean forwardLimitFault;
-        public boolean reverseLimitFault;
 
+        // Position of the rotor without taking into account connected encoders
         public double rawRotorPosition;
     }
 
@@ -97,8 +102,8 @@ public class MotorIO {
         disconnectAlert.set(!inputs.connected);
         hardwareFaultAlert.set(inputs.hardwareFault);
         tempFaultAlert.set(inputs.tempFault);
-        forwardLimitAlert.set(inputs.forwardLimitFault);
-        reverseLimitAlert.set(inputs.reverseLimitFault);
+        forwardLimitAlert.set(inputs.hitForwardLimit);
+        reverseLimitAlert.set(inputs.hitReverseLimit);
     }
 
     private void unsupportedFeature() {
@@ -171,6 +176,26 @@ public class MotorIO {
         unsupportedFeature();
     }
 
+    // Disable motor without locking
+    public void coast() {
+        unsupportedFeature();
+    }
+
+    // Disable motor with locking
+    public void brake() {
+        unsupportedFeature();
+    }
+
+    // Disable motor with locking or not depending on coastOnNeutral
+    public void neutral() {
+        unsupportedFeature();
+    }
+
+    // Sets whether the motor should brake on neutral
+    public void setBraking(boolean braking) {
+        unsupportedFeature();
+    }
+
     // Make this motor follow another motor with the given CAN ID (invert if needed)
     public void follow(int motorId, boolean invert) {
         unsupportedFeature();
@@ -178,11 +203,6 @@ public class MotorIO {
 
     // Tell the motor which direction is forward (true = invert)
     public void setInverted(boolean inverted) {
-        unsupportedFeature();
-    }
-
-    // Tell the motor what to do when stopped: brake (hold) or coast (freewheel)
-    public void setBraking(boolean braking) {
         unsupportedFeature();
     }
 
@@ -226,6 +246,16 @@ public class MotorIO {
         unsupportedFeature();
     }
 
+    // Connects a forward hardware limit switch
+    public void connectForwardLimitSwitch(int id) {
+        unsupportedFeature();
+    }
+
+    // Connects a reverse hardware limit switch
+    public void connectReverseLimitSwitch(int id) {
+        unsupportedFeature();
+    }
+
     // Tell Motion Magic the max speed to use (mechanism units per second)
     public void setMaxVelocity(double maxVelocity) {
         unsupportedFeature();
@@ -248,6 +278,10 @@ public class MotorIO {
 
     // Tell the controller which gravity model to use (like Arm_Cosine or Elevator_Static)
     public void setFeedforwardType(GravityTypeValue type) {
+        unsupportedFeature();
+    }
+
+    public void setStaticFeedforwardType(StaticFeedforwardSignValue type) {
         unsupportedFeature();
     }
 
@@ -304,7 +338,7 @@ public class MotorIO {
         unsupportedFeature();
     }
 
-    // Tell the motor to be disabled or enabled
+    // Tell the motor to be disabled or enabled. Disabled = neutral whether or not any methods are called.
     public void setDisabled(boolean disabled) {
         unsupportedFeature();
     }
@@ -316,6 +350,11 @@ public class MotorIO {
 
     // Make the simulated mechanism velocity update (rad/s). Simulation-only.
     public void setMechVelocity(double velocity) {
+        unsupportedFeature();
+    }
+
+    // Disconnects the motor. Simulation-only.
+    public void disconnect() {
         unsupportedFeature();
     }
 }
