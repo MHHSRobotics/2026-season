@@ -120,7 +120,8 @@ public class Swerve extends SubsystemBase {
         public static final LoggedNetworkNumber rotationKD = new LoggedNetworkNumber("Swerve/RotKD", 0);
         public static final LoggedNetworkNumber rotationKI = new LoggedNetworkNumber("Swerve/RotKI", 0);
 
-        public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error, 0.1 for some error
+        public static final double simSwerveError =
+                0; // Simulated error in swerve odometry, set to 0 for no error, 0.1 for some error
     }
 
     public static class VisionConstants {
