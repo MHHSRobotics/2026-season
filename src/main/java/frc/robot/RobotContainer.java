@@ -215,6 +215,21 @@ public class RobotContainer {
                 swerve.addCameraSource(brat);
                 swerve.addCameraSource(blat);
             }
+            if (Constants.currentMode == Mode.SIM) {
+                SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
+                    new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
+                    new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight),
+                    new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft),
+                    new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight)
+                };
+
+                SwerveSim swerveSim = new SwerveSim(moduleSims);
+
+                new GyroSim(gyro, swerveSim);
+                if (Constants.visionEnabled) {
+                    new VisionSim(swerve.getCameras(), swerveSim);
+                }
+            }
         }
         if (Constants.shooterEnabled) {
 
@@ -237,28 +252,14 @@ public class RobotContainer {
             // Create swerve subsystem
         }
 
-            // If mode is SIM, start the simulations for swerve modules and gyro
-            if (Constants.currentMode == Mode.SIM) {
-                SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
-                    new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
-                    new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight),
-                    new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft),
-                    new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight)
-                };
+        // If mode is SIM, start the simulations for swerve modules and gyro
 
-                SwerveSim swerveSim = new SwerveSim(moduleSims);
-
-                new GyroSim(gyro, swerveSim);
-                if (Constants.visionEnabled) {
-                    new VisionSim(swerve.getCameras(), swerveSim);
-                }
-            }
-        }
     }
 
     private void initCommands() {
-        if (Constants.shooterEnabled){
-        shooterCommands = new ShooterCommands(shooter);}
+        if (Constants.shooterEnabled) {
+            shooterCommands = new ShooterCommands(shooter);
+        }
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve);
         }

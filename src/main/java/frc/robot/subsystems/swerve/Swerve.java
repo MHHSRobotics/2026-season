@@ -32,7 +32,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -425,7 +424,8 @@ public class Swerve extends SubsystemBase {
 
     // Gets rotation error to the goal in radians
     public double getRotationError() {
-        return Math.abs(getPose().getRotation().minus(targetPose.get().getRotation()).getRadians());
+        return Math.abs(
+                getPose().getRotation().minus(targetPose.get().getRotation()).getRadians());
     }
 
     @Override
