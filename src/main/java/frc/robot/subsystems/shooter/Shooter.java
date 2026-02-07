@@ -13,18 +13,12 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
         // feedConstants
-        public static final boolean feedBraking = false;
         public static final double feedGearRatio = 0.0;
-        public static final double feedStatorCurrentLimit = 0.0;
-        public static final double feedOffset = 0.0;
 
         public static final double feedVelocityWithVoltage = 0.0;
 
         // flyConstants
-        public static final boolean flyBraking = false;
         public static final double flyGearRatio = 0.0;
-        public static final double flyStatorCurrentLimit = 0.0;
-        public static final double flyOffset = 0.0;
 
         public static final double flyVelocityWithVoltage = 0.0;
 
@@ -39,15 +33,9 @@ public class Shooter extends SubsystemBase {
         this.feed = feedIO;
         this.fly = flyIO;
 
-        feed.setBraking(Constants.feedBraking);
         feed.setGearRatio(Constants.feedGearRatio);
-        feed.setStatorCurrentLimit(Constants.feedStatorCurrentLimit);
-        feed.setOffset(Constants.feedOffset);
 
-        fly.setBraking(Constants.flyBraking);
         fly.setGearRatio(Constants.flyGearRatio);
-        fly.setStatorCurrentLimit(Constants.flyStatorCurrentLimit);
-        fly.setOffset(Constants.flyOffset);
     }
 
     public void setLocked(boolean locked) {
