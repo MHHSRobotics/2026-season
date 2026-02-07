@@ -69,6 +69,7 @@ public class SwerveCommands {
                             swerve.setFieldOriented(fieldRelative.getAsBoolean());
                         },
                         swerve)
+                .ignoringDisable(true)
                 .withName("swerve drive");
     }
 
