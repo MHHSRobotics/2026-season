@@ -209,13 +209,13 @@ public class RobotContainer {
                 case REAL:
                 case SIM:
                     feedMotor = new MotorIOTalonFX(
-                            Shooter.Constants.feedID, Constants.defaultBus, "feed motor", "Shooter/Feed/Motor");
+                            Shooter.Constants.feedID, Constants.defaultBus, "feed motor", "Shooter/Feed");
                     flyMotor = new MotorIOTalonFX(
-                            Shooter.Constants.flyID, Constants.defaultBus, "fly motor", "Shooter/Fly/Motor");
+                            Shooter.Constants.flyID, Constants.defaultBus, "fly motor", "Shooter/Fly");
                     break;
                 default:
-                    feedMotor = new MotorIO("feed motor", "Shooter/Feed/Motor");
-                    flyMotor = new MotorIO("fly motor", "Shooter/Fly/Motor");
+                    feedMotor = new MotorIO("feed motor", "Shooter/Feed");
+                    flyMotor = new MotorIO("fly motor", "Shooter/Fly");
 
                     break;
             }

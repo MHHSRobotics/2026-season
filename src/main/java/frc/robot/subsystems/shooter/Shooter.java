@@ -80,5 +80,8 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
+
+        fly.update();
+        feed.update();
     }
 }
