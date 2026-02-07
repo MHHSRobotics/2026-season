@@ -44,16 +44,17 @@ public class Shooter extends SubsystemBase {
         public static final double pitchToSensorRatio = 0.0;
         public static final double pitchOffset = 0.0;
 
-        public static final LoggedNetworkNumber pitchMaxAccel = new LoggedNetworkNumber("Pitch/maxAccel", 0.0);
-        public static final LoggedNetworkNumber pitchMaxVelocity = new LoggedNetworkNumber("Pitch/maxVelocity", 0.0);
+        public static final LoggedNetworkNumber pitchMaxAccel = new LoggedNetworkNumber("Shooter/Pitch/maxAccel", 0.0);
+        public static final LoggedNetworkNumber pitchMaxVelocity =
+                new LoggedNetworkNumber("Shooter/Pitch/maxVelocity", 0.0);
 
-        public static final LoggedNetworkNumber kP = new LoggedNetworkNumber("Pitch/kP", 0.0);
-        public static final LoggedNetworkNumber kI = new LoggedNetworkNumber("Pitch/kI", 0.0);
-        public static final LoggedNetworkNumber kD = new LoggedNetworkNumber("Pitch/kD", 0.0);
-        public static final LoggedNetworkNumber kG = new LoggedNetworkNumber("Pitch/kG", 0.0);
-        public static final LoggedNetworkNumber kS = new LoggedNetworkNumber("Pitch/kS", 0.0);
-        public static final LoggedNetworkNumber kV = new LoggedNetworkNumber("Pitch/kV", 0.0);
-        public static final LoggedNetworkNumber kA = new LoggedNetworkNumber("Pitch/kA", 0.0);
+        public static final LoggedNetworkNumber kP = new LoggedNetworkNumber("Shooter/Pitch/kP", 0.0);
+        public static final LoggedNetworkNumber kI = new LoggedNetworkNumber("Shooter/Pitch/kI", 0.0);
+        public static final LoggedNetworkNumber kD = new LoggedNetworkNumber("Shooter/Pitch/kD", 0.0);
+        public static final LoggedNetworkNumber kG = new LoggedNetworkNumber("Shooter/Pitch/kG", 0.0);
+        public static final LoggedNetworkNumber kS = new LoggedNetworkNumber("Shooter/Pitch/kS", 0.0);
+        public static final LoggedNetworkNumber kV = new LoggedNetworkNumber("Shooter/Pitch/kV", 0.0);
+        public static final LoggedNetworkNumber kA = new LoggedNetworkNumber("Shooter/Pitch/kA", 0.0);
     }
 
     private MotorIO feed;

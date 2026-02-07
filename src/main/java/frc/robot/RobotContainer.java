@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
@@ -23,6 +24,7 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterConstants;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
@@ -34,8 +36,10 @@ import frc.robot.util.Alerts;
 
 public class RobotContainer {
     private Swerve swerve;
+    private Shooter shooter;
 
     private SwerveCommands swerveCommands;
+    private ShooterCommands shooterCommands;
 
     // Main drive controller
     private final CommandPS5Controller controller = new CommandPS5Controller(0);
@@ -202,6 +206,7 @@ public class RobotContainer {
 
                     break;
             }
+            shooter = new Shooter(feedMotor, flyMotor, pitchMotor, pitchEncoder);
             // Create swerve subsystem
             SwerveModule fl = new SwerveModule(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft);
             SwerveModule fr = new SwerveModule(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight);
@@ -243,6 +248,7 @@ public class RobotContainer {
 
     private void initCommands() {
         swerveCommands = new SwerveCommands(swerve);
+        shooterCommands = new ShooterCommands(shooter);
     }
 
     private void configureBindings() {
