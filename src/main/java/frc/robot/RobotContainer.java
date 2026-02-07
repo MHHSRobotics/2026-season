@@ -245,7 +245,7 @@ public class RobotContainer {
          */
 
         if (Constants.swerveEnabled) {
-            controller.create().onTrue(swerveCommands.resetGyro());
+            controller.options().onTrue(swerveCommands.resetGyro());
 
             controller.L1().onTrue(swerveCommands.lock());
             /*

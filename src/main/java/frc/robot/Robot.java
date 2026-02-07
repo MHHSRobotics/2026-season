@@ -61,9 +61,8 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
-        Logger.recordMetadata("Swerve",Constants.swerveEnabled?"true":"false");
-        Logger.recordMetadata("Vision",Constants.visionEnabled?"true":"false");
-
+        Logger.recordMetadata("Swerve", Constants.swerveEnabled ? "true" : "false");
+        Logger.recordMetadata("Vision", Constants.visionEnabled ? "true" : "false");
 
         // Set logging mode depending on the current running mode
         switch (Constants.currentMode) {
