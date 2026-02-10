@@ -17,11 +17,11 @@ public class GroundIntakeCommands {
     public Command stop() {
         return new InstantCommand(() -> groundIntake.stop());
     }
-/* 
+
     public Command setForward(double radPerSecond) {
         return new InstantCommand(() -> groundIntake.setForward(radPerSecond));
     }
-*/
+
     public Command setDown(double radPerSecond) {
         return new InstantCommand(() -> groundIntake.setDown(radPerSecond));
     }

@@ -2,9 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
 import frc.robot.io.BitIODigitalSignal;
 import frc.robot.io.MotorIO;
@@ -23,12 +21,8 @@ public class GroundIntake extends SubsystemBase {
     private MotorIO hingeMotor;
     private BitIODigitalSignal rightLimitSwitch = new BitIODigitalSignal("MechanicalSwitchRight", "", 0);
     private BitIODigitalSignal leftLimitSwitch = new BitIODigitalSignal("MechanicalSwitchLeft", "", 1);
-    private SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
 
-    public GroundIntake(
-            MotorIO hingeMotorIO,
-            SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants) {
-        this.constants = constants;
+    public GroundIntake(MotorIO hingeMotorIO) {
         hingeMotor = hingeMotorIO;
     }
 
@@ -36,9 +30,9 @@ public class GroundIntake extends SubsystemBase {
         stop();
         hingeMotor.setBraking(brake);
     }
-    /*
+
     public void setForward(double radPerSecond) {
-        if (leftLimitSwitch.getInputs() || rightLimitSwitch.getInputs()) {
+        if (leftLimitSwitch.getInputs().value || rightLimitSwitch.getInputs().value) {
             stop();
             setLocked(true);
             currentState = MechanicalSwitchState.HIGH_POS;
@@ -46,7 +40,6 @@ public class GroundIntake extends SubsystemBase {
             hingeMotor.setDutyCycle(radPerSecond);
         }
     }
-    */
 
     public void setDown(double radPerSecond) {
         currentState = MechanicalSwitchState.NEUTRAL;
