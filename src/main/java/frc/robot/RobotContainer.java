@@ -290,6 +290,7 @@ public class RobotContainer {
         /* ---- Test controller bindings ---- */
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addOption("Swerve", "Swerve");
+        testControllerChooser.addOption("Hang", "Hang");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
@@ -323,6 +324,25 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
+
+        // Hang move up test
+        
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Hang"))
+                .onTrue(hangCommands.moveUp())
+                .onFalse(hangCommands.stop());
+
+        // Hang move down test
+        
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Hang"))
+                .onTrue(hangCommands.moveDown())
+                .onFalse(hangCommands.stop());
+            
     }
 
     // Bindings for manual control of each of the subsystems
