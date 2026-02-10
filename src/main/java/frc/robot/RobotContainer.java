@@ -15,6 +15,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.commands.HopperCommands;
+import frc.robot.commands.HangCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -25,6 +26,7 @@ import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -38,6 +40,9 @@ public class RobotContainer {
     private Hopper hopper;
     private SwerveCommands swerveCommands;
     private HopperCommands hopperCommands;
+    private Hang hang;
+    private HangCommands hangCommands;
+
 
 
     // Main drive controller
@@ -103,6 +108,21 @@ public class RobotContainer {
             }
             // Create hopper subsystem
             hopper = new Hopper(hopperMotor);
+        }
+
+        if(Constants.hangEnabled){
+            MotorIO hangMotor;
+            switch (Constants.currentMode) {
+                case REAL:
+                case SIM:
+                    hangMotor = new MotorIOTalonFX(Hang.Constants.motorId, "hang motor", "Hang/Motor");
+                    break;
+
+                default:
+                    hangMotor = new MotorIO("hang motor", "Hang/Motor");
+                    break;
+            }
+            hang = new Hang(hangMotor);
         }
 
         if (Constants.swerveEnabled) {
@@ -243,6 +263,7 @@ public class RobotContainer {
     private void initCommands() {
         swerveCommands = new SwerveCommands(swerve);
         hopperCommands = new HopperCommands(hopper);
+        hangCommands = new HangCommands(hang);
     }
 
     private void configureBindings() {
