@@ -26,12 +26,12 @@ import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
+import frc.robot.subsystems.swerve.SimpleSwerveSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModulePhysicsSim;
 import frc.robot.subsystems.swerve.SwerveModuleSim;
 import frc.robot.subsystems.swerve.SwervePhysicsSim;
-import frc.robot.subsystems.swerve.SimpleSwerveSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
@@ -238,7 +238,7 @@ public class RobotContainer {
                     new SwerveModulePhysicsSim(blDriveMotor, blAngleMotor, blEncoder, "/MuJoCo/Swerve/BackLeft");
                     new SwerveModulePhysicsSim(brDriveMotor, brAngleMotor, brEncoder, "/MuJoCo/Swerve/BackRight");
 
-                    SwervePhysicsSim swerveSim = new SwervePhysicsSim("/MuJoCo/Pose3d");
+                    SwervePhysicsSim swerveSim = new SwervePhysicsSim("MuJoCo/Pose3d");
 
                     new GyroSim(gyro, swerveSim);
                     if (Constants.visionEnabled) {

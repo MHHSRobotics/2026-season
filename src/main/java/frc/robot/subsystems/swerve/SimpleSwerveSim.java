@@ -24,7 +24,7 @@ public class SimpleSwerveSim extends SwerveSim {
 
     @Override
     public void periodic() {
-        Pose2d currentPose2d=currentPose.toPose2d();
+        Pose2d currentPose2d = currentPose.toPose2d();
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++) {
             states[i] = moduleSims[i].getState();
@@ -37,7 +37,7 @@ public class SimpleSwerveSim extends SwerveSim {
         ChassisSpeeds speeds = kinematics.toChassisSpeeds(states);
         Twist2d twist = speeds.toTwist2d(Constants.loopTime);
         currentPose2d = currentPose2d.exp(twist);
-        currentPose=new Pose3d(currentPose2d);
+        currentPose = new Pose3d(currentPose2d);
         Logger.recordOutput("SwerveSim/ActualPose", currentPose);
     }
 }
