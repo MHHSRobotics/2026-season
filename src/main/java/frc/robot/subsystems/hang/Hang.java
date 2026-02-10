@@ -31,37 +31,21 @@ public class Hang extends SubsystemBase{
                 new LoggedNetworkBoolean("Hang/Disabled", false); // Toggle to completely disable the hang subsystem
     }
 
-    private MotorIO motorR;
-    private MotorIO motorL;
+    private MotorIO hangMotor;
 
     public boolean invert = false;
 
     public Hang(MotorIO motorIO) {
-        motorR.setInverted(Constants.motorInverted);
-        motorL.setInverted(Constants.motorInverted);
+        hangMotor.setInverted(Constants.motorInverted);
 
-        motorR.setStatorCurrentLimit(Constants.statorCurrentLimit);
-        motorR.setSupplyCurrentLimit(Constants.supplyCurrentLimit);
-        motorR.setSupplyCurrentLowerLimit(Constants.supplyCurrentLowerLimit);
-        motorR.setSupplyCurrentLowerTime(Constants.supplyCurrentLowerTime);
-
-        motorL.setStatorCurrentLimit(Constants.statorCurrentLimit);
-        motorL.setSupplyCurrentLimit(Constants.supplyCurrentLimit);
-        motorL.setSupplyCurrentLowerLimit(Constants.supplyCurrentLowerLimit);
-        motorL.setSupplyCurrentLowerTime(Constants.supplyCurrentLowerTime);
-    }
-
-    public void setSpeedLeft(double speed) {
-        motorL.setDutyCycle(speed);
-    }
-
-    public void setSpeedRight(double speed) {
-        motorR.setDutyCycle(speed);
+        hangMotor.setStatorCurrentLimit(Constants.statorCurrentLimit);
+        hangMotor.setSupplyCurrentLimit(Constants.supplyCurrentLimit);
+        hangMotor.setSupplyCurrentLowerLimit(Constants.supplyCurrentLowerLimit);
+        hangMotor.setSupplyCurrentLowerTime(Constants.supplyCurrentLowerTime);
     }
 
     public void setSpeed(double speed) {
-        motorR.setDutyCycle(speed);
-        motorL.setDutyCycle(speed);
+        hangMotor.setDutyCycle(speed);
     }
 
     @Override
@@ -69,12 +53,12 @@ public class Hang extends SubsystemBase{
         // This runs every robot loop (about 50 times per second) to update sensors and check for problems
 
         // Set braking based on user input
-        motorL.setBraking(Constants.hangLocked.get());
+        hangMotor.setBraking(Constants.hangLocked.get());
 
         // Disable the motor based on user input
-        motorL.setDisabled(Constants.hangDisabled.get());
+        hangMotor.setDisabled(Constants.hangDisabled.get());
 
         // Update motor inputs so the latest values are available (logging and alerts happen automatically)
-        motorL.update();
+        hangMotor.update();
     }
 }

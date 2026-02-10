@@ -21,14 +21,6 @@ public class HangCommands {
         return new InstantCommand(() -> hang.setSpeed(-0.5), hang);
     }
 
-    public Command individualLeft() {
-        return new InstantCommand(() -> hang.setSpeedLeft(0.5), hang);
-    }
-
-    public Command individualRight() {
-        return new InstantCommand(() -> hang.setSpeedRight(0.5), hang);
-    }
-
     public Command stop() {
         return new InstantCommand(() -> hang.setSpeed(0), hang);
     }
