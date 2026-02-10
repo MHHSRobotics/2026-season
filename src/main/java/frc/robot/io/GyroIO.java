@@ -16,6 +16,10 @@ public class GyroIO {
         public boolean connected;
         public double yawPositionRad;
         public double yawVelocityRadPerSec;
+        public double pitchPositionRad;
+        public double pitchVelocityRadPerSec;
+        public double rollPositionRad;
+        public double rollVelocityRadPerSec;
         public boolean hardwareFault;
     }
 
@@ -72,6 +76,22 @@ public class GyroIO {
     }
 
     public void setMechYawVelocity(double yawVelocity) {
+        unsupportedFeature();
+    }
+
+    public void setMechPitch(double yaw) {
+        unsupportedFeature();
+    }
+
+    public void setMechPitchVelocity(double yawVelocity) {
+        unsupportedFeature();
+    }
+
+    public void setMechRoll(double yaw) {
+        unsupportedFeature();
+    }
+
+    public void setMechRollVelocity(double yawVelocity) {
         unsupportedFeature();
     }
 

@@ -28,8 +28,10 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
+import frc.robot.subsystems.swerve.SwerveModulePhysicsSim;
 import frc.robot.subsystems.swerve.SwerveModuleSim;
-import frc.robot.subsystems.swerve.SwerveSim;
+import frc.robot.subsystems.swerve.SwervePhysicsSim;
+import frc.robot.subsystems.swerve.SimpleSwerveSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
@@ -216,23 +218,36 @@ public class RobotContainer {
                 swerve.addCameraSource(blat);
             }
             if (Constants.currentMode == Mode.SIM) {
-                SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
-                    new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
-                    new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight),
-                    new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft),
-                    new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight)
-                };
+                if (!Constants.enablePhysicsSim) {
+                    SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
+                        new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
+                        new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight),
+                        new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft),
+                        new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight)
+                    };
 
-                SwerveSim swerveSim = new SwerveSim(moduleSims);
+                    SimpleSwerveSim swerveSim = new SimpleSwerveSim(moduleSims);
 
-                new GyroSim(gyro, swerveSim);
-                if (Constants.visionEnabled) {
-                    new VisionSim(swerve.getCameras(), swerveSim);
+                    new GyroSim(gyro, swerveSim);
+                    if (Constants.visionEnabled) {
+                        new VisionSim(swerve.getCameras(), swerveSim);
+                    }
+                } else {
+                    new SwerveModulePhysicsSim(flDriveMotor, flAngleMotor, flEncoder, "/MuJoCo/Swerve/FrontLeft");
+                    new SwerveModulePhysicsSim(frDriveMotor, frAngleMotor, frEncoder, "/MuJoCo/Swerve/FrontRight");
+                    new SwerveModulePhysicsSim(blDriveMotor, blAngleMotor, blEncoder, "/MuJoCo/Swerve/BackLeft");
+                    new SwerveModulePhysicsSim(brDriveMotor, brAngleMotor, brEncoder, "/MuJoCo/Swerve/BackRight");
+
+                    SwervePhysicsSim swerveSim = new SwervePhysicsSim("/MuJoCo/Pose3d");
+
+                    new GyroSim(gyro, swerveSim);
+                    if (Constants.visionEnabled) {
+                        new VisionSim(swerve.getCameras(), swerveSim);
+                    }
                 }
             }
         }
         if (Constants.shooterEnabled) {
-
             MotorIO feedMotor, flyMotor;
             switch (Constants.currentMode) {
                 case REAL:
@@ -251,9 +266,6 @@ public class RobotContainer {
             shooter = new Shooter(feedMotor, flyMotor);
             // Create swerve subsystem
         }
-
-        // If mode is SIM, start the simulations for swerve modules and gyro
-
     }
 
     private void initCommands() {

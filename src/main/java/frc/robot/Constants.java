@@ -15,10 +15,7 @@ public final class Constants {
         SIM,
 
         /** Replaying from a log file. */
-        REPLAY,
-
-        // WIP physics simulator
-        PHYSICS_SIM,
+        REPLAY
     }
 
     public static final Mode simMode =
@@ -27,7 +24,11 @@ public final class Constants {
     public static final Mode currentMode =
             RobotBase.isReal() ? Mode.REAL : simMode; // Current mode the robot program is in
 
-    public static final double loopTime = 0.02; // Period of main robot loop, 20ms default
+    public static final boolean enablePhysicsSim =
+            true; // Whether to enable the physics sim connector (for SIM mode only)
+
+    public static final double loopTime =
+            (currentMode == Mode.SIM && enablePhysicsSim) ? 0.005 : 0.02; // Period of main robot loop, 20ms default
 
     public static final CANBus defaultBus = new CANBus("rio"); // CAN bus used for non-swerve motors
 
@@ -45,7 +46,6 @@ public final class Constants {
     public static final boolean simIsRedAlliance = false; // Whether simulated FMS is on red alliance
 
     public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error
-
 
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = true;

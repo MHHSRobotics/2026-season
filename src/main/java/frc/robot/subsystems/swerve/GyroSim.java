@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.io.GyroIO;
 
-// Gyro sim does NOTHING because swerve replaces gyro with odometry when it's disconnected
 public class GyroSim extends SubsystemBase {
     private GyroIO gyro;
     private SwerveSim swerveSim;
@@ -16,7 +15,11 @@ public class GyroSim extends SubsystemBase {
 
     @Override
     public void periodic() {
-        gyro.setMechYaw(swerveSim.getPhysicalPose().getRotation().getRadians());
+        gyro.setMechYaw(swerveSim.getPhysicalPose().getRotation().getZ());
+        gyro.setMechPitch(swerveSim.getPhysicalPose().getRotation().getY());
+        gyro.setMechRoll(swerveSim.getPhysicalPose().getRotation().getX());
         gyro.setMechYawVelocity(0);
+        gyro.setMechPitchVelocity(0);
+        gyro.setMechRollVelocity(0);
     }
 }
