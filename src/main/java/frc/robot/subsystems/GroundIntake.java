@@ -4,9 +4,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.signals.ForwardLimitSourceValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 
+import frc.robot.io.BitIODigitalSignal;
 import frc.robot.io.MotorIO;
 import frc.robot.subsystems.GroundIntake.Constants.MechanicalSwitchState;
 
@@ -21,8 +21,8 @@ public class GroundIntake extends SubsystemBase {
     private MechanicalSwitchState currentState = MechanicalSwitchState.HIGH_POS;
     private TalonFXConfiguration config = new TalonFXConfiguration();
     private MotorIO hingeMotor;
-    private int id = 0;
-    private int id1 = 0;
+    private BitIODigitalSignal rightLimitSwitch = new BitIODigitalSignal("MechanicalSwitchRight", "", 0);
+    private BitIODigitalSignal leftLimitSwitch = new BitIODigitalSignal("MechanicalSwitchLeft", "", 1);
     private SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> constants;
 
     public GroundIntake(
@@ -36,15 +36,17 @@ public class GroundIntake extends SubsystemBase {
         stop();
         hingeMotor.setBraking(brake);
     }
-
+    /*
     public void setForward(double radPerSecond) {
-        while (connectForwardLimitSwitch(id) == false || connectForwardLimitSwitch1(id1) == false) {
+        if (leftLimitSwitch.getInputs() || rightLimitSwitch.getInputs()) {
+            stop();
+            setLocked(true);
+            currentState = MechanicalSwitchState.HIGH_POS;
+        } else {
             hingeMotor.setDutyCycle(radPerSecond);
         }
-        stop();
-        setLocked(true);
-        currentState = MechanicalSwitchState.HIGH_POS;
     }
+    */
 
     public void setDown(double radPerSecond) {
         currentState = MechanicalSwitchState.NEUTRAL;
@@ -62,20 +64,6 @@ public class GroundIntake extends SubsystemBase {
 
     public void stop() {
         hingeMotor.setDutyCycle(0);
-    }
-
-    public boolean connectForwardLimitSwitch(int i) {
-        config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
-        config.HardwareLimitSwitch.ForwardLimitEnable = true;
-        config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = i;
-        return (config.HardwareLimitSwitch.ForwardLimitEnable);
-    }
-
-    public boolean connectForwardLimitSwitch1(int i1) {
-        config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
-        config.HardwareLimitSwitch.ForwardLimitEnable = true;
-        config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = i1;
-        return (config.HardwareLimitSwitch.ForwardLimitEnable);
     }
 
     @Override
