@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
-import frc.robot.commands.SwerveCommands;
 import frc.robot.commands.HopperCommands;
+import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -38,7 +38,6 @@ public class RobotContainer {
     private Hopper hopper;
     private SwerveCommands swerveCommands;
     private HopperCommands hopperCommands;
-
 
     // Main drive controller
     private final CommandPS5Controller controller = new CommandPS5Controller(0);
@@ -94,7 +93,8 @@ public class RobotContainer {
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
-                    hopperMotor = new MotorIOTalonFX(Hopper.Constants.motorId, "hopper motor", "Hopper/Motor");
+                    hopperMotor = new MotorIOTalonFX(
+                            Hopper.Constants.motorId, Constants.defaultBus, "hopper motor", "Hopper/Motor");
                     break;
 
                 default:

@@ -7,6 +7,7 @@ import frc.robot.subsystems.hopper.Hopper;
 
 public class HopperCommands {
     public Hopper hopper;
+
     public HopperCommands(Hopper hopper) {
         this.hopper = hopper;
     }
