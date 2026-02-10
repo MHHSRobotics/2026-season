@@ -45,4 +45,5 @@ public final class Constants {
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = true;
     public static final boolean hopperEnabled = true;
+    public static final boolean hangEnabled = true;
 }
