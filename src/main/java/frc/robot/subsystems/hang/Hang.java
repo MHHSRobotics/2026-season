@@ -11,18 +11,10 @@ import frc.robot.io.MotorIO;
 public class Hang extends SubsystemBase{
     public static class Constants {
         // CAN device ID for the hang motor controller, and Digital input sensors initialized.
-        private DigitalInput irSensor1;
-        private DigitalInput irSensor2;
-        private DigitalInput irSensor3;
-        public static final int motorId = 0;
+        public static final int motorId = 25;
 
         // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
-
-        public static final double statorCurrentLimit = 80; // (amps) limit on motor torque output for climbing
-        public static final double supplyCurrentLimit = 70; // (amps) normal current limit pulled from battery
-        public static final double supplyCurrentLowerLimit = 50; // (amps) reduce to this if over limit for some time
-        public static final double supplyCurrentLowerTime = 0.5; // (seconds) time before lowering current limit
 
         public static final LoggedNetworkBoolean hangLocked =
                 new LoggedNetworkBoolean("Hang/Locked", true); // Toggle to enable braking when stopped
@@ -33,15 +25,8 @@ public class Hang extends SubsystemBase{
 
     private MotorIO hangMotor;
 
-    public boolean invert = false;
-
     public Hang(MotorIO motorIO) {
         hangMotor.setInverted(Constants.motorInverted);
-
-        hangMotor.setStatorCurrentLimit(Constants.statorCurrentLimit);
-        hangMotor.setSupplyCurrentLimit(Constants.supplyCurrentLimit);
-        hangMotor.setSupplyCurrentLowerLimit(Constants.supplyCurrentLowerLimit);
-        hangMotor.setSupplyCurrentLowerTime(Constants.supplyCurrentLowerTime);
     }
 
     public void setSpeed(double speed) {
