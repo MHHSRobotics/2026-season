@@ -13,7 +13,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
+import frc.robot.commands.GroundIntakeCommands;
 import frc.robot.commands.SwerveCommands;
+import frc.robot.io.BitIO;
+import frc.robot.io.BitIODigitalSignal;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -23,6 +26,7 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.intake.GroundIntake;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -33,8 +37,10 @@ import frc.robot.util.Alerts;
 
 public class RobotContainer {
     private Swerve swerve;
+    private GroundIntake gIntake;
 
     private SwerveCommands swerveCommands;
+    private GroundIntakeCommands intakeCommands;
 
     // Main drive controller
     private final CommandPS5Controller controller = new CommandPS5Controller(0);
@@ -217,17 +223,42 @@ public class RobotContainer {
                 new VisionSim(swerve.getCameras(), swerve);
             }
         }
+
+        if (Constants.gIntakeEnabled) {
+            MotorIO gIntakeMotor;
+            BitIO lIntakeIO;
+            BitIO rIntakeIO;
+            switch (Constants.currentMode) {
+                case REAL:
+                case SIM:
+                    gIntakeMotor = new MotorIOTalonFX(
+                            GroundIntake.Constants.motorId,
+                            Constants.defaultBus,
+                            "ground-intake motor",
+                            "gIntake/Motor");
+                    lIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "gIntake/IOleft", 8);
+                    rIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "gIntake/IOleft", 9);
+                    break;
+                default:
+                    gIntakeMotor = new MotorIO("ground-intake motor", "gIntake/Motor");
+                    lIntakeIO = new BitIO("ground-intake left BitIO", "gIntake/IOleft");
+                    rIntakeIO = new BitIO("ground-intake right BitIO", "gIntake/IOright");
+                    break;
+            }
+            gIntake = new GroundIntake(gIntakeMotor, lIntakeIO, rIntakeIO);
+        }
     }
 
     private void initCommands() {
         swerveCommands = new SwerveCommands(swerve);
+        intakeCommands = new GroundIntakeCommands(gIntake);
     }
 
     private void configureBindings() {
         /* ---- Main controller bindings ---- */
 
         // controller.R2().onTrue(ssCommands.lowAlgaePosition());
-
+        controller.L1().onTrue(intakeCommands.setPos(0.5));
         controller.create().onTrue(swerveCommands.resetGyro());
 
         controller
@@ -249,6 +280,7 @@ public class RobotContainer {
         /* ---- Test controller bindings ---- */
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addOption("Swerve", "Swerve");
+        testControllerChooser.addOption("Intake", "Intake");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
@@ -273,6 +305,12 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Intake"))
+                .onTrue(intakeCommands.setSpeed(0.2))
+                .onFalse(intakeCommands.stop());
 
         // Manual duty cycle backward test
 
@@ -282,6 +320,12 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Intake"))
+                .onTrue(intakeCommands.setSpeed(-0.2))
+                .onFalse(intakeCommands.stop());
     }
 
     // Bindings for manual control of each of the subsystems

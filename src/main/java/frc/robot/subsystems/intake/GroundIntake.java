@@ -1,12 +1,10 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-
-import frc.robot.io.BitIODigitalSignal;
+import frc.robot.io.BitIO;
 import frc.robot.io.MotorIO;
-import frc.robot.subsystems.GroundIntake.Constants.MechanicalSwitchState;
+import frc.robot.subsystems.intake.GroundIntake.Constants.MechanicalSwitchState;
 
 public class GroundIntake extends SubsystemBase {
     public static class Constants {
@@ -14,16 +12,19 @@ public class GroundIntake extends SubsystemBase {
             HIGH_POS,
             NEUTRAL
         }
+
+        public static final int motorId = 20;
     }
 
     private MechanicalSwitchState currentState = MechanicalSwitchState.HIGH_POS;
-    private TalonFXConfiguration config = new TalonFXConfiguration();
     private MotorIO hingeMotor;
-    private BitIODigitalSignal rightLimitSwitch = new BitIODigitalSignal("MechanicalSwitchRight", "", 0);
-    private BitIODigitalSignal leftLimitSwitch = new BitIODigitalSignal("MechanicalSwitchLeft", "", 1);
+    private BitIO rightLimitSwitch;
+    private BitIO leftLimitSwitch;
 
-    public GroundIntake(MotorIO hingeMotorIO) {
+    public GroundIntake(MotorIO hingeMotorIO, BitIO rightLimitSwitchIO, BitIO leftLimitSwitchIO) {
         hingeMotor = hingeMotorIO;
+        rightLimitSwitch = rightLimitSwitchIO;
+        leftLimitSwitch = leftLimitSwitchIO;
     }
 
     public void setLocked(boolean brake) {
@@ -31,20 +32,24 @@ public class GroundIntake extends SubsystemBase {
         hingeMotor.setBraking(brake);
     }
 
-    public void setForward(double radPerSecond) {
+    public void setSpeed(double speed) {
+        hingeMotor.setDutyCycle(speed);
+    }
+
+    public void setForward(double speed) {
         if (leftLimitSwitch.getInputs().value || rightLimitSwitch.getInputs().value) {
             stop();
             setLocked(true);
             currentState = MechanicalSwitchState.HIGH_POS;
         } else {
-            hingeMotor.setDutyCycle(radPerSecond);
+            hingeMotor.setDutyCycle(speed);
         }
     }
 
-    public void setDown(double radPerSecond) {
+    public void setDown(double speed) {
         currentState = MechanicalSwitchState.NEUTRAL;
         setLocked(false);
-        hingeMotor.setDutyCycle(radPerSecond);
+        hingeMotor.setDutyCycle(speed);
 
         try {
             Thread.sleep(1000); // One second delay
@@ -53,6 +58,14 @@ public class GroundIntake extends SubsystemBase {
         }
 
         stop();
+    }
+
+    public void setPos(double speed) {
+        if (currentState == MechanicalSwitchState.NEUTRAL) {
+            setForward(speed);
+        } else {
+            setDown(speed);
+        }
     }
 
     public void stop() {

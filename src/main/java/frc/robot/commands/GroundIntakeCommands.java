@@ -3,7 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
-import frc.robot.subsystems.GroundIntake;
+import frc.robot.subsystems.intake.GroundIntake;
 
 public class GroundIntakeCommands {
 
@@ -18,12 +18,20 @@ public class GroundIntakeCommands {
         return new InstantCommand(() -> groundIntake.stop());
     }
 
-    public Command setForward(double radPerSecond) {
-        return new InstantCommand(() -> groundIntake.setForward(radPerSecond));
+    public Command setPos(double speed) {
+        return new InstantCommand(() -> groundIntake.setPos(speed));
     }
 
-    public Command setDown(double radPerSecond) {
-        return new InstantCommand(() -> groundIntake.setDown(radPerSecond));
+    public Command setDown(double speed) {
+        return new InstantCommand(() -> groundIntake.setDown(speed));
+    }
+
+    public Command setUp(double speed) {
+        return new InstantCommand(() -> groundIntake.setForward(speed));
+    }
+
+    public Command setSpeed(double speed) {
+        return new InstantCommand(() -> groundIntake.setSpeed(speed));
     }
 
     public Command setLocked(boolean brake) {
