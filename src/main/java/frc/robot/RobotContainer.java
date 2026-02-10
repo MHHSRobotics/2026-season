@@ -13,9 +13,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
-import frc.robot.commands.SwerveCommands;
-import frc.robot.commands.HopperCommands;
 import frc.robot.commands.HangCommands;
+import frc.robot.commands.HopperCommands;
+import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -25,8 +25,8 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
-import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hang.Hang;
+import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -42,8 +42,6 @@ public class RobotContainer {
     private HopperCommands hopperCommands;
     private Hang hang;
     private HangCommands hangCommands;
-
-
 
     // Main drive controller
     private final CommandPS5Controller controller = new CommandPS5Controller(0);
@@ -110,7 +108,7 @@ public class RobotContainer {
             hopper = new Hopper(hopperMotor);
         }
 
-        if(Constants.hangEnabled){
+        if (Constants.hangEnabled) {
             MotorIO hangMotor;
             switch (Constants.currentMode) {
                 case REAL:

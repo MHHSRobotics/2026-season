@@ -1,14 +1,12 @@
 package frc.robot.subsystems.hang;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import frc.robot.io.MotorIO;
 
-
-public class Hang extends SubsystemBase{
+public class Hang extends SubsystemBase {
     public static class Constants {
         // CAN device ID for the hang motor controller, and Digital input sensors initialized.
         public static final int motorId = 25;

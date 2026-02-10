@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import frc.robot.subsystems.hang.Hang;
 
-
 public class HangCommands {
     private Hang hang;
 
