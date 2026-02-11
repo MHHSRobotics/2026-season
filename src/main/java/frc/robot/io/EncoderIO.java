@@ -76,6 +76,10 @@ public class EncoderIO {
         unsupportedFeature();
     }
 
+    public void setPosition(double position) {
+        unsupportedFeature();
+    }
+
     public void setInverted(boolean inverted) {
         unsupportedFeature();
     }
@@ -85,6 +89,11 @@ public class EncoderIO {
     }
 
     public void setMechVelocity(double velocity) {
+        unsupportedFeature();
+    }
+
+    // Disconnect the encoder. Simulation-only.
+    public void disconnect() {
         unsupportedFeature();
     }
 }

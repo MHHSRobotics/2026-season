@@ -1,5 +1,8 @@
 package frc.robot.io;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -23,22 +26,37 @@ public class CameraIOPhotonCamera extends CameraIO {
     private Transform3d robotToCamera;
 
     private double fov;
+    private int resWidth, resHeight;
 
-    public CameraIOPhotonCamera(String name, String logPath, Transform3d robotToCamera, double fov) {
+    private boolean disconnected = false;
+
+    public CameraIOPhotonCamera(
+            String name, String logPath, Transform3d robotToCamera, double fov, int resWidth, int resHeight) {
         super(name, logPath);
         cam = new PhotonCamera(name);
         this.robotToCamera = robotToCamera;
         this.fov = fov;
+        this.resWidth = resWidth;
+        this.resHeight = resHeight;
+    }
+
+    // Camera resolution defaults to 320x240
+    public CameraIOPhotonCamera(String name, String logPath, Transform3d robotToCamera, double fov) {
+        this(name, logPath, robotToCamera, fov, 320, 240);
     }
 
     @Override
     public void update() {
-        inputs.connected = cam.isConnected();
-        inputs.measurements = 0;
+        inputs.connected = disconnected ? false : cam.isConnected();
+
+        List<Pose3d> posesList = new ArrayList<>();
+        List<Double> timestampsList = new ArrayList<>();
+        List<Double> ambiguitiesList = new ArrayList<>();
+        List<Integer> tagCountsList = new ArrayList<>();
 
         var unreadResults = cam.getAllUnreadResults();
         for (PhotonPipelineResult res : unreadResults) {
-            if (inputs.measurements < Swerve.VisionConstants.maxMeasurements && res.hasTargets()) {
+            if (posesList.size() < Swerve.VisionConstants.maxMeasurements && res.hasTargets()) {
                 // Try multi-tag first (most accurate when multiple tags are visible)
                 var multiTagResult = res.getMultiTagResult();
                 if (multiTagResult.isPresent()) {
@@ -46,11 +64,10 @@ public class CameraIOPhotonCamera extends CameraIO {
                     // Multi-tag result gives field-to-camera transform, convert to camera pose then to robot pose
                     Pose3d estimatedRobotPose =
                             new Pose3d().transformBy(result.estimatedPose.best).transformBy(robotToCamera.inverse());
-                    inputs.poses[inputs.measurements] = estimatedRobotPose;
-                    inputs.poseTimestamps[inputs.measurements] = res.getTimestampSeconds();
-                    inputs.ambiguities[inputs.measurements] = result.estimatedPose.ambiguity;
-                    inputs.tagCounts[inputs.measurements] = result.fiducialIDsUsed.size();
-                    inputs.measurements++;
+                    posesList.add(estimatedRobotPose);
+                    timestampsList.add(res.getTimestampSeconds());
+                    ambiguitiesList.add(result.estimatedPose.ambiguity);
+                    tagCountsList.add(result.fiducialIDsUsed.size());
                 } else {
                     // Fall back to single-tag if multi-tag unavailable
                     PhotonTrackedTarget target = res.getBestTarget();
@@ -61,19 +78,23 @@ public class CameraIOPhotonCamera extends CameraIO {
                         Pose3d estimatedRobotPose = aprilTagLocation
                                 .transformBy(bestCameraToTarget.inverse())
                                 .transformBy(robotToCamera.inverse());
-                        inputs.poses[inputs.measurements] = estimatedRobotPose;
-                        inputs.poseTimestamps[inputs.measurements] = res.getTimestampSeconds();
-                        inputs.ambiguities[inputs.measurements] = target.getPoseAmbiguity();
-                        inputs.tagCounts[inputs.measurements] = 1;
-                        inputs.measurements++;
+                        posesList.add(estimatedRobotPose);
+                        timestampsList.add(res.getTimestampSeconds());
+                        ambiguitiesList.add(target.getPoseAmbiguity());
+                        tagCountsList.add(1);
                     }
                 }
             }
         }
 
-        for (int i = inputs.measurements; i < Swerve.VisionConstants.maxMeasurements; i++) {
-            inputs.poses[i] = new Pose3d();
-        }
+        // Convert lists to arrays
+        inputs.poses = posesList.toArray(new Pose3d[0]);
+        inputs.poseTimestamps =
+                timestampsList.stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.ambiguities =
+                ambiguitiesList.stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.tagCounts = tagCountsList.stream().mapToInt(Integer::intValue).toArray();
+
         super.update();
     }
 
@@ -85,8 +106,8 @@ public class CameraIOPhotonCamera extends CameraIO {
         }
         // Config for the camera sim
         SimCameraProperties cameraProp = new SimCameraProperties();
-        // 640x480 input with 80 degree FOV
-        cameraProp.setCalibration(320, 240, Rotation2d.fromDegrees(fov));
+        // Set resolution and FOV
+        cameraProp.setCalibration(resWidth, resHeight, Rotation2d.fromDegrees(fov));
         // 50 FPS
         cameraProp.setFPS(50);
         // Latency of 35ms with standard deviation of 5ms
@@ -97,5 +118,14 @@ public class CameraIOPhotonCamera extends CameraIO {
         visionSim.addCamera(cameraSim, robotToCamera);
 
         cameraSim.enableDrawWireframe(true);
+    }
+
+    @Override
+    public void disconnect() {
+        if (Constants.currentMode == Mode.REAL) {
+            Alerts.create("Used sim-only method disconnect on " + getName(), AlertType.kWarning);
+            return;
+        }
+        disconnected = true;
     }
 }
