@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
-import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.GroundIntakeCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.BitIO;
 import frc.robot.io.BitIODigitalSignal;
@@ -27,8 +27,8 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
-import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.intake.GroundIntake;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -260,7 +260,6 @@ public class RobotContainer {
 
         // If mode is SIM, start the simulations for swerve modules and gyro
 
-
         if (Constants.gIntakeEnabled) {
             MotorIO gIntakeMotor;
             BitIO lIntakeIO;
@@ -294,7 +293,8 @@ public class RobotContainer {
             swerveCommands = new SwerveCommands(swerve);
         }
         if (Constants.gIntakeEnabled) {
-        intakeCommands = new GroundIntakeCommands(gIntake);}
+            intakeCommands = new GroundIntakeCommands(gIntake);
+        }
     }
 
     private void configureBindings() {
