@@ -2,6 +2,8 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+
 import frc.robot.io.BitIO;
 import frc.robot.io.MotorIO;
 import frc.robot.subsystems.intake.GroundIntake.Constants.MechanicalSwitchState;
@@ -20,6 +22,12 @@ public class GroundIntake extends SubsystemBase {
     private MotorIO hingeMotor;
     private BitIO rightLimitSwitch;
     private BitIO leftLimitSwitch;
+
+    public static final LoggedNetworkBoolean gIntakeLocked =
+            new LoggedNetworkBoolean("GIntake/Locked", true); // Toggle to enable braking when stopped
+
+    public static final LoggedNetworkBoolean gIntakeDisabled = new LoggedNetworkBoolean(
+            "GIntake/Disabled", false); // Toggle to completely disable all motors in the swerve subsystem
 
     public GroundIntake(MotorIO hingeMotorIO, BitIO rightLimitSwitchIO, BitIO leftLimitSwitchIO) {
         hingeMotor = hingeMotorIO;
@@ -73,5 +81,15 @@ public class GroundIntake extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+        hingeMotor.setBraking(gIntakeLocked.get());
+
+        hingeMotor.setDisabled(gIntakeDisabled.get());
+
+        hingeMotor.update();
+
+        rightLimitSwitch.update();
+
+        leftLimitSwitch.update();
+    }
 }

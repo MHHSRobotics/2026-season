@@ -235,14 +235,14 @@ public class RobotContainer {
                             GroundIntake.Constants.motorId,
                             Constants.defaultBus,
                             "ground-intake motor",
-                            "gIntake/Motor");
-                    lIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "gIntake/IOleft", 8);
-                    rIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "gIntake/IOleft", 9);
+                            "GIntake/Motor");
+                    lIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "GIntake/IOleft", 8);
+                    rIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "GIntake/IOleft", 9);
                     break;
                 default:
-                    gIntakeMotor = new MotorIO("ground-intake motor", "gIntake/Motor");
-                    lIntakeIO = new BitIO("ground-intake left BitIO", "gIntake/IOleft");
-                    rIntakeIO = new BitIO("ground-intake right BitIO", "gIntake/IOright");
+                    gIntakeMotor = new MotorIO("ground-intake motor", "GIntake/Motor");
+                    lIntakeIO = new BitIO("ground-intake left BitIO", "GIntake/IOleft");
+                    rIntakeIO = new BitIO("ground-intake right BitIO", "GIntake/IOright");
                     break;
             }
             gIntake = new GroundIntake(gIntakeMotor, lIntakeIO, rIntakeIO);
@@ -305,12 +305,6 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
-        testController
-                .cross()
-                .and(() -> testControllerManual.get().equals("Manual"))
-                .and(() -> testControllerChooser.get().equals("Intake"))
-                .onTrue(intakeCommands.setSpeed(0.2))
-                .onFalse(intakeCommands.stop());
 
         // Manual duty cycle backward test
 
@@ -320,11 +314,18 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
+
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Intake"))
+                .onTrue(intakeCommands.setSpeed(-0.2))
+                .onFalse(intakeCommands.stop());
         testController
                 .cross()
                 .and(() -> testControllerManual.get().equals("Manual"))
                 .and(() -> testControllerChooser.get().equals("Intake"))
-                .onTrue(intakeCommands.setSpeed(-0.2))
+                .onTrue(intakeCommands.setSpeed(0.2))
                 .onFalse(intakeCommands.stop());
     }
 
