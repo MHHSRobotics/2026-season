@@ -304,6 +304,24 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
+
+        // Hopper roll towards shooter test
+        
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Hopper"))
+                .onTrue(hopperCommands.rollForward())
+                .onFalse(hopperCommands.stop());
+
+        // Hopper roll towards intake test
+
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Hopper"))
+                .onTrue(hopperCommands.rollReverse())
+                .onFalse(hopperCommands.stop());
     }
 
     // Bindings for manual control of each of the subsystems
