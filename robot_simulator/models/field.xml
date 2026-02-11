@@ -1,0 +1,783 @@
+<!-- 2026 REBUILT Field
+     Origin: Blue alliance wall corner (WPILib convention)
+     X: along field length (0 to 16.54m), blue-to-red
+     Y: along field width (0 to 8.07m)
+     Z: up
+
+     Field: 16.54m x 8.07m
+     Blue/red halves are exact 180-degree rotations about field center
+-->
+
+<mujoco model="rebuilt_field">
+  <asset>
+    <!-- Field surface -->
+    <material name="carpet_mat" rgba="0.3 0.3 0.3 1"/>
+    <!-- Structural -->
+    <material name="wall_mat" rgba="0.35 0.38 0.4 1"/>
+    <material name="metal_mat" rgba="0.5 0.5 0.5 1"/>
+    <!-- Alliance colors -->
+    <material name="blue_wall_mat" rgba="0.1 0.2 0.7 1"/>
+    <material name="red_wall_mat" rgba="0.7 0.1 0.1 1"/>
+    <material name="blue_accent_mat" rgba="0.2 0.35 0.8 1"/>
+    <material name="red_accent_mat" rgba="0.8 0.2 0.15 1"/>
+    <!-- Hub -->
+    <material name="hub_mat" rgba="0.65 0.68 0.7 1"/>
+    <material name="blue_hub_mat" rgba="0.5 0.6 0.85 1"/>
+    <material name="red_hub_mat" rgba="0.85 0.5 0.5 1"/>
+    <material name="net_mat" rgba="0.9 0.9 0.9 0.4"/>
+    <!-- Depot -->
+    <material name="depot_mat" rgba="0.6 0.6 0.55 1"/>
+    <!-- Lines -->
+    <material name="line_white_mat" rgba="1.0 1.0 1.0 1"/>
+    <material name="line_blue_mat" rgba="0.1 0.1 0.8 1"/>
+    <material name="line_red_mat" rgba="0.8 0.1 0.1 1"/>
+    <!-- Bumps/ramps -->
+    <material name="bump_mat" rgba="0.35 0.35 0.35 1"/>
+    <!-- Fuel -->
+    <material name="fuel_mat" rgba="1.0 0.85 0.0 1"/>
+    <!-- Rung -->
+    <material name="rung_mat" rgba="0.9 0.6 0.1 1"/>
+  </asset>
+
+  <worldbody>
+    <!-- ========== FIELD FLOOR ========== -->
+    <!-- Carpet: 16.54m x 8.07m, centered at (8.27, 4.035, 0) -->
+    <geom name="field_floor" type="box" pos="8.27 4.035 -0.005"
+          size="8.27 4.035 0.005" material="carpet_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- ========== FIELD LINES (visual only, no collision) ========== -->
+    <!-- Center line: X=8.27, 0.05m wide -->
+    <geom name="center_line" type="box" pos="8.27 4.035 0.001"
+          size="0.025 4.035 0.001" material="line_white_mat"
+          contype="0" conaffinity="0"/>
+    <!-- Blue alliance line: 4.0m from blue wall, 0.05m wide -->
+    <geom name="blue_alliance_line" type="box" pos="4.0 4.035 0.001"
+          size="0.025 4.035 0.001" material="line_blue_mat"
+          contype="0" conaffinity="0"/>
+    <!-- Red alliance line: 4.0m from red wall (16.54 - 4.0 = 12.54m) -->
+    <geom name="red_alliance_line" type="box" pos="12.54 4.035 0.001"
+          size="0.025 4.035 0.001" material="line_red_mat"
+          contype="0" conaffinity="0"/>
+
+    <!-- ========== GUARDRAILS (long edges, 0.5m tall) ========== -->
+    <!-- Wall thickness: 0.03m -->
+    <!-- Near guardrail (Y=0 side) -->
+    <geom name="guardrail_near" type="box" pos="8.27 -0.015 0.25"
+          size="8.27 0.015 0.25" material="wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Far guardrail (Y=8.07m side) -->
+    <geom name="guardrail_far" type="box" pos="8.27 8.085 0.25"
+          size="8.27 0.015 0.25" material="wall_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- ========== ALLIANCE WALLS (short edges, 2.0m tall, 0.05m thick) ========== -->
+    <!-- Blue alliance wall (X=0), split around corral hole
+         Corral: 0.813m wide, 0.178m tall, bottom at Z=0.047
+         Right edge at Y=0.26, left edge at Y=1.073 -->
+    <!-- Right of hole (Y=0 to 0.26) -->
+    <geom name="blue_wall_r" type="box" pos="-0.025 0.13 1.0"
+          size="0.025 0.13 1.0" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Left of hole (Y=1.073 to 8.07) -->
+    <geom name="blue_wall_l" type="box" pos="-0.025 4.5715 1.0"
+          size="0.025 3.4985 1.0" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Below hole (Z=0 to 0.047) -->
+    <geom name="blue_wall_below" type="box" pos="-0.025 0.6665 0.0235"
+          size="0.025 0.4065 0.0235" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Above hole (Z=0.225 to 2.0) -->
+    <geom name="blue_wall_above" type="box" pos="-0.025 0.6665 1.1125"
+          size="0.025 0.4065 0.8875" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Corral divider cylinder in middle of hole -->
+    <geom name="blue_corral_post" type="cylinder" pos="-0.025 0.6665 0.136"
+          size="0.021 0.089" material="metal_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Blue CORRAL: 0.9x0.9m area behind wall, 0.2m tall walls
+         Centered on hole (Y=0.6665), extends X=-0.05 to X=-0.95 -->
+    <body name="blue_corral" pos="-0.5 0.6665 0">
+      <!-- Back wall -->
+      <geom name="blue_corral_back" type="box" pos="-0.45 0 0.1"
+            size="0.015 0.45 0.1" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right wall -->
+      <geom name="blue_corral_right" type="box" pos="0 -0.45 0.1"
+            size="0.45 0.015 0.1" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left wall -->
+      <geom name="blue_corral_left" type="box" pos="0 0.45 0.1"
+            size="0.45 0.015 0.1" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Ramp from hole lip (X=-0.05, Z=0.047) down to ground (X=-0.8, Z=0)
+           Length=0.75m, drop=0.047m, angle=0.063 rad -->
+      <geom name="blue_corral_ramp" type="box" pos="0.075 0 0.0235"
+            size="0.376 0.4065 0.005" euler="0 -0.063 0" material="wall_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red alliance wall (X=16.54m), split around corral hole (180° mirror)
+         Hole spans Y=6.997 to 7.81 -->
+    <!-- Right of hole (from red perspective, Y=7.81 to 8.07) -->
+    <geom name="red_wall_r" type="box" pos="16.565 7.94 1.0"
+          size="0.025 0.13 1.0" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Left of hole (from red perspective, Y=0 to 6.997) -->
+    <geom name="red_wall_l" type="box" pos="16.565 3.4985 1.0"
+          size="0.025 3.4985 1.0" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Below hole -->
+    <geom name="red_wall_below" type="box" pos="16.565 7.4035 0.0235"
+          size="0.025 0.4065 0.0235" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Above hole -->
+    <geom name="red_wall_above" type="box" pos="16.565 7.4035 1.1125"
+          size="0.025 0.4065 0.8875" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Corral divider cylinder in middle of hole -->
+    <geom name="red_corral_post" type="cylinder" pos="16.565 7.4035 0.136"
+          size="0.021 0.089" material="metal_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Red CORRAL: 180° mirror, extends X=16.59 to X=17.49 -->
+    <body name="red_corral" pos="17.04 7.4035 0">
+      <!-- Back wall -->
+      <geom name="red_corral_back" type="box" pos="0.45 0 0.1"
+            size="0.015 0.45 0.1" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right wall (from red perspective) -->
+      <geom name="red_corral_right" type="box" pos="0 0.45 0.1"
+            size="0.45 0.015 0.1" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left wall (from red perspective) -->
+      <geom name="red_corral_left" type="box" pos="0 -0.45 0.1"
+            size="0.45 0.015 0.1" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Ramp from hole lip down to ground -->
+      <geom name="red_corral_ramp" type="box" pos="-0.075 0 0.0235"
+            size="0.376 0.4065 0.005" euler="0 0.063 0" material="wall_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- ========== BLUE ALLIANCE ELEMENTS ========== -->
+
+    <!-- Blue DEPOT: against blue wall, 0.685m deep (X) x 1.06m wide (Y)
+         Left edge 1.57m from left wall (Y=8.07), so Y spans 5.44 to 6.50
+         3 sides: 0.076m thick, 0.028m tall. Blue wall is the 4th side. -->
+    <body name="blue_depot" pos="0.3425 5.97 0">
+      <!-- Front side (facing red, at X=0.685 from wall) -->
+      <geom name="blue_depot_front" type="box" pos="0.3045 0 0.014"
+            size="0.038 0.53 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left side (Y=6.50, toward far guardrail) -->
+      <geom name="blue_depot_left" type="box" pos="0 0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right side (Y=5.44, toward near guardrail) -->
+      <geom name="blue_depot_right" type="box" pos="0 -0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Blue TOWER: 0.0889m (X) x 0.0381m (Y) posts, 1.83m tall
+         Back of posts at X=1.02, so center X = 1.02 + 0.0889/2 = 1.064
+         Right post nearest edge at Y=3.3, center Y = 3.319
+         Left post nearest edge at Y=4.155, center Y = 4.174
+         Rungs: 0.042m dia cylinders, centered between posts, extend 0.15m beyond each -->
+    <body name="blue_tower" pos="1.064 3.747 0">
+      <!-- Right post (center Y offset = 3.319 - 3.747 = -0.428) -->
+      <geom name="blue_tower_post_r" type="box" pos="0 -0.428 0.915"
+            size="0.04445 0.01905 0.915" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left post (center Y offset = 4.174 - 3.747 = 0.427) -->
+      <geom name="blue_tower_post_l" type="box" pos="0 0.427 0.915"
+            size="0.04445 0.01905 0.915" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Rungs: span from Y=3.3-0.15=3.15 to Y=4.193+0.15=4.343
+           half-length = (4.343-3.15)/2 = 0.597, centered at body origin -->
+      <geom name="blue_rung_low" type="cylinder" pos="0 0 0.686"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_rung_mid" type="cylinder" pos="0 0 1.143"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_rung_high" type="cylinder" pos="0 0 1.6"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Supports: 0.044x0.044m beams from posts to alliance wall (X=0 to X=1.02)
+           Bottom at Z=0.89, center Z=0.912, half-length X=0.51, center X=0.51
+           Relative to body: X = 0.51 - 1.064 = -0.554 -->
+      <geom name="blue_tower_support_r" type="box" pos="-0.554 -0.428 0.912"
+            size="0.51 0.022 0.022" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_tower_support_l" type="box" pos="-0.554 0.427 0.912"
+            size="0.51 0.022 0.022" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Blue HUB: 1.194x1.194m walls, 1.435m tall, with hexagonal funnel on top
+         Back face at X=4.025 (front of alliance line), centered on Y=4.035
+         Center X = 4.025 + 0.597 = 4.622
+         Funnel: bottom hex 0.7m across-flats at Z=1.435, top 1.22m at Z=1.825 -->
+    <body name="blue_hub" pos="4.622 4.035 0">
+      <!-- Hub walls (1.435m tall) -->
+      <geom name="blue_hub_back" type="box" pos="-0.597 0 0.7175"
+            size="0.015 0.597 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Front wall split around output hole: 1.09m wide, 0.225m tall, bottom at Z=0.765 -->
+      <geom name="blue_hub_front_l" type="box" pos="0.597 0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_front_r" type="box" pos="0.597 -0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_front_below" type="box" pos="0.597 0 0.3825"
+            size="0.015 0.545 0.3825" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_front_above" type="box" pos="0.597 0 1.2125"
+            size="0.015 0.545 0.2225" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Interior ramp: 21° from back wall (Z=1.223) down to front hole (Z=0.765)
+           Slope length = 1.279m, width = 1.09m -->
+      <geom name="blue_hub_ramp" type="box" pos="0 0 0.994"
+            size="0.640 0.545 0.005" euler="0 0.3665 0" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_left" type="box" pos="0 0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_right" type="box" pos="0 -0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Gap panels at hub top (Z=1.435) sealing square-to-hexagon transition -->
+      <geom name="blue_hub_gap_px" type="box" pos="0.465 0 1.435"
+            size="0.115 0.58 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_gap_nx" type="box" pos="-0.465 0 1.435"
+            size="0.115 0.58 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_gap_py" type="box" pos="0 0.465 1.435"
+            size="0.35 0.115 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_gap_ny" type="box" pos="0 -0.465 1.435"
+            size="0.35 0.115 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Hexagonal funnel: 6 panels, each 0.005m thick
+           Panel size=(0.005, 0.352, 0.234), normal initially along +X
+           Tilt outward 0.588 rad, then yaw by face angle
+           Slope height=0.469m, avg apothem=0.48m -->
+      <!-- Hexagonal funnel rotated 30° so vertices face alliance walls -->
+      <geom name="blue_funnel_30" type="box" pos="0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 -0.075 0.280 0.248"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_90" type="box" pos="0 0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 -0.205 0.205 0.677"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_150" type="box" pos="-0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 -0.280 0.075 0.924"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_210" type="box" pos="-0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 0.280 0.075 -0.924"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_270" type="box" pos="0 -0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 0.205 0.205 -0.677"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_330" type="box" pos="0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 0.075 0.280 -0.248"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <!-- Net: vertical plane, bottom at Z=1.67, 1.35m tall, 1.47m wide
+           0.23m in front of top funnel vertex (X = 0.704 + 0.23 = 0.934) -->
+      <geom name="blue_hub_net" type="box" pos="0.934 0 2.345"
+            size="0.005 0.735 0.675" material="net_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Blue BUMP/TRENCH WALLS: 1.194m (X) x 0.3m (Y), 0.7m tall
+         Back face at X=4.025 (same as hub), 1.867m gap to hub on each side
+         Right wall center Y=1.421, left wall center Y=6.649 -->
+    <geom name="blue_wall_right" type="box" pos="4.622 1.421 0.35"
+          size="0.597 0.15 0.35" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="blue_wall_left" type="box" pos="4.622 6.649 0.35"
+          size="0.597 0.15 0.35" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Blue TRENCH POSTS: 0.102x0.102m horizontal beams, bottom at Z=0.565
+         X centered on bump/trench walls (X=4.622)
+         Right: from guardrail (Y=0) to right wall (Y=1.271), center Y=0.636
+         Left: from left wall (Y=6.799) to guardrail (Y=8.07), center Y=7.435 -->
+    <geom name="blue_trench_right" type="box" pos="4.622 0.636 0.616"
+          size="0.051 0.636 0.051" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="blue_trench_left" type="box" pos="4.622 7.435 0.616"
+          size="0.051 0.636 0.051" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Blue BUMPS: 1.12m (X) x 1.867m (Y), 0.165m peak, two angled ramps
+         Starts 0.036m in front of alliance line (X=4.061 to 5.181), center X=4.621
+         Right bump: Y=1.571 to 3.438, center Y=2.505
+         Left bump: Y=4.632 to 6.499, center Y=5.566
+         Ramp angle: atan(0.165/0.56) = 0.287 rad, slope length = 0.584m -->
+    <body name="blue_bump_right" pos="4.621 2.505 0">
+      <geom name="blue_bump_r_back" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_bump_r_front" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_bump_left" pos="4.621 5.566 0">
+      <geom name="blue_bump_l_back" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_bump_l_front" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- ========== RED ALLIANCE ELEMENTS (180-degree rotation of blue about field center) ========== -->
+
+    <!-- Red DEPOT: 180° rotation of blue depot about (8.27, 4.035)
+         Against red wall, Y spans 1.57 to 2.63 -->
+    <body name="red_depot" pos="16.1975 2.10 0">
+      <!-- Front side (facing blue, at X=16.54-0.685 from blue wall) -->
+      <geom name="red_depot_front" type="box" pos="-0.3045 0 0.014"
+            size="0.038 0.53 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left side (toward near guardrail from red perspective) -->
+      <geom name="red_depot_left" type="box" pos="0 -0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right side (toward far guardrail from red perspective) -->
+      <geom name="red_depot_right" type="box" pos="0 0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red BUMPS: 180° rotation of blue bumps -->
+    <body name="red_bump_right" pos="11.919 5.565 0">
+      <geom name="red_bump_r_back" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_bump_r_front" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_bump_left" pos="11.919 2.504 0">
+      <geom name="red_bump_l_back" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_bump_l_front" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red TRENCH POSTS: 180° rotation of blue trench posts -->
+    <geom name="red_trench_right" type="box" pos="11.918 7.435 0.616"
+          size="0.051 0.636 0.051" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="red_trench_left" type="box" pos="11.918 0.636 0.616"
+          size="0.051 0.636 0.051" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Red BUMP/TRENCH WALLS: 180° rotation of blue walls -->
+    <geom name="red_wall_right" type="box" pos="11.918 6.649 0.35"
+          size="0.597 0.15 0.35" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="red_wall_left" type="box" pos="11.918 1.421 0.35"
+          size="0.597 0.15 0.35" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Red HUB: 180° rotation of blue hub about (8.27, 4.035)
+         Center X = 16.54 - 4.622 = 11.918 -->
+    <body name="red_hub" pos="11.918 4.035 0">
+      <!-- Hub walls (1.435m tall) -->
+      <geom name="red_hub_back" type="box" pos="0.597 0 0.7175"
+            size="0.015 0.597 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Front wall split around output hole -->
+      <geom name="red_hub_front_l" type="box" pos="-0.597 -0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_front_r" type="box" pos="-0.597 0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_front_below" type="box" pos="-0.597 0 0.3825"
+            size="0.015 0.545 0.3825" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_front_above" type="box" pos="-0.597 0 1.2125"
+            size="0.015 0.545 0.2225" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Interior ramp: 21° from back wall down to front hole -->
+      <geom name="red_hub_ramp" type="box" pos="0 0 0.994"
+            size="0.640 0.545 0.005" euler="0 -0.3665 0" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_left" type="box" pos="0 -0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_right" type="box" pos="0 0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Gap panels at hub top -->
+      <geom name="red_hub_gap_px" type="box" pos="0.465 0 1.435"
+            size="0.115 0.58 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_gap_nx" type="box" pos="-0.465 0 1.435"
+            size="0.115 0.58 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_gap_py" type="box" pos="0 0.465 1.435"
+            size="0.35 0.115 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_gap_ny" type="box" pos="0 -0.465 1.435"
+            size="0.35 0.115 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Hexagonal funnel rotated 30° so vertices face alliance walls -->
+      <geom name="red_funnel_30" type="box" pos="0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 -0.075 0.280 0.248"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_90" type="box" pos="0 0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 -0.205 0.205 0.677"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_150" type="box" pos="-0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 -0.280 0.075 0.924"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_210" type="box" pos="-0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 0.280 0.075 -0.924"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_270" type="box" pos="0 -0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 0.205 0.205 -0.677"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_330" type="box" pos="0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 0.075 0.280 -0.248"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <!-- Net: vertical plane, 0.23m in front of top funnel vertex -->
+      <geom name="red_hub_net" type="box" pos="-0.934 0 2.345"
+            size="0.005 0.735 0.675" material="net_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red TOWER: 180° rotation of blue tower about (8.27, 4.035)
+         Center X = 16.54 - 1.064 = 15.476, Center Y = 8.07 - 3.747 = 4.323 -->
+    <body name="red_tower" pos="15.476 4.323 0">
+      <!-- Right post (from red perspective) -->
+      <geom name="red_tower_post_r" type="box" pos="0 0.428 0.915"
+            size="0.04445 0.01905 0.915" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left post (from red perspective) -->
+      <geom name="red_tower_post_l" type="box" pos="0 -0.427 0.915"
+            size="0.04445 0.01905 0.915" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_rung_low" type="cylinder" pos="0 0 0.686"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_rung_mid" type="cylinder" pos="0 0 1.143"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_rung_high" type="cylinder" pos="0 0 1.6"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Supports: beams from posts to red alliance wall -->
+      <geom name="red_tower_support_r" type="box" pos="0.554 0.428 0.912"
+            size="0.51 0.022 0.022" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_tower_support_l" type="box" pos="0.554 -0.427 0.912"
+            size="0.51 0.022 0.022" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- ========== FUEL (Yellow Balls, 5.91" diameter) ========== -->
+
+    <!-- Blue depot fuel: 6x4 grid -->
+    <body name="blue_fuel_0" pos="0.075 5.595 0.075">
+      <freejoint name="blue_fuel_0_jnt"/>
+      <geom name="blue_fuel_0_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_1" pos="0.075 5.745 0.075">
+      <freejoint name="blue_fuel_1_jnt"/>
+      <geom name="blue_fuel_1_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_2" pos="0.075 5.895 0.075">
+      <freejoint name="blue_fuel_2_jnt"/>
+      <geom name="blue_fuel_2_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_3" pos="0.075 6.045 0.075">
+      <freejoint name="blue_fuel_3_jnt"/>
+      <geom name="blue_fuel_3_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_4" pos="0.075 6.195 0.075">
+      <freejoint name="blue_fuel_4_jnt"/>
+      <geom name="blue_fuel_4_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_5" pos="0.075 6.345 0.075">
+      <freejoint name="blue_fuel_5_jnt"/>
+      <geom name="blue_fuel_5_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_6" pos="0.225 5.595 0.075">
+      <freejoint name="blue_fuel_6_jnt"/>
+      <geom name="blue_fuel_6_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_7" pos="0.225 5.745 0.075">
+      <freejoint name="blue_fuel_7_jnt"/>
+      <geom name="blue_fuel_7_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_8" pos="0.225 5.895 0.075">
+      <freejoint name="blue_fuel_8_jnt"/>
+      <geom name="blue_fuel_8_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_9" pos="0.225 6.045 0.075">
+      <freejoint name="blue_fuel_9_jnt"/>
+      <geom name="blue_fuel_9_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_10" pos="0.225 6.195 0.075">
+      <freejoint name="blue_fuel_10_jnt"/>
+      <geom name="blue_fuel_10_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_11" pos="0.225 6.345 0.075">
+      <freejoint name="blue_fuel_11_jnt"/>
+      <geom name="blue_fuel_11_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_12" pos="0.375 5.595 0.075">
+      <freejoint name="blue_fuel_12_jnt"/>
+      <geom name="blue_fuel_12_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_13" pos="0.375 5.745 0.075">
+      <freejoint name="blue_fuel_13_jnt"/>
+      <geom name="blue_fuel_13_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_14" pos="0.375 5.895 0.075">
+      <freejoint name="blue_fuel_14_jnt"/>
+      <geom name="blue_fuel_14_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_15" pos="0.375 6.045 0.075">
+      <freejoint name="blue_fuel_15_jnt"/>
+      <geom name="blue_fuel_15_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_16" pos="0.375 6.195 0.075">
+      <freejoint name="blue_fuel_16_jnt"/>
+      <geom name="blue_fuel_16_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_17" pos="0.375 6.345 0.075">
+      <freejoint name="blue_fuel_17_jnt"/>
+      <geom name="blue_fuel_17_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <body name="blue_fuel_18" pos="0.525 5.595 0.075">
+      <freejoint name="blue_fuel_18_jnt"/>
+      <geom name="blue_fuel_18_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_19" pos="0.525 5.745 0.075">
+      <freejoint name="blue_fuel_19_jnt"/>
+      <geom name="blue_fuel_19_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_20" pos="0.525 5.895 0.075">
+      <freejoint name="blue_fuel_20_jnt"/>
+      <geom name="blue_fuel_20_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_21" pos="0.525 6.045 0.075">
+      <freejoint name="blue_fuel_21_jnt"/>
+      <geom name="blue_fuel_21_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_22" pos="0.525 6.195 0.075">
+      <freejoint name="blue_fuel_22_jnt"/>
+      <geom name="blue_fuel_22_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_23" pos="0.525 6.345 0.075">
+      <freejoint name="blue_fuel_23_jnt"/>
+      <geom name="blue_fuel_23_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red depot fuel: 6x4 grid -->
+    <body name="red_fuel_0" pos="16.465 2.475 0.075">
+      <freejoint name="red_fuel_0_jnt"/>
+      <geom name="red_fuel_0_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_1" pos="16.465 2.325 0.075">
+      <freejoint name="red_fuel_1_jnt"/>
+      <geom name="red_fuel_1_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_2" pos="16.465 2.175 0.075">
+      <freejoint name="red_fuel_2_jnt"/>
+      <geom name="red_fuel_2_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_3" pos="16.465 2.025 0.075">
+      <freejoint name="red_fuel_3_jnt"/>
+      <geom name="red_fuel_3_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_4" pos="16.465 1.875 0.075">
+      <freejoint name="red_fuel_4_jnt"/>
+      <geom name="red_fuel_4_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_5" pos="16.465 1.725 0.075">
+      <freejoint name="red_fuel_5_jnt"/>
+      <geom name="red_fuel_5_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_6" pos="16.315 2.475 0.075">
+      <freejoint name="red_fuel_6_jnt"/>
+      <geom name="red_fuel_6_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_7" pos="16.315 2.325 0.075">
+      <freejoint name="red_fuel_7_jnt"/>
+      <geom name="red_fuel_7_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_8" pos="16.315 2.175 0.075">
+      <freejoint name="red_fuel_8_jnt"/>
+      <geom name="red_fuel_8_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_9" pos="16.315 2.025 0.075">
+      <freejoint name="red_fuel_9_jnt"/>
+      <geom name="red_fuel_9_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_10" pos="16.315 1.875 0.075">
+      <freejoint name="red_fuel_10_jnt"/>
+      <geom name="red_fuel_10_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_11" pos="16.315 1.725 0.075">
+      <freejoint name="red_fuel_11_jnt"/>
+      <geom name="red_fuel_11_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_12" pos="16.165 2.475 0.075">
+      <freejoint name="red_fuel_12_jnt"/>
+      <geom name="red_fuel_12_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_13" pos="16.165 2.325 0.075">
+      <freejoint name="red_fuel_13_jnt"/>
+      <geom name="red_fuel_13_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_14" pos="16.165 2.175 0.075">
+      <freejoint name="red_fuel_14_jnt"/>
+      <geom name="red_fuel_14_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_15" pos="16.165 2.025 0.075">
+      <freejoint name="red_fuel_15_jnt"/>
+      <geom name="red_fuel_15_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_16" pos="16.165 1.875 0.075">
+      <freejoint name="red_fuel_16_jnt"/>
+      <geom name="red_fuel_16_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_17" pos="16.165 1.725 0.075">
+      <freejoint name="red_fuel_17_jnt"/>
+      <geom name="red_fuel_17_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_18" pos="16.015 2.475 0.075">
+      <freejoint name="red_fuel_18_jnt"/>
+      <geom name="red_fuel_18_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_19" pos="16.015 2.325 0.075">
+      <freejoint name="red_fuel_19_jnt"/>
+      <geom name="red_fuel_19_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_20" pos="16.015 2.175 0.075">
+      <freejoint name="red_fuel_20_jnt"/>
+      <geom name="red_fuel_20_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_21" pos="16.015 2.025 0.075">
+      <freejoint name="red_fuel_21_jnt"/>
+      <geom name="red_fuel_21_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_22" pos="16.015 1.875 0.075">
+      <freejoint name="red_fuel_22_jnt"/>
+      <geom name="red_fuel_22_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_23" pos="16.015 1.725 0.075">
+      <freejoint name="red_fuel_23_jnt"/>
+      <geom name="red_fuel_23_geom" type="sphere" size="0.0750"
+            mass="0.14" material="fuel_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+  </worldbody>
+</mujoco>
