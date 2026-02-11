@@ -238,7 +238,7 @@ public class RobotContainer {
                     new SwerveModulePhysicsSim(blDriveMotor, blAngleMotor, blEncoder, "/MuJoCo/Swerve/BackLeft");
                     new SwerveModulePhysicsSim(brDriveMotor, brAngleMotor, brEncoder, "/MuJoCo/Swerve/BackRight");
 
-                    SwervePhysicsSim swerveSim = new SwervePhysicsSim("MuJoCo/Pose3d");
+                    SwervePhysicsSim swerveSim = new SwervePhysicsSim("MuJoCo/Swerve/Pose");
 
                     new GyroSim(gyro, swerveSim);
                     if (Constants.visionEnabled) {
