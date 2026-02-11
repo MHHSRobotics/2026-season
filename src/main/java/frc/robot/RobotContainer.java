@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
+import frc.robot.commands.IntakeMotorCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
@@ -23,6 +24,8 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.intake.IntakeConstants;
+import frc.robot.subsystems.intake.IntakeMotor;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -35,9 +38,11 @@ import frc.robot.util.Alerts;
 public class RobotContainer {
     // Subsystems
     private Swerve swerve;
+    private IntakeMotor intake;
 
     // Subsystem commands
     private SwerveCommands swerveCommands;
+    private IntakeMotorCommands intakeCommands;
 
     private final CommandPS5Controller controller = new CommandPS5Controller(0); // Main drive controller
 
@@ -227,11 +232,33 @@ public class RobotContainer {
                 }
             }
         }
+        if (Constants.intakeEnabled) {
+            // Create variables for each
+            MotorIO intakeMotorIO;
+            switch (Constants.currentMode) {
+                // If in REAL or SIM mode, use MotorIOTalonFX for motors, EncoderIOCANcoder for encoders, and
+                // GyroIOPigeon for the gyro
+                case REAL:
+                case SIM:
+                    intakeMotorIO = new MotorIOTalonFX(
+                            IntakeConstants.id, Constants.defaultBus, "intake motor", "Intake/Motor");
+                    break;
+                default:
+                    // If in REPLAY, use empty MotorIO objects
+                    intakeMotorIO = new MotorIO("intake motor", "Intake/Motor");
+
+                    break;
+            }
+            intake = new IntakeMotor(intakeMotorIO);
+        }
     }
 
     private void initCommands() {
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve);
+        }
+        if (Constants.intakeEnabled) {
+            intakeCommands = new IntakeMotorCommands(intake);
         }
     }
 
@@ -275,6 +302,7 @@ public class RobotContainer {
         // Initialize dashboard choosers
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addOption("Swerve", "Swerve");
+        testControllerChooser.addOption("Intake", "Intake");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
@@ -323,6 +351,20 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-1, 0, 0))
                 .onFalse(swerveCommands.stop());
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Intake"))
+                .onTrue(intakeCommands.intakeForward())
+                .onFalse(intakeCommands.intakeStop());
+
+        // Manual duty cycle backward test, fast
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Intake"))
+                .onTrue(intakeCommands.intakeReverse())
+                .onFalse(intakeCommands.intakeStop());
     }
 
     // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)
