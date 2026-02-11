@@ -16,12 +16,20 @@ public class ShooterCommands {
         return new InstantCommand(() -> shooter.flyShoot());
     }
 
+    public Command flyReverse() {
+        return new InstantCommand(() -> shooter.flyReverse());
+    }
+
     public Command flyStop() {
         return new InstantCommand(() -> shooter.flyStop());
     }
 
     public Command feedShoot() {
         return new InstantCommand(() -> shooter.feedShoot());
+    }
+
+    public Command feedReverse() {
+        return new InstantCommand(() -> shooter.feedReverse());
     }
 
     public Command feedStop() {
