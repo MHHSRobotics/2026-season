@@ -28,6 +28,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.revrobotics.util.StatusLogger;
 import frc.robot.Constants.Mode;
 import frc.robot.util.Alerts;
 
@@ -41,6 +42,7 @@ public class Robot extends LoggedRobot {
     private final Alert lowBatteryAlert = new Alert("Battery charge is low, replace it soon", AlertType.kWarning);
 
     public Robot() {
+        super(Constants.loopTime);
         // Add the project metadata to the logs so we can identify which version of the code created a specific log file
         Logger.recordMetadata("Name", BuildConstants.MAVEN_NAME);
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
@@ -59,6 +61,8 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
+        Logger.recordMetadata("Swerve", Constants.swerveEnabled ? "true" : "false");
+        Logger.recordMetadata("Vision", Constants.visionEnabled ? "true" : "false");
 
         // Set logging mode depending on the current running mode
         switch (Constants.currentMode) {
@@ -86,6 +90,9 @@ public class Robot extends LoggedRobot {
 
         // Disable automatic Hoot logging
         SignalLogger.enableAutoLogging(false);
+
+        // Disable automatic REV logging
+        StatusLogger.disableAutoLogging();
 
         // Adjust loop overrun warning timeout
         try {

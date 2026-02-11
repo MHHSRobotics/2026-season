@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.GroundIntakeCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.BitIO;
@@ -26,77 +27,77 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.intake.GroundIntake;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModuleSim;
+import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
 
 public class RobotContainer {
+    // Subsystems
     private Swerve swerve;
+    private Shooter shooter;
     private GroundIntake gIntake;
 
+    // Subsystem commands
     private SwerveCommands swerveCommands;
+    private ShooterCommands shooterCommands;
+
+    private final CommandPS5Controller controller = new CommandPS5Controller(0); // Main drive controller
     private GroundIntakeCommands intakeCommands;
 
-    // Main drive controller
-    private final CommandPS5Controller controller = new CommandPS5Controller(0);
+    private final CommandPS5Controller manualController =
+            new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
 
-    // Manual controller for subsystems
-    private final CommandPS5Controller manualController = new CommandPS5Controller(1);
+    private final CommandPS5Controller testController = new CommandPS5Controller(
+            2); // Test controller for controlling one subsystem at a time, for full manual and PID movements
 
-    // Test controller for controlling one subsystem at a time
-    private final CommandPS5Controller testController = new CommandPS5Controller(2);
+    private LoggedDashboardChooser<String> testControllerChooser; // Which subsystem the test controller is applied to
+    private LoggedDashboardChooser<String>
+            testControllerManual; // Whether to use manual or PID mode for the test controller
 
-    private LoggedDashboardChooser<String> testControllerChooser;
-    private LoggedDashboardChooser<String> testControllerManual;
-    private LoggedDashboardChooser<String> autoChooser;
+    private LoggedDashboardChooser<String> autoChooser; // Choice of auto
 
-    // Publishes all robot data to AdvantageScope
-    private RobotPublisher publisher;
+    private RobotPublisher publisher; // Publishes 3D robot data to AdvantageScope for visualization
 
+    // Alerts for disconnected controllers
     private Alert controllerDisconnected = new Alert("Drive controller is disconnected", AlertType.kWarning);
     private Alert manualDisconnected = new Alert("Manual controller is disconnected", AlertType.kWarning);
 
     public RobotContainer() {
-        // Initialize all the IO objects, subsystems, and mechanism simulators
-        initSubsystems();
+        initSubsystems(); // Initialize all the IO objects, subsystems, and mechanism simulators
+        initCommands(); // Initialize command classes
 
-        // Initialize command classes
-        initCommands();
+        configureBindings(); // Add drive controller bindings
 
-        // Add controller bindings
-        configureBindings();
-
-        // Configure bindings for manual controller
-        configureManualBindings();
+        configureManualBindings(); // Configure bindings for manual controller
 
         // Configure bindings for test controller when not in match
         if (!DriverStation.isFMSAttached()) {
             configureTestBindings();
         }
 
-        // Set up the auto chooser
-        configureAutoChooser();
+        configureAutoChooser(); // Set up the auto chooser
 
-        // Initialize the publisher
-        publisher = new RobotPublisher(swerve);
+        publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
     }
 
     private void initSubsystems() {
-        // Initialize subsystems in order: arm, elevator, wrist, intake, hang, swerve
-        // Each subsystem is created immediately after its motor/encoder initialization
-
+        // Initialize swerve motors, encoders, and gyro
         if (Constants.swerveEnabled) {
-            // Initialize swerve motors, encoders, and gyro
+            // Create variables for each
             MotorIO flDriveMotor, flAngleMotor, frDriveMotor, frAngleMotor;
             MotorIO blDriveMotor, blAngleMotor, brDriveMotor, brAngleMotor;
             EncoderIO flEncoder, frEncoder, blEncoder, brEncoder;
             GyroIO gyro;
             switch (Constants.currentMode) {
+                // If in REAL or SIM mode, use MotorIOTalonFX for motors, EncoderIOCANcoder for encoders, and
+                // GyroIOPigeon for the gyro
                 case REAL:
                 case SIM:
                     flDriveMotor = new MotorIOTalonFX(
@@ -165,8 +166,10 @@ public class RobotContainer {
 
                     gyro = new GyroIOPigeon(
                             TunerConstants.DrivetrainConstants.Pigeon2Id, Constants.swerveBus, "gyro", "Swerve/Gyro");
+
                     break;
                 default:
+                    // If in REPLAY, use empty MotorIO objects
                     flDriveMotor = new MotorIO("front left drive motor", "Swerve/FrontLeft/Drive");
                     flAngleMotor = new MotorIO("front left angle motor", "Swerve/FrontLeft/Steer");
                     flEncoder = new EncoderIO("front left encoder", "Swerve/FrontLeft/Encoder");
@@ -184,45 +187,79 @@ public class RobotContainer {
                     brEncoder = new EncoderIO("back right encoder", "Swerve/BackRight/Encoder");
 
                     gyro = new GyroIO("gyro", "Swerve/Gyro");
+
                     break;
             }
-            // Create swerve subsystem
+            // Initialize swerve modules
             SwerveModule fl = new SwerveModule(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft);
             SwerveModule fr = new SwerveModule(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight);
             SwerveModule bl = new SwerveModule(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft);
             SwerveModule br = new SwerveModule(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight);
 
-            swerve = new Swerve(gyro, fl, fr, bl, br);
-            if (Constants.currentMode == Mode.SIM) {
-                new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft);
-                new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight);
-                new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft);
-                new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight);
+            swerve = new Swerve(gyro, fl, fr, bl, br); // Initialize swerve subsystem
 
-                new GyroSim(gyro);
+            if (Constants.visionEnabled) {
+                // Create camera variables
+                CameraIO brat;
+                CameraIO blat;
+                switch (Constants.currentMode) {
+                    case REAL:
+                    case SIM:
+                        // If in real bot or sim, use CameraIOPhotonCamera
+                        brat = new CameraIOPhotonCamera(
+                                "BackRight_AT", "Vision/BRAT", Swerve.VisionConstants.bratPose, 60);
+                        blat = new CameraIOPhotonCamera(
+                                "BackLeft_AT", "Vision/BLAT", Swerve.VisionConstants.blatPose, 60);
+                        break;
+                    default:
+                        // If in replay use an empty CameraIO
+                        brat = new CameraIO("BackRight_AT", "Vision/BRAT");
+                        blat = new CameraIO("BackLeft_AT", "Vision/BLAT");
+                        break;
+                }
+                // Add cameras to swerve ododmetry
+                swerve.addCameraSource(brat);
+                swerve.addCameraSource(blat);
+            }
+            if (Constants.currentMode == Mode.SIM) {
+                SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
+                    new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
+                    new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight),
+                    new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft),
+                    new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight)
+                };
+
+                SwerveSim swerveSim = new SwerveSim(moduleSims);
+
+                new GyroSim(gyro, swerveSim);
+                if (Constants.visionEnabled) {
+                    new VisionSim(swerve.getCameras(), swerveSim);
+                }
             }
         }
+        if (Constants.shooterEnabled) {
 
-        if (Constants.visionEnabled) {
-            CameraIO brat;
-            CameraIO blat;
+            MotorIO feedMotor, flyMotor;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
-                    brat = new CameraIOPhotonCamera("BackRight_AT", "Vision/BRAT", Swerve.VisionConstants.bratPose, 60);
-                    blat = new CameraIOPhotonCamera("BackLeft_AT", "Vision/BLAT", Swerve.VisionConstants.blatPose, 60);
+                    feedMotor = new MotorIOTalonFX(
+                            Shooter.Constants.feedMotorId, Constants.defaultBus, "feed motor", "Shooter/Feed");
+                    flyMotor = new MotorIOTalonFX(
+                            Shooter.Constants.flyMotorId, Constants.defaultBus, "fly motor", "Shooter/Fly");
                     break;
                 default:
-                    brat = new CameraIO("BackRight_AT", "Vision/BRAT");
-                    blat = new CameraIO("BackLeft_AT", "Vision/BLAT");
+                    feedMotor = new MotorIO("feed motor", "Shooter/Feed");
+                    flyMotor = new MotorIO("fly motor", "Shooter/Fly");
+
                     break;
             }
-            swerve.addCameraSource(brat);
-            swerve.addCameraSource(blat);
-            if (Constants.currentMode == Mode.SIM) {
-                new VisionSim(swerve.getCameras(), swerve);
-            }
+            shooter = new Shooter(feedMotor, flyMotor);
+            // Create swerve subsystem
         }
+
+        // If mode is SIM, start the simulations for swerve modules and gyro
+
 
         if (Constants.gIntakeEnabled) {
             MotorIO gIntakeMotor;
@@ -250,47 +287,69 @@ public class RobotContainer {
     }
 
     private void initCommands() {
-        swerveCommands = new SwerveCommands(swerve);
-        intakeCommands = new GroundIntakeCommands(gIntake);
+        if (Constants.shooterEnabled) {
+            shooterCommands = new ShooterCommands(shooter);
+        }
+        if (Constants.swerveEnabled) {
+            swerveCommands = new SwerveCommands(swerve);
+        }
+        if (Constants.gIntakeEnabled) {
+        intakeCommands = new GroundIntakeCommands(gIntake);}
     }
 
     private void configureBindings() {
         /* ---- Main controller bindings ---- */
+        /*
+         * Reset gyro: create
+         * Left stick: drive
+         * Right stick X: turn
+         * Touchpad: cancel all commands
+         */
 
-        // controller.R2().onTrue(ssCommands.lowAlgaePosition());
-        controller.L1().onTrue(intakeCommands.setPos(0.5));
-        controller.create().onTrue(swerveCommands.resetGyro());
+        if (Constants.swerveEnabled) {
+            controller.options().onTrue(swerveCommands.resetGyro());
+            controller.L1().onTrue(swerveCommands.lock());
+            /*
+             * How this works:
+             * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
+             */
+            controller
+                    .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
+                    .or(() -> Math.hypot(controller.getLeftX(), controller.getLeftY()) > Swerve.Constants.moveDeadband)
+                    .onTrue(swerveCommands.drive(
+                            () -> -controller.getLeftY(),
+                            () -> -controller.getLeftX(),
+                            () -> -controller.getRightX(),
+                            () -> Swerve.Constants.swerveFieldCentric.get()));
 
-        controller
-                .axisMagnitudeGreaterThan(0, Swerve.Constants.moveDeadband)
-                .or(controller.axisMagnitudeGreaterThan(1, Swerve.Constants.moveDeadband))
-                .or(controller.axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband))
-                .onTrue(swerveCommands.drive(
-                        () -> -controller.getLeftY(),
-                        () -> -controller.getLeftX(),
-                        () -> -controller.getRightX(),
-                        () -> Swerve.Constants.swerveFieldCentric.get()));
-
-        // Cancel all commands
-        controller.PS().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                .cancelAll()));
+            controller.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
+        }
     }
 
     private void configureTestBindings() {
         /* ---- Test controller bindings ---- */
+        /*
+         * Forward manual/PID: cross
+         * Backward manual/PID: circle
+         */
+        // Initialize dashboard choosers
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addOption("Swerve", "Swerve");
+        testControllerChooser.addOption("Fly", "Fly");
+        testControllerChooser.addOption("Feed", "Feed");
         testControllerChooser.addOption("Intake", "Intake");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
         testControllerManual.addOption("PID", "PID");
+        testControllerManual.addOption("Fast", "Fast");
 
         // Test controller swerve control for convenience
         testController
-                .axisMagnitudeGreaterThan(0, Swerve.Constants.moveDeadband)
-                .or(testController.axisMagnitudeGreaterThan(1, Swerve.Constants.moveDeadband))
-                .or(testController.axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband))
+                .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
+                .or(() -> Math.hypot(testController.getLeftX(), testController.getLeftY())
+                        > Swerve.Constants.moveDeadband)
                 .onTrue(swerveCommands.drive(
                         () -> -testController.getLeftY(),
                         () -> -testController.getLeftX(),
@@ -298,7 +357,6 @@ public class RobotContainer {
                         () -> Swerve.Constants.swerveFieldCentric.get()));
 
         // Manual duty cycle forward test
-
         testController
                 .cross()
                 .and(() -> testControllerManual.get().equals("Manual"))
@@ -307,7 +365,6 @@ public class RobotContainer {
                 .onFalse(swerveCommands.stop());
 
         // Manual duty cycle backward test
-
         testController
                 .circle()
                 .and(() -> testControllerManual.get().equals("Manual"))
@@ -327,13 +384,51 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Intake"))
                 .onTrue(intakeCommands.setSpeed(0.2))
                 .onFalse(intakeCommands.stop());
+
+        // Manual duty cycle forward test, fast
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Fast"))
+                .and(() -> testControllerChooser.get().equals("Swerve"))
+                .onTrue(swerveCommands.setSpeed(1, 0, 0))
+                .onFalse(swerveCommands.stop());
+
+        // Manual duty cycle backward test, fast
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Fast"))
+                .and(() -> testControllerChooser.get().equals("Swerve"))
+                .onTrue(swerveCommands.setSpeed(-1, 0, 0))
+                .onFalse(swerveCommands.stop());
+
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Fly"))
+                .onTrue(shooterCommands.flyShoot())
+                .onFalse(shooterCommands.flyStop());
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Fly"))
+                .onTrue(shooterCommands.flyReverse())
+                .onFalse(shooterCommands.flyStop());
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Feed"))
+                .onTrue(shooterCommands.feedShoot())
+                .onFalse(shooterCommands.feedStop());
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Feed"))
+                .onTrue(shooterCommands.feedReverse())
+                .onFalse(shooterCommands.feedStop());
     }
 
-    // Bindings for manual control of each of the subsystems
-    public void configureManualBindings() {
-        // Square + circle control arm
-
-    }
+    // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)
+    public void configureManualBindings() {}
 
     // Refresh drive and manual controller disconnect alerts
     public void refreshControllerAlerts() {
@@ -341,6 +436,7 @@ public class RobotContainer {
         manualDisconnected.set(!manualController.isConnected());
     }
 
+    // Initialize dashboard auto chooser
     public void configureAutoChooser() {
         autoChooser = new LoggedDashboardChooser<>("AutoSelection");
         autoChooser.addOption("Left", "Left");
@@ -361,10 +457,7 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        // Publish 3D robot data
-        publisher.publish();
-
-        // Enable alerts for controller disconnects
-        refreshControllerAlerts();
+        publisher.publish(); // Publish 3D robot data
+        refreshControllerAlerts(); // Enable alerts for controller disconnects
     }
 }
