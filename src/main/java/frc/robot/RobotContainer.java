@@ -31,6 +31,7 @@ import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.GroundIntake;
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -45,7 +46,7 @@ public class RobotContainer {
     private Swerve swerve;
     private Hang hang;
     private Hopper hopper;
-    private GroundIntake gIntake;
+    private Intake gIntake;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
