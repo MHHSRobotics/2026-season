@@ -568,7 +568,9 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        publisher.publish(); // Publish 3D robot data
+        if (Constants.swerveEnabled) {
+            publisher.publish(); // Publish 3D robot data
+        }
         refreshControllerAlerts(); // Enable alerts for controller disconnects
     }
 }
