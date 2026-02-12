@@ -13,6 +13,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
+import frc.robot.commands.HangCommands;
+import frc.robot.commands.HopperCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
@@ -23,6 +26,9 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
+import frc.robot.subsystems.hang.Hang;
+import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -35,9 +41,16 @@ import frc.robot.util.Alerts;
 public class RobotContainer {
     // Subsystems
     private Swerve swerve;
+    private Hang hang;
+    private Hopper hopper;
+    private Shooter shooter;
 
     private SwerveCommands swerveCommands;
+    private HangCommands hangCommands;
+    private HopperCommands hopperCommands;
+    private ShooterCommands shooterCommands;
 
+    private final CommandPS5Controller driveController=new CommandPS5Controller(0);
     private final CommandPS5Controller manualController =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
 
@@ -227,7 +240,6 @@ public class RobotContainer {
             }
         }
         if (Constants.shooterEnabled) {
-
             MotorIO feedMotor, flyMotor;
             switch (Constants.currentMode) {
                 case REAL:
@@ -244,11 +256,7 @@ public class RobotContainer {
                     break;
             }
             shooter = new Shooter(feedMotor, flyMotor);
-            // Create swerve subsystem
         }
-
-        // If mode is SIM, start the simulations for swerve modules and gyro
-
     }
 
     private void initCommands() {
@@ -258,8 +266,12 @@ public class RobotContainer {
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve);
         }
-        hopperCommands = new HopperCommands(hopper);
-        hangCommands = new HangCommands(hang);
+        if(Constants.hopperEnabled){
+            hopperCommands = new HopperCommands(hopper);
+        }
+        if(Constants.hangEnabled){
+            hangCommands = new HangCommands(hang);
+        }
     }
 
     private void configureBindings() {
@@ -272,23 +284,23 @@ public class RobotContainer {
          */
 
         if (Constants.swerveEnabled) {
-            controller.options().onTrue(swerveCommands.resetGyro());
+            driveController.options().onTrue(swerveCommands.resetGyro());
 
-            controller.L1().onTrue(swerveCommands.lock());
+            driveController.L1().onTrue(swerveCommands.lock());
             /*
              * How this works:
              * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
              */
-            controller
+            driveController
                     .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
-                    .or(() -> Math.hypot(controller.getLeftX(), controller.getLeftY()) > Swerve.Constants.moveDeadband)
+                    .or(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY()) > Swerve.Constants.moveDeadband)
                     .onTrue(swerveCommands.drive(
-                            () -> -controller.getLeftY(),
-                            () -> -controller.getLeftX(),
-                            () -> -controller.getRightX(),
+                            () -> -driveController.getLeftY(),
+                            () -> -driveController.getLeftX(),
+                            () -> -driveController.getRightX(),
                             () -> Swerve.Constants.swerveFieldCentric.get()));
 
-            controller.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
                     .cancelAll()));
         }
     }
@@ -303,6 +315,9 @@ public class RobotContainer {
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addOption("Swerve", "Swerve");
         testControllerChooser.addOption("Hang", "Hang");
+        testControllerChooser.addOption("Hang", "ShooterFeed");
+        testControllerChooser.addOption("Hang", "ShooterFly");
+        testControllerChooser.addOption("Hang", "Hopper");
         testControllerChooser.addOption("Fly", "Fly");
         testControllerChooser.addOption("Feed", "Feed");
 
@@ -339,7 +354,6 @@ public class RobotContainer {
                 .onFalse(swerveCommands.stop());
 
         // Hang move up test
-        
         testController
                 .cross()
                 .and(() -> testControllerManual.get().equals("Manual"))
@@ -348,7 +362,6 @@ public class RobotContainer {
                 .onFalse(hangCommands.stop());
 
         // Hang move down test
-        
         testController
                 .circle()
                 .and(() -> testControllerManual.get().equals("Manual"))
@@ -404,7 +417,7 @@ public class RobotContainer {
 
     // Refresh drive and manual controller disconnect alerts
     public void refreshControllerAlerts() {
-        controllerDisconnected.set(!controller.isConnected());
+        controllerDisconnected.set(!driveController.isConnected());
         manualDisconnected.set(!manualController.isConnected());
     }
 
