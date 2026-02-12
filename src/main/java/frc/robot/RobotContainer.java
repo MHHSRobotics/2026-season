@@ -303,6 +303,8 @@ public class RobotContainer {
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addOption("Swerve", "Swerve");
         testControllerChooser.addOption("Hang", "Hang");
+        testControllerChooser.addOption("Fly", "Fly");
+        testControllerChooser.addOption("Feed", "Feed");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
@@ -370,6 +372,31 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-1, 0, 0))
                 .onFalse(swerveCommands.stop());
+
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Fly"))
+                .onTrue(shooterCommands.flyShoot())
+                .onFalse(shooterCommands.flyStop());
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Fly"))
+                .onTrue(shooterCommands.flyReverse())
+                .onFalse(shooterCommands.flyStop());
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Feed"))
+                .onTrue(shooterCommands.feedShoot())
+                .onFalse(shooterCommands.feedStop());
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Feed"))
+                .onTrue(shooterCommands.feedReverse())
+                .onFalse(shooterCommands.feedStop());
     }
 
     // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)

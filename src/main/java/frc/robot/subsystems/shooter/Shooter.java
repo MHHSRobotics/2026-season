@@ -47,12 +47,20 @@ public class Shooter extends SubsystemBase {
         feed.setDutyCycle(Constants.feedSpeed);
     }
 
+    public void feedReverse() {
+        feed.setDutyCycle(-Constants.feedSpeed);
+    }
+
     public void feedStop() {
         feed.setDutyCycle(0);
     }
 
     public void flyShoot() {
         fly.setDutyCycle(Constants.flySpeed);
+    }
+
+    public void flyReverse() {
+        fly.setDutyCycle(-Constants.flySpeed);
     }
 
     public void flyStop() {
