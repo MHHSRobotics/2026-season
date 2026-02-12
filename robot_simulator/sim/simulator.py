@@ -1,5 +1,7 @@
 """MuJoCo simulator for FRC swerve drive robot."""
 
+import math
+
 import mujoco
 import mujoco.viewer
 import numpy as np
@@ -7,7 +9,7 @@ from pathlib import Path
 
 from wpimath.geometry import Pose3d, Quaternion, Rotation3d, Translation3d
 
-from .nt_interface import SwerveInputs, SwerveOutputs
+from .nt_interface import SwerveInputs, SwerveOutputs, SteerPIDGains, DrivePIDGains
 
 
 # Motor constants for voltage -> torque conversion
@@ -35,6 +37,7 @@ def voltage_to_torque(voltage: float, angular_velocity: float,
     torque = (V - omega * Kv) / R * Kt
 
     Where the motor is geared down by gear_ratio.
+    Stator current is clamped to MOTOR_CURRENT_LIMIT (TalonFX default).
     """
     # Motor angular velocity (before gearbox)
     motor_omega = angular_velocity * gear_ratio
@@ -43,9 +46,10 @@ def voltage_to_torque(voltage: float, angular_velocity: float,
     kv = 12.0 / MOTOR_FREE_SPEED  # V/(rad/s)
     back_emf = motor_omega * kv
 
-    # Motor torque
+    # Motor current with stator current limiting (matches TalonFX firmware)
     kt = MOTOR_STALL_TORQUE / (12.0 / MOTOR_RESISTANCE)  # Nm/A
     current = (voltage - back_emf) / MOTOR_RESISTANCE
+    current = max(-MOTOR_CURRENT_LIMIT, min(MOTOR_CURRENT_LIMIT, current))
     motor_torque = current * kt
 
     # Output torque after gearbox
@@ -73,6 +77,14 @@ class SwerveSimulator:
         # Viewer (created on demand)
         self._viewer = None
         self._voltages = None
+
+        # Steer PID state (one integrator per module)
+        self._steer_pid_integral = {"fl": 0.0, "fr": 0.0, "bl": 0.0, "br": 0.0}
+        self._steer_pid_gains = SteerPIDGains()
+
+        # Drive velocity PID state (one integrator per module)
+        self._drive_pid_integral = {"fl": 0.0, "fr": 0.0, "bl": 0.0, "br": 0.0}
+        self._drive_pid_gains = DrivePIDGains()
 
     def _cache_indices(self) -> None:
         """Cache actuator and sensor indices for fast access."""
@@ -110,6 +122,28 @@ class SwerveSimulator:
             jnt_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, jnt_name)
             if jnt_id >= 0:
                 self._fuel_qpos_adrs.append(self.model.jnt_qposadr[jnt_id])
+        # Neutral zone fuel (24x15 grid = 360 balls)
+        for i in range(360):
+            jnt_name = f"neutral_fuel_{i}_jnt"
+            jnt_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, jnt_name)
+            if jnt_id >= 0:
+                self._fuel_qpos_adrs.append(self.model.jnt_qposadr[jnt_id])
+
+        # Cache fuel ball dof start addresses for velocity damping
+        self._fuel_dof_starts = []
+        all_fuel_jnt_ids = []
+        for i in range(48):
+            prefix = "blue" if i < 24 else "red"
+            idx = i if i < 24 else i - 24
+            jnt_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, f"{prefix}_fuel_{idx}_jnt")
+            if jnt_id >= 0:
+                all_fuel_jnt_ids.append(jnt_id)
+        for i in range(360):
+            jnt_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, f"neutral_fuel_{i}_jnt")
+            if jnt_id >= 0:
+                all_fuel_jnt_ids.append(jnt_id)
+        for jnt_id in all_fuel_jnt_ids:
+            self._fuel_dof_starts.append(self.model.jnt_dofadr[jnt_id])
 
         # Joint indices for velocity lookup
         self.joints = {
@@ -124,11 +158,72 @@ class SwerveSimulator:
         }
 
     def set_voltages(self, inputs: SwerveInputs) -> None:
-        """Store motor voltages for use during physics stepping."""
+        """Store motor voltages and PID gains for use during physics stepping."""
         self._voltages = inputs
+        if inputs.steer_pid is not None:
+            self._steer_pid_gains = inputs.steer_pid
+        if inputs.drive_pid is not None:
+            self._drive_pid_gains = inputs.drive_pid
 
-    def _apply_motor_model(self) -> None:
-        """Recompute torques from stored voltages and current joint velocities."""
+    def _compute_steer_voltage(self, prefix: str, setpoint: float,
+                               angle: float, velocity: float, dt: float) -> float:
+        """Run PID on steer angle error with proper angle wrapping.
+
+        Returns voltage in [-12, 12].
+        """
+        gains = self._steer_pid_gains
+        # Shortest-path angle error (wraps around ±pi)
+        error = math.atan2(math.sin(setpoint - angle), math.cos(setpoint - angle))
+
+        # Integrate with anti-windup clamp
+        self._steer_pid_integral[prefix] += error * dt
+        max_integral = 2.0  # prevent windup
+        self._steer_pid_integral[prefix] = max(-max_integral,
+            min(max_integral, self._steer_pid_integral[prefix]))
+
+        # PID output (derivative on measurement to avoid setpoint kick)
+        voltage = (gains.kP * error
+                   + gains.kI * self._steer_pid_integral[prefix]
+                   - gains.kD * velocity)
+
+        return max(-12.0, min(12.0, voltage))
+
+    def _compute_drive_voltage(self, prefix: str, setpoint: float,
+                               velocity: float, dt: float) -> float:
+        """Run PID + feedforward on drive velocity error.
+
+        Args:
+            setpoint: target wheel velocity in rad/s
+            velocity: current wheel velocity in rad/s
+
+        Returns voltage in [-12, 12].
+        """
+        gains = self._drive_pid_gains
+        error = setpoint - velocity
+
+        # Integrate with anti-windup clamp
+        self._drive_pid_integral[prefix] += error * dt
+        max_integral = 4.0
+        self._drive_pid_integral[prefix] = max(-max_integral,
+            min(max_integral, self._drive_pid_integral[prefix]))
+
+        # Feedforward + PID
+        ff = 0.0
+        if setpoint != 0.0:
+            ff = gains.kS * math.copysign(1.0, setpoint) + gains.kV * setpoint
+        voltage = (ff
+                   + gains.kP * error
+                   + gains.kI * self._drive_pid_integral[prefix]
+                   - gains.kD * velocity)
+
+        return max(-12.0, min(12.0, voltage))
+
+    def _apply_motor_model(self, dt: float) -> None:
+        """Recompute torques from stored voltages and current joint velocities.
+
+        Steer and drive torques use sim-side PID when gains are set,
+        otherwise fall back to WPILib voltages directly.
+        """
         if self._voltages is None:
             return
 
@@ -136,14 +231,40 @@ class SwerveSimulator:
             joint_id = self.joints[joint_name]
             return self.data.qvel[self.model.jnt_dofadr[joint_id]]
 
+        def get_qpos(joint_name: str) -> float:
+            joint_id = self.joints[joint_name]
+            return self.data.qpos[self.model.jnt_qposadr[joint_id]]
+
         v = self._voltages
+        steer_gains = self._steer_pid_gains
+        drive_gains = self._drive_pid_gains
+        use_steer_pid = steer_gains.kP != 0.0 or steer_gains.kI != 0.0 or steer_gains.kD != 0.0
+        use_drive_pid = (drive_gains.kP != 0.0 or drive_gains.kI != 0.0
+                         or drive_gains.kD != 0.0 or drive_gains.kV != 0.0)
+
         for prefix, module in [("fl", v.fl), ("fr", v.fr), ("bl", v.bl), ("br", v.br)]:
             steer_vel = get_qvel(f"{prefix}_steer")
             drive_vel = get_qvel(f"{prefix}_drive")
+
+            # Steer: sim-side PID or WPILib voltage
+            if use_steer_pid:
+                steer_angle = get_qpos(f"{prefix}_steer")
+                steer_voltage = self._compute_steer_voltage(
+                    prefix, module.steer_setpoint, steer_angle, steer_vel, dt)
+            else:
+                steer_voltage = module.steer_voltage
+
+            # Drive: sim-side PID+FF or WPILib voltage
+            if use_drive_pid:
+                drive_voltage = self._compute_drive_voltage(
+                    prefix, module.drive_velocity_setpoint, drive_vel, dt)
+            else:
+                drive_voltage = module.drive_voltage
+
             self.data.ctrl[self.actuators[f"{prefix}_steer"]] = voltage_to_torque(
-                module.steer_voltage, steer_vel, STEER_GEAR_RATIO)
+                steer_voltage, steer_vel, STEER_GEAR_RATIO)
             self.data.ctrl[self.actuators[f"{prefix}_drive"]] = voltage_to_torque(
-                module.drive_voltage, drive_vel, DRIVE_GEAR_RATIO)
+                drive_voltage, drive_vel, DRIVE_GEAR_RATIO)
 
     def get_outputs(self) -> SwerveOutputs:
         """Read sensor data from simulation."""
@@ -166,15 +287,8 @@ class SwerveSimulator:
             Rotation3d(Quaternion(float(quat[0]), float(quat[1]), float(quat[2]), float(quat[3]))),
         )
 
-        # Fuel ball poses
+        # Fuel ball poses (disabled - too expensive for 408 balls at 200Hz)
         fuel_poses = []
-        for adr in self._fuel_qpos_adrs:
-            fp = self.data.qpos[adr:adr + 3]
-            fq = self.data.qpos[adr + 3:adr + 7]
-            fuel_poses.append(Pose3d(
-                Translation3d(float(fp[0]), float(fp[1]), float(fp[2])),
-                Rotation3d(Quaternion(float(fq[0]), float(fq[1]), float(fq[2]), float(fq[3]))),
-            ))
 
         return SwerveOutputs(
             fl_steer_angle=get_sensor("fl_steer_pos"),
@@ -212,9 +326,20 @@ class SwerveSimulator:
         Recomputes motor torques from stored voltages each step
         so back-EMF tracks the changing joint velocities.
         """
+        # Damping factor per step: exponential decay approximating rolling friction
+        # At 2ms timestep, 0.998 per step ≈ halving speed every ~0.69s
+        fuel_damping = 0.998
+        fuel_radius = 0.075
+        dt = self.model.opt.timestep
         for _ in range(n_steps):
-            self._apply_motor_model()
+            self._apply_motor_model(dt)
             mujoco.mj_step(self.model, self.data)
+            # Apply velocity damping to linear DOFs only (indices 0-2)
+            # Leave angular DOFs (3-5) undamped so balls roll naturally
+            for qpos_adr, dof_adr in zip(self._fuel_qpos_adrs, self._fuel_dof_starts):
+                z = self.data.qpos[qpos_adr + 2]  # z position
+                if z < fuel_radius + 0.01:  # within 1cm of ground contact
+                    self.data.qvel[dof_adr:dof_adr + 3] *= fuel_damping
 
     def get_timestep(self) -> float:
         """Get the simulation timestep in seconds."""

@@ -27,11 +27,10 @@ public final class Constants {
     public static final boolean enablePhysicsSim =
             true; // Whether to enable the physics sim connector (for SIM mode only)
 
-    public static final boolean physicsSimEnabled =
-            currentMode == Mode.SIM && enablePhysicsSim; // Whether to enable the physics sim connector (for SIM mode only)
+    public static final boolean physicsSimEnabled = currentMode == Mode.SIM
+            && enablePhysicsSim; // Whether to enable the physics sim connector (for SIM mode only)
 
-    public static final double loopTime =
-            physicsSimEnabled ? 0.005 : 0.02; // Period of main robot loop, 20ms default
+    public static final double loopTime = physicsSimEnabled ? 0.005 : 0.02; // Period of main robot loop, 20ms default
 
     public static final CANBus defaultBus = new CANBus("rio"); // CAN bus used for non-swerve motors
 

@@ -58,9 +58,10 @@ def main():
         sim.launch_viewer()
 
     # Simulation parameters
-    # WPILib runs at 50Hz (20ms), MuJoCo at 1000Hz (1ms)
-    # So we run 20 physics steps per control update
-    wpilib_period = 0.005  # 20ms
+    # WPILib runs at 200Hz (5ms), MuJoCo at 200Hz (5ms)
+    # 1 physics step per control update; stability comes from current limiting,
+    # steer frictionloss, and drive armature rather than sub-stepping
+    wpilib_period = 0.005  # 5ms
     physics_steps_per_update = int(wpilib_period / sim.get_timestep())
 
     print(f"Running {physics_steps_per_update} physics steps per control update")
@@ -69,8 +70,9 @@ def main():
         print("(Standalone mode - no NetworkTables)")
 
     try:
-        last_update_time = time.time()
-        last_print_time = 0.0
+        next_update_time = time.time()
+        last_print_time = next_update_time
+        frame_count = 0
 
         while True:
             # Check if viewer was closed
@@ -78,46 +80,57 @@ def main():
                 print("Viewer closed, exiting...")
                 break
 
-            current_time = time.time()
-            dt = current_time - last_update_time
+            now = time.time()
 
-            # Run at approximately real-time
-            if dt >= wpilib_period:
-                last_update_time = current_time
+            # Sleep until next update is due
+            sleep_time = next_update_time - now
+            if sleep_time > 0.001:
+                time.sleep(sleep_time - 0.0005)  # wake slightly early to avoid oversleep
+                continue
+            elif sleep_time > 0:
+                continue  # busy-wait the last bit
 
-                # Get inputs from NetworkTables
+            # Schedule next update (advance by period, don't accumulate drift)
+            # If we're behind, skip ahead to avoid spiral of death
+            if now - next_update_time > wpilib_period * 10:
+                next_update_time = now
+            next_update_time += wpilib_period
+
+            # Get inputs from NetworkTables
+            if nt is not None:
+                inputs = nt.get_inputs()
+                sim.set_voltages(inputs)
+
+            # Step physics
+            sim.step(physics_steps_per_update)
+            frame_count += 1
+
+            # Send outputs to NetworkTables
+            if nt is not None:
+                outputs = sim.get_outputs()
+                nt.set_outputs(outputs)
+
+            # Print status periodically
+            if now - last_print_time >= 0.5:
+                fps = frame_count / (now - last_print_time)
+                frame_count = 0
+                last_print_time = now
+                connected = "connected" if nt is not None and nt.is_connected() else "disconnected"
                 if nt is not None:
-                    inputs = nt.get_inputs()
-                    sim.set_voltages(inputs)
+                    print(
+                        f"[{connected}] {fps:5.1f} Hz  "
+                        f"FL({inputs.fl.drive_voltage:+5.1f}V/{inputs.fl.steer_voltage:+5.1f}V) "
+                        f"FR({inputs.fr.drive_voltage:+5.1f}V/{inputs.fr.steer_voltage:+5.1f}V) "
+                        f"BL({inputs.bl.drive_voltage:+5.1f}V/{inputs.bl.steer_voltage:+5.1f}V) "
+                        f"BR({inputs.br.drive_voltage:+5.1f}V/{inputs.br.steer_voltage:+5.1f}V)",
+                        end="\r",
+                    )
+                else:
+                    print(f"{fps:5.1f} Hz", end="\r")
 
-                # Step physics
-                sim.step(physics_steps_per_update)
-
-                # Send outputs to NetworkTables
-                if nt is not None:
-                    outputs = sim.get_outputs()
-                    nt.set_outputs(outputs)
-
-                # Print status periodically
-                if current_time - last_print_time >= 0.5:
-                    last_print_time = current_time
-                    connected = "connected" if nt is not None and nt.is_connected() else "disconnected"
-                    if nt is not None:
-                        print(
-                            f"[{connected}] "
-                            f"FL({inputs.fl.drive_voltage:+5.1f}V/{inputs.fl.steer_voltage:+5.1f}V) "
-                            f"FR({inputs.fr.drive_voltage:+5.1f}V/{inputs.fr.steer_voltage:+5.1f}V) "
-                            f"BL({inputs.bl.drive_voltage:+5.1f}V/{inputs.bl.steer_voltage:+5.1f}V) "
-                            f"BR({inputs.br.drive_voltage:+5.1f}V/{inputs.br.steer_voltage:+5.1f}V)",
-                            end="\r",
-                        )
-
-                # Update viewer
-                if not args.no_viewer:
-                    sim.sync_viewer()
-            else:
-                # Sleep to avoid busy-waiting
-                time.sleep(0.001)
+            # Update viewer
+            if not args.no_viewer:
+                sim.sync_viewer()
 
     except KeyboardInterrupt:
         print("\nInterrupted, exiting...")

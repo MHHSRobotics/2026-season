@@ -11,6 +11,26 @@ class SwerveModuleState:
     """State for a single swerve module."""
     steer_voltage: float = 0.0
     drive_voltage: float = 0.0
+    steer_setpoint: float = 0.0  # radians, for sim-side PID
+    drive_velocity_setpoint: float = 0.0  # rad/s at wheel, for sim-side PID
+
+
+@dataclass
+class SteerPIDGains:
+    """PID gains for sim-side steer control."""
+    kP: float = 0.0
+    kI: float = 0.0
+    kD: float = 0.0
+
+
+@dataclass
+class DrivePIDGains:
+    """PID + feedforward gains for sim-side drive velocity control."""
+    kP: float = 0.0
+    kI: float = 0.0
+    kD: float = 0.0
+    kS: float = 0.0  # static friction feedforward (V)
+    kV: float = 0.0  # velocity feedforward (V/(rad/s))
 
 
 @dataclass
@@ -20,6 +40,8 @@ class SwerveInputs:
     fr: SwerveModuleState
     bl: SwerveModuleState
     br: SwerveModuleState
+    steer_pid: SteerPIDGains = None
+    drive_pid: DrivePIDGains = None
 
 
 @dataclass
@@ -94,10 +116,25 @@ class NetworkTablesInterface:
         # Path: AdvantageKit/Swerve/{Module}/Steer/AppliedVoltage
         self._drive_voltage = {}
         self._steer_voltage = {}
+        self._steer_setpoint = {}
+        self._drive_velocity_setpoint = {}
         for key, name in _MODULE_NAMES.items():
             mod = swerve.getSubTable(name)
             self._drive_voltage[key] = mod.getDoubleTopic("Drive/AppliedVoltage").subscribe(0.0, pub_opts)
             self._steer_voltage[key] = mod.getDoubleTopic("Steer/AppliedVoltage").subscribe(0.0, pub_opts)
+            self._steer_setpoint[key] = mod.getDoubleTopic("Setpoint").subscribe(0.0, pub_opts)
+            self._drive_velocity_setpoint[key] = mod.getDoubleTopic("Drive/Setpoint").subscribe(0.0, pub_opts)
+
+        # PID gains from Swerve/ table (NOT AdvantageKit/Swerve/)
+        pid_table = self.inst.getTable("Swerve")
+        self._steer_kP = pid_table.getDoubleTopic("SteerKP").subscribe(0.0, pub_opts)
+        self._steer_kI = pid_table.getDoubleTopic("SteerKI").subscribe(0.0, pub_opts)
+        self._steer_kD = pid_table.getDoubleTopic("SteerKD").subscribe(0.0, pub_opts)
+        self._drive_kP = pid_table.getDoubleTopic("DriveKP").subscribe(0.0, pub_opts)
+        self._drive_kI = pid_table.getDoubleTopic("DriveKI").subscribe(0.0, pub_opts)
+        self._drive_kD = pid_table.getDoubleTopic("DriveKD").subscribe(0.0, pub_opts)
+        self._drive_kS = pid_table.getDoubleTopic("DriveKS").subscribe(0.0, pub_opts)
+        self._drive_kV = pid_table.getDoubleTopic("DriveKV").subscribe(0.0, pub_opts)
 
         # Output publishers (sensor data to WPILib)
         # Path: MuJoCo/Swerve/{Module}/Drive/Position
@@ -124,20 +161,22 @@ class NetworkTablesInterface:
         # Robot pose output (struct-encoded Pose3d)
         self._pose = self.inst.getStructTopic("MuJoCo/Swerve/Pose", Pose3d).publish(pub_opts)
 
-        # Fuel ball poses (struct array of Pose3d) - slower rate to reduce AScope load
-        fuel_opts = ntcore.PubSubOptions(periodic=0.05)
-        self._fuel_poses = self.inst.getStructArrayTopic("MuJoCo/Fuel", Pose3d).publish(fuel_opts)
+        # Fuel ball poses (struct array of Pose3d) - disabled to reduce NT load
+        # fuel_opts = ntcore.PubSubOptions(periodic=0.05)
+        # self._fuel_poses = self.inst.getStructArrayTopic("MuJoCo/Fuel", Pose3d).publish(fuel_opts)
 
         # Debug: tick counter to verify publish rate in AdvantageScope
         # self._tick = self.inst.getTable("MuJoCo").getDoubleTopic("Tick").publish(pub_opts)
         # self._tick_count = 0
 
     def get_inputs(self) -> SwerveInputs:
-        """Read motor voltages from NetworkTables."""
+        """Read motor voltages and setpoints from NetworkTables."""
         def module(key: str) -> SwerveModuleState:
             return SwerveModuleState(
                 steer_voltage=self._steer_voltage[key].get(),
                 drive_voltage=self._drive_voltage[key].get(),
+                steer_setpoint=self._steer_setpoint[key].get(),
+                drive_velocity_setpoint=self._drive_velocity_setpoint[key].get(),
             )
 
         return SwerveInputs(
@@ -145,6 +184,18 @@ class NetworkTablesInterface:
             fr=module("fr"),
             bl=module("bl"),
             br=module("br"),
+            steer_pid=SteerPIDGains(
+                kP=self._steer_kP.get(),
+                kI=self._steer_kI.get(),
+                kD=self._steer_kD.get(),
+            ),
+            drive_pid=DrivePIDGains(
+                kP=self._drive_kP.get(),
+                kI=self._drive_kI.get(),
+                kD=self._drive_kD.get(),
+                kS=self._drive_kS.get(),
+                kV=self._drive_kV.get(),
+            ),
         )
 
     def set_outputs(self, outputs: SwerveOutputs) -> None:
@@ -176,9 +227,8 @@ class NetworkTablesInterface:
         if outputs.pose is not None:
             self._pose.set(outputs.pose)
 
-        if outputs.fuel_poses:
-            self._fuel_poses.set(outputs.fuel_poses)
-            pass
+        # if outputs.fuel_poses:
+        #     self._fuel_poses.set(outputs.fuel_poses)
 
         # self._tick_count += 1
         # self._tick.set(self._tick_count)
