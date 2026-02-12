@@ -13,9 +13,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
-import frc.robot.commands.GroundIntakeCommands;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
+import frc.robot.commands.IntakeCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.BitIO;
 import frc.robot.io.BitIODigitalSignal;
@@ -30,8 +31,8 @@ import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
-import frc.robot.subsystems.intake.GroundIntake;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -46,14 +47,17 @@ public class RobotContainer {
     private Swerve swerve;
     private Hang hang;
     private Hopper hopper;
-    private Intake gIntake;
+    private Intake intake;
+    private Shooter shooter;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
     private HopperCommands hopperCommands;
+    private IntakeCommands intakeCommands;
+    private ShooterCommands shooterCommands;
 
     private final CommandPS5Controller driveController = new CommandPS5Controller(0);
-    private GroundIntakeCommands intakeCommands;
+    
 
     private final CommandPS5Controller operator =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
@@ -244,7 +248,7 @@ public class RobotContainer {
             }
         }
 
-        if (Constants.intakeEnabled) {
+        if (Constants.shooterEnabled) {
             // Create variables for each            MotorIO intakeMotorIO;
             switch (Constants.currentMode) {
                 // If in REAL or SIM mode, use MotorIOTalonFX for motors, EncoderIOCANcoder for encoders, and
@@ -268,7 +272,7 @@ public class RobotContainer {
                 case REAL:
                 case SIM:
                     hopperMotor = new MotorIOTalonFX(
-         S                   Hopper.Constants.motorId, Constants.defaultBus, "hopper motor", "Hopper/Motor");
+                            Hopper.Constants.motorId, Constants.defaultBus, "hopper motor", "Hopper/Motor");
                     break;
                 default:
                     hopperMotor = new MotorIO("hopper motor", "Hopper/Motor");
@@ -291,8 +295,8 @@ public class RobotContainer {
             }
             hang = new Hang(hangMotor);
         }
-        if (Constants.gIntakeEnabled) {
-            MotorIO gIntakeMotor;
+        if (Constants.intakeEnabled) {
+            MotorIO intakeMotor;
             BitIO lIntakeIO;
             BitIO rIntakeIO;
             switch (Constants.currentMode) {
@@ -328,11 +332,8 @@ public class RobotContainer {
         if (Constants.hangEnabled) {
             hangCommands = new HangCommands(hang);
         }
-        if (Constants.gIntakeEnabled) {
-            intakeCommands = new GroundIntakeCommands(gIntake);
-        }
         if (Constants.intakeEnabled) {
-            intakeCommands = new IntakeMotorCommands(intake);
+            intakeCommands = new IntakeCommands(intake);
         }
     }
 

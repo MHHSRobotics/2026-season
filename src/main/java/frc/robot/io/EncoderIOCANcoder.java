@@ -16,23 +16,6 @@ import frc.robot.util.Alerts;
 /**
  * CANcoder implementation of EncoderIO that handles absolute position sensing.
  *
- * OFFSET HANDLING ARCHITECTURE:
- * This class uses a two-part offset system to handle arbitrary mechanism offsets:
- *
- * 1. MagnetOffset (hardware offset): Applied by the CANcoder firmware directly to raw sensor readings.
- *    - MUST be in range [-1, 1] encoder rotations (API limitation - values outside this range are silently modulo'd)
- *    - Applied before any gear ratio conversion
- *    - Measured in encoder rotations
- *
- * 2. extraOffset (software offset): Applied in software after unit conversion.
- *    - Handles the "overflow" when desired offset exceeds MagnetOffset range
- *    - Always a multiple of 2π (full rotations) when possible
- *    - Measured in mechanism units
- *
- * MATHEMATICAL RELATIONSHIPS:
- * - Encoder rotations to mechanism units: mech_rad = (enc_rot * 2π) / encoderRatio
- * - Total offset = (MagnetOffset * 2π / encoderRatio) + extraOffset (both in mechanism unitns)
- * - When setting an offset, we try to maximize use of MagnetOffset (for accuracy) while keeping extraOffset as multiples of 2π
  */
 public class EncoderIOCANcoder extends EncoderIO {
     private CANcoder encoder;
