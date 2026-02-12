@@ -13,10 +13,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
+import frc.robot.commands.GroundIntakeCommands;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
+import frc.robot.io.BitIO;
+import frc.robot.io.BitIODigitalSignal;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -28,6 +31,7 @@ import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.intake.GroundIntake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
@@ -44,6 +48,7 @@ public class RobotContainer {
     private Hang hang;
     private Hopper hopper;
     private Shooter shooter;
+    private GroundIntake gIntake;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
@@ -51,6 +56,8 @@ public class RobotContainer {
     private ShooterCommands shooterCommands;
 
     private final CommandPS5Controller driveController = new CommandPS5Controller(0);
+    private GroundIntakeCommands intakeCommands;
+
     private final CommandPS5Controller operator =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
 
@@ -287,6 +294,29 @@ public class RobotContainer {
             }
             hang = new Hang(hangMotor);
         }
+        if (Constants.gIntakeEnabled) {
+            MotorIO gIntakeMotor;
+            BitIO lIntakeIO;
+            BitIO rIntakeIO;
+            switch (Constants.currentMode) {
+                case REAL:
+                case SIM:
+                    gIntakeMotor = new MotorIOTalonFX(
+                            GroundIntake.Constants.motorId,
+                            Constants.defaultBus,
+                            "ground-intake motor",
+                            "GIntake/Motor");
+                    lIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "GIntake/IOleft", 8);
+                    rIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "GIntake/IOleft", 9);
+                    break;
+                default:
+                    gIntakeMotor = new MotorIO("ground-intake motor", "GIntake/Motor");
+                    lIntakeIO = new BitIO("ground-intake left BitIO", "GIntake/IOleft");
+                    rIntakeIO = new BitIO("ground-intake right BitIO", "GIntake/IOright");
+                    break;
+            }
+            gIntake = new GroundIntake(gIntakeMotor, lIntakeIO, rIntakeIO);
+        }
     }
 
     private void initCommands() {
@@ -302,6 +332,9 @@ public class RobotContainer {
         if (Constants.hangEnabled) {
             hangCommands = new HangCommands(hang);
         }
+        if (Constants.gIntakeEnabled) {
+            intakeCommands = new GroundIntakeCommands(gIntake);
+        }
     }
 
     private void configureBindings() {
@@ -315,7 +348,6 @@ public class RobotContainer {
 
         if (Constants.swerveEnabled) {
             driveController.options().onTrue(swerveCommands.resetGyro());
-
             driveController.L1().onTrue(swerveCommands.lock());
             /*
              * How this works:
@@ -343,6 +375,12 @@ public class RobotContainer {
          * Backward manual/PID: circle
          */
         // Initialize dashboard choosers
+        testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
+        testControllerChooser.addOption("Swerve", "Swerve");
+        testControllerChooser.addOption("Fly", "Fly");
+        testControllerChooser.addOption("Feed", "Feed");
+        testControllerChooser.addOption("Intake", "Intake");
+
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
         testControllerManual.addOption("PID", "PID");
@@ -379,6 +417,19 @@ public class RobotContainer {
                     .and(() -> testControllerChooser.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                     .onFalse(swerveCommands.stop());
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("Manual"))
+                    .and(() -> testControllerChooser.get().equals("Intake"))
+                    .onTrue(intakeCommands.setSpeed(-0.2))
+                    .onFalse(intakeCommands.stop());
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("Manual"))
+                    .and(() -> testControllerChooser.get().equals("Intake"))
+                    .onTrue(intakeCommands.setSpeed(0.2))
+                    .onFalse(intakeCommands.stop());
 
             // Manual duty cycle forward test, fast
             testController
