@@ -14,6 +14,8 @@ public class Hang extends SubsystemBase {
         // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
 
+        public static final double hangSpeed = 0.5;
+
         public static final LoggedNetworkBoolean hangLocked =
                 new LoggedNetworkBoolean("Hang/Locked", true); // Toggle to enable braking when stopped
 
@@ -21,14 +23,27 @@ public class Hang extends SubsystemBase {
                 new LoggedNetworkBoolean("Hang/Disabled", false); // Toggle to completely disable the hang subsystem
     }
 
-    private MotorIO hangMotor;
+    private MotorIO motor;
 
     public Hang(MotorIO motorIO) {
-        hangMotor.setInverted(Constants.motorInverted);
+        motor = motorIO;
+        motor.setInverted(Constants.motorInverted);
     }
 
     public void setSpeed(double speed) {
-        hangMotor.setDutyCycle(speed);
+        motor.setDutyCycle(speed);
+    }
+
+    public void moveUp() {
+        setSpeed(Constants.hangSpeed);
+    }
+
+    public void moveDown() {
+        setSpeed(-Constants.hangSpeed);
+    }
+
+    public void stop() {
+        setSpeed(0);
     }
 
     @Override
@@ -36,12 +51,12 @@ public class Hang extends SubsystemBase {
         // This runs every robot loop (about 50 times per second) to update sensors and check for problems
 
         // Set braking based on user input
-        hangMotor.setBraking(Constants.hangLocked.get());
+        motor.setBraking(Constants.hangLocked.get());
 
         // Disable the motor based on user input
-        hangMotor.setDisabled(Constants.hangDisabled.get());
+        motor.setDisabled(Constants.hangDisabled.get());
 
         // Update motor inputs so the latest values are available (logging and alerts happen automatically)
-        hangMotor.update();
+        motor.update();
     }
 }
