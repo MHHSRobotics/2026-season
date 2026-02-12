@@ -16,7 +16,6 @@ import frc.robot.Constants.Mode;
 import frc.robot.commands.GroundIntakeCommands;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
-import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.BitIO;
 import frc.robot.io.BitIODigitalSignal;
@@ -32,7 +31,6 @@ import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.intake.GroundIntake;
-import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -47,13 +45,11 @@ public class RobotContainer {
     private Swerve swerve;
     private Hang hang;
     private Hopper hopper;
-    private Shooter shooter;
     private GroundIntake gIntake;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
     private HopperCommands hopperCommands;
-    private ShooterCommands shooterCommands;
 
     private final CommandPS5Controller driveController = new CommandPS5Controller(0);
     private GroundIntakeCommands intakeCommands;
@@ -175,7 +171,6 @@ public class RobotContainer {
 
                     gyro = new GyroIOPigeon(
                             TunerConstants.DrivetrainConstants.Pigeon2Id, Constants.swerveBus, "gyro", "Swerve/Gyro");
-
                     break;
                 default:
                     // If in REPLAY, use empty MotorIO objects
@@ -196,7 +191,6 @@ public class RobotContainer {
                     brEncoder = new EncoderIO("back right encoder", "Swerve/BackRight/Encoder");
 
                     gyro = new GyroIO("gyro", "Swerve/Gyro");
-
                     break;
             }
             // Initialize swerve modules
@@ -230,6 +224,8 @@ public class RobotContainer {
                 swerve.addCameraSource(brat);
                 swerve.addCameraSource(blat);
             }
+
+            // If mode is SIM, start the simulations for swerve modules and gyro
             if (Constants.currentMode == Mode.SIM) {
                 SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
                     new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
@@ -247,19 +243,19 @@ public class RobotContainer {
             }
         }
 
-        if (Constants.shooterEnabled) {
-            MotorIO feedMotor, flyMotor;
+        if (Constants.intakeEnabled) {
+            // Create variables for each            MotorIO intakeMotorIO;
             switch (Constants.currentMode) {
+                // If in REAL or SIM mode, use MotorIOTalonFX for motors, EncoderIOCANcoder for encoders, and
+                // GyroIOPigeon for the gyro
                 case REAL:
                 case SIM:
-                    feedMotor = new MotorIOTalonFX(
-                            Shooter.Constants.feedMotorId, Constants.defaultBus, "feed motor", "Shooter/Feed");
-                    flyMotor = new MotorIOTalonFX(
-                            Shooter.Constants.flyMotorId, Constants.defaultBus, "fly motor", "Shooter/Fly");
+                    intakeMotorIO = new MotorIOTalonFX(
+                            IntakeConstants.id, Constants.defaultBus, "intake motor", "Intake/Motor");
                     break;
                 default:
-                    feedMotor = new MotorIO("feed motor", "Shooter/Feed");
-                    flyMotor = new MotorIO("fly motor", "Shooter/Fly");
+                    // If in REPLAY, use empty MotorIO objects
+                    intakeMotorIO = new MotorIO("intake motor", "Intake/Motor");
                     break;
             }
             shooter = new Shooter(feedMotor, flyMotor);
@@ -271,7 +267,7 @@ public class RobotContainer {
                 case REAL:
                 case SIM:
                     hopperMotor = new MotorIOTalonFX(
-                            Hopper.Constants.motorId, Constants.defaultBus, "hopper motor", "Hopper/Motor");
+         S                   Hopper.Constants.motorId, Constants.defaultBus, "hopper motor", "Hopper/Motor");
                     break;
                 default:
                     hopperMotor = new MotorIO("hopper motor", "Hopper/Motor");
@@ -317,12 +313,11 @@ public class RobotContainer {
             }
             gIntake = new GroundIntake(gIntakeMotor, lIntakeIO, rIntakeIO);
         }
+            intake = new IntakeMotor(intakeMotorIO);
+        }
     }
 
     private void initCommands() {
-        if (Constants.shooterEnabled) {
-            shooterCommands = new ShooterCommands(shooter);
-        }
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve);
         }
@@ -334,6 +329,9 @@ public class RobotContainer {
         }
         if (Constants.gIntakeEnabled) {
             intakeCommands = new GroundIntakeCommands(gIntake);
+        }
+        if (Constants.intakeEnabled) {
+            intakeCommands = new IntakeMotorCommands(intake);
         }
     }
 
@@ -379,6 +377,7 @@ public class RobotContainer {
         testControllerChooser.addOption("Swerve", "Swerve");
         testControllerChooser.addOption("Fly", "Fly");
         testControllerChooser.addOption("Feed", "Feed");
+        testControllerChooser.addOption("Intake", "Intake");
         testControllerChooser.addOption("Intake", "Intake");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
@@ -587,6 +586,20 @@ public class RobotContainer {
                     .onTrue(shooterCommands.feedReverse())
                     .onFalse(shooterCommands.feedStop());
         }
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Intake"))
+                .onTrue(intakeCommands.intakeForward())
+                .onFalse(intakeCommands.intakeStop());
+
+        // Manual duty cycle backward test, fast
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Intake"))
+                .onTrue(intakeCommands.intakeReverse())
+                .onFalse(intakeCommands.intakeStop());
     }
 
     // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)

@@ -14,12 +14,14 @@ public class GroundIntake extends SubsystemBase {
             HIGH_POS,
             NEUTRAL
         }
-
-        public static final int motorId = 20;
+        public static final int id = 15;
+        public static final int motorId = 16;
+        public static final double defaultSpeed = 0.1;
     }
 
     private MechanicalSwitchState currentState = MechanicalSwitchState.HIGH_POS;
     private MotorIO hingeMotor;
+    private final MotorIO intakeMotor;
     private BitIO rightLimitSwitch;
     private BitIO leftLimitSwitch;
 
@@ -29,10 +31,11 @@ public class GroundIntake extends SubsystemBase {
     public static final LoggedNetworkBoolean gIntakeDisabled = new LoggedNetworkBoolean(
             "GIntake/Disabled", false); // Toggle to completely disable all motors in the swerve subsystem
 
-    public GroundIntake(MotorIO hingeMotorIO, BitIO rightLimitSwitchIO, BitIO leftLimitSwitchIO) {
+    public GroundIntake(MotorIO intakeMotorIO, MotorIO hingeMotorIO, BitIO rightLimitSwitchIO, BitIO leftLimitSwitchIO) {
         hingeMotor = hingeMotorIO;
         rightLimitSwitch = rightLimitSwitchIO;
         leftLimitSwitch = leftLimitSwitchIO;
+        intakeMotor = intakeMotorIO;
     }
 
     public void setLocked(boolean brake) {
@@ -80,6 +83,20 @@ public class GroundIntake extends SubsystemBase {
         hingeMotor.setDutyCycle(0);
     }
 
+    /** Turn intake motor ON (forward only) */
+    public void intakeOn() {
+        intakeMotor.setDutyCycle(Constants.defaultSpeed); // adjust speed as needed
+    }
+
+    public void intakeReverse() {
+        intakeMotor.setDutyCycle(-Constants.defaultSpeed); // adjust speed as needed
+    }
+
+    /** Turn intake motor OFF */
+    public void intakeOff() {
+        intakeMotor.setDutyCycle(0);
+    }
+
     @Override
     public void periodic() {
         hingeMotor.setBraking(gIntakeLocked.get());
@@ -91,5 +108,9 @@ public class GroundIntake extends SubsystemBase {
         rightLimitSwitch.update();
 
         leftLimitSwitch.update();
+
+        intakeMotor.setBraking(gIntakeLocked.get());
+        intakeMotor.setDisabled(gIntakeDisabled.get());
+        intakeMotor.update();
     }
 }

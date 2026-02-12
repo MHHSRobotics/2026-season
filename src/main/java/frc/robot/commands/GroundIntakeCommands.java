@@ -37,4 +37,16 @@ public class GroundIntakeCommands {
     public Command setLocked(boolean brake) {
         return new InstantCommand(() -> groundIntake.setLocked(brake));
     }
+
+    public Command intakeForward() {
+        return new InstantCommand(() -> groundIntake.intakeOn());
+    }
+
+    public Command intakeReverse() {
+        return new InstantCommand(() -> groundIntake.intakeReverse());
+    }
+
+    public Command intakeStop() {
+        return new InstantCommand(() -> groundIntake.intakeOff());
+    }
 }
