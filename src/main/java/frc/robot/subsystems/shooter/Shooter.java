@@ -43,28 +43,36 @@ public class Shooter extends SubsystemBase {
         fly.setDisabled(disabled);
     }
 
-    public void feedShoot() {
-        feed.setDutyCycle(Constants.feedSpeed);
-    }
-
-    public void feedReverse() {
-        feed.setDutyCycle(-Constants.feedSpeed);
-    }
-
-    public void feedStop() {
-        feed.setDutyCycle(0);
+    public void setFlySpeed(double speed) {
+        fly.setDutyCycle(speed);
     }
 
     public void flyShoot() {
-        fly.setDutyCycle(Constants.flySpeed);
+        setFlySpeed(Constants.flySpeed);
     }
 
     public void flyReverse() {
-        fly.setDutyCycle(-Constants.flySpeed);
+        setFlySpeed(-Constants.flySpeed);
     }
 
     public void flyStop() {
-        fly.setDutyCycle(0);
+        setFlySpeed(0);
+    }
+
+    public void setFeedSpeed(double speed) {
+        feed.setDutyCycle(speed);
+    }
+
+    public void feedShoot() {
+        setFeedSpeed(Constants.feedSpeed);
+    }
+
+    public void feedReverse() {
+        setFeedSpeed(-Constants.feedSpeed);
+    }
+
+    public void feedStop() {
+        setFeedSpeed(0);
     }
 
     @Override

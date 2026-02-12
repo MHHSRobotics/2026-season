@@ -46,7 +46,6 @@ public final class Constants {
 
     public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error
 
-
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = true;
     public static final boolean shooterEnabled = true;
