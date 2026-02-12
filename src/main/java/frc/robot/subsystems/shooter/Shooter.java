@@ -29,6 +29,8 @@ public class Shooter extends SubsystemBase {
         public static final double flyGearRatio = 0.0;
         public static final double flyStatorCurrentLimit = 0.0;
         public static final double flyOffset = 0.0;
+        public static final double flySpeed = 0.0;
+        public static final double feedSpeed = 0.0;
 
         public static final double flyVelocityWithVoltage = 0.0;
 
@@ -100,36 +102,36 @@ public class Shooter extends SubsystemBase {
         pitch.setBraking(disabled);
     }
 
-    public void feedShoot() {
-        feed.setVelocityWithVoltage(Constants.feedVelocityWithVoltage);
-    }
-
-    public void feedStop() {
-        feed.setVelocityWithVoltage(0);
+    public void setFlySpeed(double speed) {
+        fly.setDutyCycle(speed);
     }
 
     public void flyShoot() {
-        fly.setVelocityWithVoltage(Constants.flyVelocityWithVoltage);
+        setFlySpeed(Constants.flySpeed);
+    }
+
+    public void flyReverse() {
+        setFlySpeed(-Constants.flySpeed);
     }
 
     public void flyStop() {
-        fly.setVelocityWithVoltage(0);
+        setFlySpeed(0);
     }
 
-    public double pitchGetPosition() {
-        return pitch.getInputs().position;
+    public void setFeedSpeed(double speed) {
+        feed.setDutyCycle(speed);
     }
 
-    public double pitchGetGoal() {
-        return pitch.getInputs().setpoint;
+    public void feedShoot() {
+        setFeedSpeed(Constants.feedSpeed);
     }
 
-    public void pitchSetGoal(double position) {
-        pitch.setGoalWithVoltage(position);
+    public void feedReverse() {
+        setFeedSpeed(-Constants.feedSpeed);
     }
 
-    public void pitchStop() {
-        pitch.setVoltage(0);
+    public void feedStop() {
+        setFeedSpeed(0);
     }
 
     @Override

@@ -45,9 +45,11 @@ public final class Constants {
     public static final boolean simIsRedAlliance = false; // Whether simulated FMS is on red alliance
 
     public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error
-
     // Toggles for susbsytems
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = false;
+    public static final boolean shooterEnabled = false;
+    public static final boolean hopperEnabled = false;
+    public static final boolean hangEnabled = false;
     public static final boolean intakeEnabled = true;
 }
