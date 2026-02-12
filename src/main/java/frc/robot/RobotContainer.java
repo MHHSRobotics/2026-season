@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.Constants.Mode;
-import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
@@ -24,7 +23,6 @@ import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
-import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -37,13 +35,8 @@ import frc.robot.util.Alerts;
 public class RobotContainer {
     // Subsystems
     private Swerve swerve;
-    private Shooter shooter;
 
-    // Subsystem commands
     private SwerveCommands swerveCommands;
-    private ShooterCommands shooterCommands;
-
-    private final CommandPS5Controller controller = new CommandPS5Controller(0); // Main drive controller
 
     private final CommandPS5Controller manualController =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
@@ -82,7 +75,9 @@ public class RobotContainer {
     }
 
     private void initSubsystems() {
-        // Initialize swerve motors, encoders, and gyro
+        // Initialize subsystems in order: arm, elevator, wrist, intake, hang, swerve
+        // Each subsystem is created immediately after its motor/encoder initialization
+
         if (Constants.swerveEnabled) {
             // Create variables for each
             MotorIO flDriveMotor, flAngleMotor, frDriveMotor, frAngleMotor;
@@ -263,6 +258,8 @@ public class RobotContainer {
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve);
         }
+        hopperCommands = new HopperCommands(hopper);
+        hangCommands = new HangCommands(hang);
     }
 
     private void configureBindings() {
@@ -305,6 +302,7 @@ public class RobotContainer {
         // Initialize dashboard choosers
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addOption("Swerve", "Swerve");
+        testControllerChooser.addOption("Hang", "Hang");
         testControllerChooser.addOption("Fly", "Fly");
         testControllerChooser.addOption("Feed", "Feed");
 
@@ -339,6 +337,25 @@ public class RobotContainer {
                 .and(() -> testControllerChooser.get().equals("Swerve"))
                 .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                 .onFalse(swerveCommands.stop());
+
+        // Hang move up test
+        
+        testController
+                .cross()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Hang"))
+                .onTrue(hangCommands.moveUp())
+                .onFalse(hangCommands.stop());
+
+        // Hang move down test
+        
+        testController
+                .circle()
+                .and(() -> testControllerManual.get().equals("Manual"))
+                .and(() -> testControllerChooser.get().equals("Hang"))
+                .onTrue(hangCommands.moveDown())
+                .onFalse(hangCommands.stop());
+            
 
         // Manual duty cycle forward test, fast
         testController
