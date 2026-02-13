@@ -57,7 +57,6 @@ public class RobotContainer {
     private ShooterCommands shooterCommands;
 
     private final CommandPS5Controller driveController = new CommandPS5Controller(0);
-    
 
     private final CommandPS5Controller operator =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
@@ -249,18 +248,20 @@ public class RobotContainer {
         }
 
         if (Constants.shooterEnabled) {
-            // Create variables for each            MotorIO intakeMotorIO;
+            MotorIO feedMotor, flyMotor;
             switch (Constants.currentMode) {
                 // If in REAL or SIM mode, use MotorIOTalonFX for motors, EncoderIOCANcoder for encoders, and
                 // GyroIOPigeon for the gyro
                 case REAL:
                 case SIM:
-                    intakeMotorIO = new MotorIOTalonFX(
-                            IntakeConstants.id, Constants.defaultBus, "intake motor", "Intake/Motor");
+                    feedMotor = new MotorIOTalonFX(
+                            Shooter.Constants.feedMotorId, Constants.defaultBus, "shooter feed motor", "Shooter/Feed");
+                    flyMotor = new MotorIOTalonFX(
+                            Shooter.Constants.flyMotorId, Constants.defaultBus, "shooter fly motor", "Shooter/Fly");
                     break;
                 default:
-                    // If in REPLAY, use empty MotorIO objects
-                    intakeMotorIO = new MotorIO("intake motor", "Intake/Motor");
+                    feedMotor = new MotorIO("shooter feed motor", "Shooter/Feed");
+                    flyMotor = new MotorIO("shooter fly motor", "Shooter/Fly");
                     break;
             }
             shooter = new Shooter(feedMotor, flyMotor);
@@ -297,28 +298,35 @@ public class RobotContainer {
         }
         if (Constants.intakeEnabled) {
             MotorIO intakeMotor;
-            BitIO lIntakeIO;
-            BitIO rIntakeIO;
+            MotorIO hingeMotor;
+            BitIO leftSwitch;
+            BitIO rightSwitch;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
-                    gIntakeMotor = new MotorIOTalonFX(
-                            GroundIntake.Constants.motorId,
+                    intakeMotor = new MotorIOTalonFX(
+                            Intake.Constants.intakeMotorId,
                             Constants.defaultBus,
-                            "ground-intake motor",
-                            "GIntake/Motor");
-                    lIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "GIntake/IOleft", 8);
-                    rIntakeIO = new BitIODigitalSignal("ground-intake left BitIO", "GIntake/IOleft", 9);
+                            "intake flywheel motor",
+                            "Intake/FlywheelMotor");
+                    hingeMotor = new MotorIOTalonFX(
+                            Intake.Constants.hingeMotorId,
+                            Constants.defaultBus,
+                            "intake hinge motor",
+                            "Intake/HingeMotor");
+                    leftSwitch = new BitIODigitalSignal(
+                            "intake left limit switch", "Intake/LeftSwitch", Intake.Constants.leftSwitchId);
+                    rightSwitch = new BitIODigitalSignal(
+                            "intake right limit switch", "Intake/RightSwitch", Intake.Constants.rightSwitchId);
                     break;
                 default:
-                    gIntakeMotor = new MotorIO("ground-intake motor", "GIntake/Motor");
-                    lIntakeIO = new BitIO("ground-intake left BitIO", "GIntake/IOleft");
-                    rIntakeIO = new BitIO("ground-intake right BitIO", "GIntake/IOright");
+                    intakeMotor = new MotorIO("intake flywheel motor", "Intake/FlywheelMotor");
+                    hingeMotor = new MotorIO("intake hinge motor", "Intake/HingeMotor");
+                    leftSwitch = new BitIO("intake left limit switch", "Intake/LeftSwitch");
+                    rightSwitch = new BitIO("intake right limit switch", "Intake/RightSwitch");
                     break;
             }
-            gIntake = new GroundIntake(gIntakeMotor, lIntakeIO, rIntakeIO);
-        }
-            intake = new IntakeMotor(intakeMotorIO);
+            intake = new Intake(intakeMotor, hingeMotor, leftSwitch, rightSwitch);
         }
     }
 
@@ -334,6 +342,9 @@ public class RobotContainer {
         }
         if (Constants.intakeEnabled) {
             intakeCommands = new IntakeCommands(intake);
+        }
+        if (Constants.shooterEnabled) {
+            shooterCommands = new ShooterCommands(shooter);
         }
     }
 
@@ -418,19 +429,6 @@ public class RobotContainer {
                     .and(() -> testControllerChooser.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                     .onFalse(swerveCommands.stop());
-
-            testController
-                    .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.setSpeed(-0.2))
-                    .onFalse(intakeCommands.stop());
-            testController
-                    .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.setSpeed(0.2))
-                    .onFalse(intakeCommands.stop());
 
             // Manual duty cycle forward test, fast
             testController
@@ -588,20 +586,67 @@ public class RobotContainer {
                     .onTrue(shooterCommands.feedReverse())
                     .onFalse(shooterCommands.feedStop());
         }
-        testController
-                .cross()
-                .and(() -> testControllerManual.get().equals("Manual"))
-                .and(() -> testControllerChooser.get().equals("Intake"))
-                .onTrue(intakeCommands.intakeForward())
-                .onFalse(intakeCommands.intakeStop());
 
-        // Manual duty cycle backward test, fast
-        testController
-                .circle()
-                .and(() -> testControllerManual.get().equals("Manual"))
-                .and(() -> testControllerChooser.get().equals("Intake"))
-                .onTrue(intakeCommands.intakeReverse())
-                .onFalse(intakeCommands.intakeStop());
+        if (Constants.intakeEnabled) {
+            testControllerChooser.addOption("Intake", "Intake");
+            testControllerChooser.addOption("IntakeHinge", "IntakeHinge");
+
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("Manual"))
+                    .and(() -> testControllerChooser.get().equals("Intake"))
+                    .onTrue(intakeCommands.setIntakeSpeed(() -> 0.1))
+                    .onFalse(intakeCommands.intakeStop());
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("Manual"))
+                    .and(() -> testControllerChooser.get().equals("Intake"))
+                    .onTrue(intakeCommands.setIntakeSpeed(() -> -0.1))
+                    .onFalse(intakeCommands.intakeStop());
+
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("Fast"))
+                    .and(() -> testControllerChooser.get().equals("Intake"))
+                    .onTrue(intakeCommands.intake())
+                    .onFalse(intakeCommands.intakeStop());
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("Fast"))
+                    .and(() -> testControllerChooser.get().equals("Intake"))
+                    .onTrue(intakeCommands.outtake())
+                    .onFalse(intakeCommands.intakeStop());
+
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("Manual"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.setHingeSpeed(() -> 0.1))
+                    .onFalse(intakeCommands.hingeStop());
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("Manual"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.setIntakeSpeed(() -> -0.1))
+                    .onFalse(intakeCommands.hingeStop());
+
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("Fast"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.setHingeSpeed(() -> 0.5))
+                    .onFalse(intakeCommands.hingeStop());
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("Fast"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.setHingeSpeed(() -> -0.5))
+                    .onFalse(intakeCommands.hingeStop());
+        }
     }
 
     // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)

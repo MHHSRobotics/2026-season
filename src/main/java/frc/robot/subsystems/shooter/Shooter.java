@@ -2,12 +2,8 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.ctre.phoenix6.signals.GravityTypeValue;
-
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
 public class Shooter extends SubsystemBase {
@@ -19,8 +15,11 @@ public class Shooter extends SubsystemBase {
         public static final double flySpeed = 1.0;
         public static final double feedSpeed = 0.5;
 
-        public static final boolean flyInverted=false;
-        public static final boolean feedInverted=false;
+        public static final boolean flyInverted = false;
+        public static final boolean feedInverted = false;
+
+        public static final int flyMotorId = 28;
+        public static final int feedMotorId = 29;
     }
 
     private MotorIO feed;

@@ -1,9 +1,12 @@
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Intake.Constants;
 
 public class IntakeCommands {
 
@@ -13,36 +16,35 @@ public class IntakeCommands {
         this.intake = intake;
     }
 
-    // Stops all swerve output
-    public Command stop() {
-        return new InstantCommand(() -> intake.stop());
+    public Command hingeDown() {
+        return new InstantCommand(() -> intake.setHingeGoal(Constants.hingeDown));
     }
 
-    public Command setPos(double speed) {
-        return new InstantCommand(() -> intake.setPos(speed));
+    public Command hingeUp() {
+        return new InstantCommand(() -> intake.setHingeGoal(Constants.hingeUp));
     }
 
-    public Command setDown(double speed) {
-        return new InstantCommand(() -> intake.setDown(speed));
+    public Command setHingeSpeed(DoubleSupplier speed) {
+        return new InstantCommand(() -> intake.setHingeSpeed(speed.getAsDouble()));
     }
 
-    public Command setUp(double speed) {
-        return new InstantCommand(() -> intake.setForward(speed));
+    public Command hingeStop() {
+        return new InstantCommand(() -> intake.hingeStop());
     }
 
-    public Command setSpeed(double speed) {
-        return new InstantCommand(() -> intake.setSpeed(speed));
+    public Command setIntakeSpeed(DoubleSupplier speed) {
+        return new InstantCommand(() -> intake.setIntakeSpeed(speed.getAsDouble()));
     }
 
-    public Command intakeForward() {
-        return new InstantCommand(() -> intake.intakeOn());
+    public Command intake() {
+        return new InstantCommand(() -> intake.intake());
     }
 
-    public Command intakeReverse() {
-        return new InstantCommand(() -> intake.intakeReverse());
+    public Command outtake() {
+        return new InstantCommand(() -> intake.outtake());
     }
 
     public Command intakeStop() {
-        return new InstantCommand(() -> intake.intakeOff());
+        return new InstantCommand(() -> intake.intakeStop());
     }
 }

@@ -446,25 +446,25 @@ public class MotorIOTalonFXS extends MotorIO {
 
     @Override
     public void connectForwardLimitSwitch(BitIO limitSwitch) {
-        if(limitSwitch instanceof BitIODigitalSignal io){
-            int id=io.getId();
+        if (limitSwitch instanceof BitIODigitalSignal io) {
+            int id = io.getId();
             config.HardwareLimitSwitch.ForwardLimitSource = ForwardLimitSourceValue.LimitSwitchPin;
             config.HardwareLimitSwitch.ForwardLimitEnable = true;
             config.HardwareLimitSwitch.ForwardLimitRemoteSensorID = id;
-        }else{
-            Alerts.create("BitIO "+limitSwitch.getName()+ " is not a digital signal", AlertType.kWarning);
+        } else {
+            Alerts.create("BitIO " + limitSwitch.getName() + " is not a digital signal", AlertType.kWarning);
         }
     }
 
     @Override
     public void connectReverseLimitSwitch(BitIO limitSwitch) {
-        if(limitSwitch instanceof BitIODigitalSignal io){
-            int id=io.getId();
+        if (limitSwitch instanceof BitIODigitalSignal io) {
+            int id = io.getId();
             config.HardwareLimitSwitch.ReverseLimitSource = ReverseLimitSourceValue.LimitSwitchPin;
             config.HardwareLimitSwitch.ReverseLimitEnable = true;
             config.HardwareLimitSwitch.ReverseLimitRemoteSensorID = id;
-        }else{
-            Alerts.create("BitIO "+limitSwitch.getName()+ " is not a digital signal", AlertType.kWarning);
+        } else {
+            Alerts.create("BitIO " + limitSwitch.getName() + " is not a digital signal", AlertType.kWarning);
         }
     }
 
