@@ -33,6 +33,7 @@ import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.hopper.HopperSim;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.swerve.GyroSim;
@@ -337,6 +338,10 @@ public class RobotContainer {
                     break;
             }
             intake = new Intake(intakeMotor, hingeMotor, leftSwitch, rightSwitch);
+
+            if (Constants.currentMode == Mode.SIM) {
+                new IntakeSim(intakeMotor, hingeMotor);
+            }
         }
     }
 
@@ -397,11 +402,12 @@ public class RobotContainer {
          */
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
-        testControllerManual.addOption("Manual", "Manual");
+        testControllerManual.addDefaultOption("Manual", "Manual");
         testControllerManual.addOption("PID", "PID");
         testControllerManual.addOption("Fast", "Fast");
 
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
+        testControllerChooser.addDefaultOption("", ""); // Add default option so code doesn't crash on read
 
         if (Constants.swerveEnabled) {
             testControllerChooser.addOption("Swerve", "Swerve");

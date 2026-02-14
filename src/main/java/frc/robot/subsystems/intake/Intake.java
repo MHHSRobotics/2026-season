@@ -74,7 +74,7 @@ public class Intake extends SubsystemBase {
         hingeMotor.setInverted(Constants.hingeInverted);
         hingeMotor.connectInternalSensor(Constants.hingeRatio);
         hingeMotor.setPosition(Constants.hingeUp);
-        hingeMotor.connectForwardLimitSwitch(rightLimitSwitch);
+        // hingeMotor.connectForwardLimitSwitch(rightLimitSwitch);
 
         intakeMotor.setInverted(Constants.intakeInverted);
         intakeMotor.connectInternalSensor(Constants.intakeRatio);
