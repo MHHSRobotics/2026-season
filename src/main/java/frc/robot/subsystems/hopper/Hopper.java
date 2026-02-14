@@ -21,10 +21,10 @@ public class Hopper extends SubsystemBase {
         public static final LoggedNetworkBoolean hopperDisabled =
                 new LoggedNetworkBoolean("Hopper/Disabled", false); // Toggle to completely disable the hopper subsystem
 
-        public static final double rollerRatio=1;
+        public static final double rollerRatio = 1;
 
         // Simulation only
-        public static final double rollerInertia=0.0009; // kg m^2
+        public static final double rollerInertia = 0.0009; // kg m^2
     }
 
     private MotorIO motor;

@@ -268,7 +268,7 @@ public class RobotContainer {
             }
             shooter = new Shooter(feedMotor, flyMotor);
 
-            if(Constants.currentMode==Mode.SIM){
+            if (Constants.currentMode == Mode.SIM) {
                 new ShooterSim(feedMotor, flyMotor);
             }
         }
@@ -287,7 +287,7 @@ public class RobotContainer {
             }
             hopper = new Hopper(hopperMotor);
 
-            if(Constants.currentMode==Mode.SIM){
+            if (Constants.currentMode == Mode.SIM) {
                 new HopperSim(hopperMotor);
             }
         }
