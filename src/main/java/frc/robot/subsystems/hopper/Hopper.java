@@ -1,8 +1,8 @@
 package frc.robot.subsystems.hopper;
 
-import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import frc.robot.io.MotorIO;
 
