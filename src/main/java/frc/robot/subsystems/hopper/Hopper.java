@@ -7,7 +7,7 @@ import frc.robot.io.MotorIO;
 public class Hopper extends SubsystemBase {
     public static class Constants {
         // CAN device ID for the intake motor controller
-        public static final int motorId = 26;
+        public static final int motorId = 24;
         // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
 
