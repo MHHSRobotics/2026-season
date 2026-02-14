@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import frc.robot.Constants.Mode;
 import frc.robot.io.BitIO;
 import frc.robot.io.MotorIO;
 
@@ -29,7 +30,8 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkNumber hingeKP = new LoggedNetworkNumber("Intake/Hinge/kP", 10);
         public static final LoggedNetworkNumber hingeKI = new LoggedNetworkNumber("Intake/Hinge/kI", 0);
         public static final LoggedNetworkNumber hingeKD = new LoggedNetworkNumber("Intake/Hinge/kD", 5);
-        public static final LoggedNetworkNumber hingeKG = new LoggedNetworkNumber("Intake/Hinge/kG", 5);
+        public static final LoggedNetworkNumber hingeKG =
+                new LoggedNetworkNumber("Intake/Hinge/kG", frc.robot.Constants.currentMode == Mode.SIM ? 0 : 5);
         public static final LoggedNetworkNumber hingeKS = new LoggedNetworkNumber("Intake/Hinge/kS", 0);
         public static final LoggedNetworkNumber hingeKV = new LoggedNetworkNumber("Intake/Hinge/kV", 0);
         public static final LoggedNetworkNumber hingeKA = new LoggedNetworkNumber("Intake/Hinge/kA", 0);
