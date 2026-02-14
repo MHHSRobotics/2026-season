@@ -35,6 +35,13 @@ public class Intake extends SubsystemBase {
 
         public static final double hingeUp = 0;
         public static final double hingeDown = Units.degreesToRadians(90);
+
+        public static final double intakeRatio = 1;
+        public static final double hingeRatio = 15;
+
+        // Simulation only
+        public static final double intakeInertia = 0.000132; // kg m^2
+        public static final double hingeInertia = 0.3; // kg m^2
     }
 
     private MotorIO hingeMotor;
