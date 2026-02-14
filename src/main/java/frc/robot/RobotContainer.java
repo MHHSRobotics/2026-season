@@ -31,8 +31,10 @@ import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.HopperSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -265,6 +267,10 @@ public class RobotContainer {
                     break;
             }
             shooter = new Shooter(feedMotor, flyMotor);
+
+            if(Constants.currentMode==Mode.SIM){
+                new ShooterSim(feedMotor, flyMotor);
+            }
         }
 
         if (Constants.hopperEnabled) {
@@ -280,6 +286,10 @@ public class RobotContainer {
                     break;
             }
             hopper = new Hopper(hopperMotor);
+
+            if(Constants.currentMode==Mode.SIM){
+                new HopperSim(hopperMotor);
+            }
         }
 
         if (Constants.hangEnabled) {
