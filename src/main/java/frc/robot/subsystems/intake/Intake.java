@@ -52,8 +52,8 @@ public class Intake extends SubsystemBase {
         public static final double intakeRatio = 1;
         public static final double hingeRatio = 15;
 
-        public static final boolean hingeInverted=false;
-        public static final boolean intakeInverted=false;
+        public static final boolean hingeInverted = false;
+        public static final boolean intakeInverted = false;
 
         // Simulation only
         public static final double intakeInertia = 0.000132; // kg m^2
@@ -184,7 +184,7 @@ public class Intake extends SubsystemBase {
     private final LoggedMechanismLigament2d iAmount =
             iRoot.append(new LoggedMechanismLigament2d("IAmount", 1.0, 90, 6, new Color8Bit(Color.kRed)));
 
-    private void updateVis(){
+    private void updateVis() {
         // 2) Update the on-screen wrist drawing to match the current wrist angle (radians)
         hinge.setAngle(Rotation2d.fromRadians(hingeMotor.getInputs().position));
 

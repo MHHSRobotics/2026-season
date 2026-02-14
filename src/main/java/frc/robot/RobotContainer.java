@@ -395,13 +395,6 @@ public class RobotContainer {
          * Forward manual/PID: cross
          * Backward manual/PID: circle
          */
-        // Initialize dashboard choosers
-        testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
-        testControllerChooser.addOption("Swerve", "Swerve");
-        testControllerChooser.addOption("Fly", "Fly");
-        testControllerChooser.addOption("Feed", "Feed");
-        testControllerChooser.addOption("Intake", "Intake");
-        testControllerChooser.addOption("Intake", "Intake");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
@@ -656,6 +649,18 @@ public class RobotContainer {
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.setHingeSpeed(() -> -0.5))
                     .onFalse(intakeCommands.hingeStop());
+
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("PID"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.hingeUp());
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("PID"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.hingeDown());
         }
     }
 
