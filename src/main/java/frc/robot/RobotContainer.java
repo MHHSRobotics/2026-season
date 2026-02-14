@@ -31,8 +31,10 @@ import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.HopperSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
@@ -257,14 +259,21 @@ public class RobotContainer {
                     feedMotor = new MotorIOTalonFX(
                             Shooter.Constants.feedMotorId, Constants.defaultBus, "shooter feed motor", "Shooter/Feed");
                     flyMotor = new MotorIOTalonFX(
-                            Shooter.Constants.flyMotorId, Constants.defaultBus, "shooter fly motor", "Shooter/Fly");
+                            Shooter.Constants.flyMotorId,
+                            Constants.defaultBus,
+                            "shooter fly motor",
+                            "Shooter/Flywheel");
                     break;
                 default:
                     feedMotor = new MotorIO("shooter feed motor", "Shooter/Feed");
-                    flyMotor = new MotorIO("shooter fly motor", "Shooter/Fly");
+                    flyMotor = new MotorIO("shooter fly motor", "Shooter/Flywheel");
                     break;
             }
             shooter = new Shooter(feedMotor, flyMotor);
+
+            if (Constants.currentMode == Mode.SIM) {
+                new ShooterSim(feedMotor, flyMotor);
+            }
         }
 
         if (Constants.hopperEnabled) {
@@ -280,6 +289,10 @@ public class RobotContainer {
                     break;
             }
             hopper = new Hopper(hopperMotor);
+
+            if (Constants.currentMode == Mode.SIM) {
+                new HopperSim(hopperMotor);
+            }
         }
 
         if (Constants.hangEnabled) {
@@ -308,20 +321,17 @@ public class RobotContainer {
                             Intake.Constants.intakeMotorId,
                             Constants.defaultBus,
                             "intake flywheel motor",
-                            "Intake/FlywheelMotor");
+                            "Intake/Flywheel");
                     hingeMotor = new MotorIOTalonFX(
-                            Intake.Constants.hingeMotorId,
-                            Constants.defaultBus,
-                            "intake hinge motor",
-                            "Intake/HingeMotor");
+                            Intake.Constants.hingeMotorId, Constants.defaultBus, "intake hinge motor", "Intake/Hinge");
                     leftSwitch = new BitIODigitalSignal(
                             "intake left limit switch", "Intake/LeftSwitch", Intake.Constants.leftSwitchId);
                     rightSwitch = new BitIODigitalSignal(
                             "intake right limit switch", "Intake/RightSwitch", Intake.Constants.rightSwitchId);
                     break;
                 default:
-                    intakeMotor = new MotorIO("intake flywheel motor", "Intake/FlywheelMotor");
-                    hingeMotor = new MotorIO("intake hinge motor", "Intake/HingeMotor");
+                    intakeMotor = new MotorIO("intake flywheel motor", "Intake/Flywheel");
+                    hingeMotor = new MotorIO("intake hinge motor", "Intake/Hinge");
                     leftSwitch = new BitIO("intake left limit switch", "Intake/LeftSwitch");
                     rightSwitch = new BitIO("intake right limit switch", "Intake/RightSwitch");
                     break;
@@ -385,13 +395,6 @@ public class RobotContainer {
          * Forward manual/PID: cross
          * Backward manual/PID: circle
          */
-        // Initialize dashboard choosers
-        testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
-        testControllerChooser.addOption("Swerve", "Swerve");
-        testControllerChooser.addOption("Fly", "Fly");
-        testControllerChooser.addOption("Feed", "Feed");
-        testControllerChooser.addOption("Intake", "Intake");
-        testControllerChooser.addOption("Intake", "Intake");
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addOption("Manual", "Manual");
@@ -646,6 +649,18 @@ public class RobotContainer {
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.setHingeSpeed(() -> -0.5))
                     .onFalse(intakeCommands.hingeStop());
+
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("PID"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.hingeUp());
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("PID"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .onTrue(intakeCommands.hingeDown());
         }
     }
 
