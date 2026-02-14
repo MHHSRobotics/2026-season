@@ -63,6 +63,7 @@ public class Robot extends LoggedRobot {
         }
         Logger.recordMetadata("Swerve", Constants.swerveEnabled ? "true" : "false");
         Logger.recordMetadata("Vision", Constants.visionEnabled ? "true" : "false");
+        Logger.recordMetadata("PhysicsSim", Constants.physicsSimEnabled?"true":"false");
 
         // Set logging mode depending on the current running mode
         switch (Constants.currentMode) {
