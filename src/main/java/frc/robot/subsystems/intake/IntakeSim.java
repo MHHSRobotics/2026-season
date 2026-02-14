@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
@@ -15,7 +16,7 @@ public class IntakeSim extends SubsystemBase {
     private MotorIO intake, hinge;
 
     private DCMotorSim intakeMech;
-    private DCMotorSim hingeMech;
+    private SingleJointedArmSim hingeMech;
 
     public IntakeSim(MotorIO intakeIO, MotorIO hingeIO) {
         intake = intakeIO;
@@ -24,10 +25,15 @@ public class IntakeSim extends SubsystemBase {
                 LinearSystemId.createDCMotorSystem(
                         intakeGearbox, Intake.Constants.intakeInertia, Intake.Constants.intakeRatio),
                 intakeGearbox);
-        hingeMech = new DCMotorSim(
-                LinearSystemId.createDCMotorSystem(
-                        hingeGearbox, Intake.Constants.hingeInertia, Intake.Constants.hingeRatio),
-                hingeGearbox);
+        hingeMech = new SingleJointedArmSim(
+                hingeGearbox,
+                Intake.Constants.hingeRatio,
+                Intake.Constants.hingeInertia,
+                1,
+                Intake.Constants.hingeDown,
+                Intake.Constants.hingeUp,
+                false,
+                Intake.Constants.hingeUp);
     }
 
     @Override
@@ -41,7 +47,7 @@ public class IntakeSim extends SubsystemBase {
         intake.setMechPosition(intakeMech.getAngularPositionRad());
         intake.setMechVelocity(intakeMech.getAngularVelocityRadPerSec());
 
-        hinge.setMechPosition(hingeMech.getAngularPositionRad());
-        hinge.setMechVelocity(hingeMech.getAngularVelocityRadPerSec());
+        hinge.setMechPosition(hingeMech.getAngleRads());
+        hinge.setMechVelocity(hingeMech.getVelocityRadPerSec());
     }
 }

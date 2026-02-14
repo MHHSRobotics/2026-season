@@ -259,7 +259,10 @@ public class RobotContainer {
                     feedMotor = new MotorIOTalonFX(
                             Shooter.Constants.feedMotorId, Constants.defaultBus, "shooter feed motor", "Shooter/Feed");
                     flyMotor = new MotorIOTalonFX(
-                            Shooter.Constants.flyMotorId, Constants.defaultBus, "shooter fly motor", "Shooter/Flywheel");
+                            Shooter.Constants.flyMotorId,
+                            Constants.defaultBus,
+                            "shooter fly motor",
+                            "Shooter/Flywheel");
                     break;
                 default:
                     feedMotor = new MotorIO("shooter feed motor", "Shooter/Feed");
@@ -320,10 +323,7 @@ public class RobotContainer {
                             "intake flywheel motor",
                             "Intake/Flywheel");
                     hingeMotor = new MotorIOTalonFX(
-                            Intake.Constants.hingeMotorId,
-                            Constants.defaultBus,
-                            "intake hinge motor",
-                            "Intake/Hinge");
+                            Intake.Constants.hingeMotorId, Constants.defaultBus, "intake hinge motor", "Intake/Hinge");
                     leftSwitch = new BitIODigitalSignal(
                             "intake left limit switch", "Intake/LeftSwitch", Intake.Constants.leftSwitchId);
                     rightSwitch = new BitIODigitalSignal(
