@@ -5,7 +5,10 @@ import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants;
+import frc.robot.Constants.Mode;
+import frc.robot.util.Alerts;
 
 public class LedIOCANdle extends LedIO {
     private CANdle candle;
@@ -35,5 +38,14 @@ public class LedIOCANdle extends LedIO {
     @Override
     public void setColor(int startIndex, int endIndex, RGBWColor color) {
         candle.setControl(new SolidColor(startIndex, endIndex).withColor(color));
+    }
+
+    @Override
+    public void disconnect() {
+        if (Constants.currentMode == Mode.REAL) {
+            Alerts.create("Used sim-only method disconnect on " + getName(), AlertType.kWarning);
+            return;
+        }
+        disconnected = true;
     }
 }
