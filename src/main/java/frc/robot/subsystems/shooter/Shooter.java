@@ -18,8 +18,8 @@ public class Shooter extends SubsystemBase {
         public static final boolean flyInverted = false;
         public static final boolean feedInverted = false;
 
-        public static final int flyMotorId = 28;
-        public static final int feedMotorId = 29;
+        public static final int flyMotorId = 20;
+        public static final int feedMotorId = 21;
     }
 
     private MotorIO feed;

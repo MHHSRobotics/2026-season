@@ -11,8 +11,8 @@ import frc.robot.io.MotorIO;
 
 public class Intake extends SubsystemBase {
     public static class Constants {
-        public static final int intakeMotorId = 27;
-        public static final int hingeMotorId = 28;
+        public static final int intakeMotorId = 22;
+        public static final int hingeMotorId = 23;
         // These are DIO IDs, separate from CAN IDs
         public static final int rightSwitchId = 1;
         public static final int leftSwitchId = 2;
@@ -22,7 +22,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkNumber hingeKP = new LoggedNetworkNumber("Intake/HingeKP", 10);
         public static final LoggedNetworkNumber hingeKI = new LoggedNetworkNumber("Intake/HingeKI", 0);
         public static final LoggedNetworkNumber hingeKD = new LoggedNetworkNumber("Intake/HingeKD", 5);
-        public static final LoggedNetworkNumber hingeKG = new LoggedNetworkNumber("Intake/HingeKS", 5);
+        public static final LoggedNetworkNumber hingeKG = new LoggedNetworkNumber("Intake/HingeKG", 5);
         public static final LoggedNetworkNumber hingeKS = new LoggedNetworkNumber("Intake/HingeKS", 0);
         public static final LoggedNetworkNumber hingeKV = new LoggedNetworkNumber("Intake/HingeKV", 0);
         public static final LoggedNetworkNumber hingeKA = new LoggedNetworkNumber("Intake/HingeKA", 0);
