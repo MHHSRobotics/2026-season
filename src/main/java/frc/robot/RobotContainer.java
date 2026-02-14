@@ -259,11 +259,11 @@ public class RobotContainer {
                     feedMotor = new MotorIOTalonFX(
                             Shooter.Constants.feedMotorId, Constants.defaultBus, "shooter feed motor", "Shooter/Feed");
                     flyMotor = new MotorIOTalonFX(
-                            Shooter.Constants.flyMotorId, Constants.defaultBus, "shooter fly motor", "Shooter/Fly");
+                            Shooter.Constants.flyMotorId, Constants.defaultBus, "shooter fly motor", "Shooter/Flywheel");
                     break;
                 default:
                     feedMotor = new MotorIO("shooter feed motor", "Shooter/Feed");
-                    flyMotor = new MotorIO("shooter fly motor", "Shooter/Fly");
+                    flyMotor = new MotorIO("shooter fly motor", "Shooter/Flywheel");
                     break;
             }
             shooter = new Shooter(feedMotor, flyMotor);
@@ -318,20 +318,20 @@ public class RobotContainer {
                             Intake.Constants.intakeMotorId,
                             Constants.defaultBus,
                             "intake flywheel motor",
-                            "Intake/FlywheelMotor");
+                            "Intake/Flywheel");
                     hingeMotor = new MotorIOTalonFX(
                             Intake.Constants.hingeMotorId,
                             Constants.defaultBus,
                             "intake hinge motor",
-                            "Intake/HingeMotor");
+                            "Intake/Hinge");
                     leftSwitch = new BitIODigitalSignal(
                             "intake left limit switch", "Intake/LeftSwitch", Intake.Constants.leftSwitchId);
                     rightSwitch = new BitIODigitalSignal(
                             "intake right limit switch", "Intake/RightSwitch", Intake.Constants.rightSwitchId);
                     break;
                 default:
-                    intakeMotor = new MotorIO("intake flywheel motor", "Intake/FlywheelMotor");
-                    hingeMotor = new MotorIO("intake hinge motor", "Intake/HingeMotor");
+                    intakeMotor = new MotorIO("intake flywheel motor", "Intake/Flywheel");
+                    hingeMotor = new MotorIO("intake hinge motor", "Intake/Hinge");
                     leftSwitch = new BitIO("intake left limit switch", "Intake/LeftSwitch");
                     rightSwitch = new BitIO("intake right limit switch", "Intake/RightSwitch");
                     break;
