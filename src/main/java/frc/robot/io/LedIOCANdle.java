@@ -1,11 +1,12 @@
 package frc.robot.io;
 
+import edu.wpi.first.wpilibj.Alert.AlertType;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.hardware.CANdle;
 import com.ctre.phoenix6.signals.RGBWColor;
 
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.util.Alerts;
