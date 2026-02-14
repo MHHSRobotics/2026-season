@@ -279,17 +279,25 @@ public class RobotContainer {
 
         if (Constants.hopperEnabled) {
             MotorIO hopperMotor;
+            BitIO[] hopperSensors = new BitIO[Hopper.Constants.numSensors];
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
                     hopperMotor = new MotorIOTalonFX(
                             Hopper.Constants.motorId, Constants.defaultBus, "hopper motor", "Hopper/Motor");
+                    for (int i = 1; i <= hopperSensors.length; i++) {
+                        hopperSensors[i - 1] = new BitIODigitalSignal(
+                                "hopper sensor " + i, "Hopper/Sensor " + i, Hopper.Constants.sensorIDs[i - 1]);
+                    }
                     break;
                 default:
                     hopperMotor = new MotorIO("hopper motor", "Hopper/Motor");
+                    for (int i = 1; i <= hopperSensors.length; i++) {
+                        hopperSensors[i - 1] = new BitIO("hopper sensor " + i, "Hopper/Sensor " + i);
+                    }
                     break;
             }
-            hopper = new Hopper(hopperMotor);
+            hopper = new Hopper(hopperMotor, hopperSensors);
 
             if (Constants.currentMode == Mode.SIM) {
                 new HopperSim(hopperMotor);

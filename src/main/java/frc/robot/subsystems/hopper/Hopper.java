@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
+import frc.robot.io.BitIO;
 import frc.robot.io.MotorIO;
 
 public class Hopper extends SubsystemBase {
@@ -14,6 +15,10 @@ public class Hopper extends SubsystemBase {
         public static final boolean motorInverted = false;
 
         public static final double rollerSpeed = 0.5;
+
+        public static final int[] sensorIDs = {8};
+
+        public static final int numSensors = sensorIDs.length;
 
         public static final LoggedNetworkBoolean hopperLocked =
                 new LoggedNetworkBoolean("Hopper/Locked", false); // Toggle to enable braking when stopped
@@ -28,11 +33,14 @@ public class Hopper extends SubsystemBase {
     }
 
     private MotorIO motor;
+    private BitIO[] hopperSensors;
 
-    public Hopper(MotorIO motorIO) {
+    public Hopper(MotorIO motorIO, BitIO[] hopperSensors) {
         motor = motorIO;
         motor.setInverted(Constants.motorInverted);
         motor.connectInternalSensor(Constants.rollerRatio);
+
+        this.hopperSensors = hopperSensors;
     }
 
     public void setSpeed(double speed) {
@@ -63,5 +71,9 @@ public class Hopper extends SubsystemBase {
 
         // Update motor inputs so the latest values are available (logging and alerts happen automatically)
         motor.update();
+
+        for (int i = 0; i < hopperSensors.length; i++) {
+            hopperSensors[i].update();
+        }
     }
 }
