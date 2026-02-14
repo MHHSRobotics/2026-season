@@ -162,27 +162,6 @@
             }
           },
           {
-            "title": "Field",
-            "x": 384.0,
-            "y": 0.0,
-            "width": 1152.0,
-            "height": 512.0,
-            "type": "Field",
-            "properties": {
-              "topic": "/SmartDashboard/Field",
-              "period": 0.06,
-              "field_game": "Reefscape",
-              "robot_width": 0.85,
-              "robot_length": 0.85,
-              "show_other_objects": true,
-              "show_trajectories": true,
-              "field_rotation": 0.0,
-              "robot_color": 4294198070,
-              "trajectory_color": 4294967295,
-              "show_robot_outside_widget": true
-            }
-          },
-          {
             "title": "AutoSelection",
             "x": 768.0,
             "y": 512.0,
@@ -193,6 +172,27 @@
               "topic": "/SmartDashboard/AutoSelection",
               "period": 0.06,
               "sort_options": false
+            }
+          },
+          {
+            "title": "Field",
+            "x": 384.0,
+            "y": 0.0,
+            "width": 1152.0,
+            "height": 512.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295,
+              "show_robot_outside_widget": true
             }
           }
         ]
@@ -326,10 +326,10 @@
           },
           {
             "title": "Hopper Settings",
-            "x": 512.0,
+            "x": 1024.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -343,7 +343,7 @@
                 "height": 128.0,
                 "type": "Toggle Switch",
                 "properties": {
-                  "topic": "Wrist/Disabled",
+                  "topic": "Hopper/Disabled",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -356,93 +356,9 @@
                 "height": 128.0,
                 "type": "Toggle Switch",
                 "properties": {
-                  "topic": "Wrist/Locked",
+                  "topic": "Hopper/Locked",
                   "period": 0.06,
                   "data_type": "boolean"
-                }
-              },
-              {
-                "title": "HingeKA",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Intake/HingeKA",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "HingeKD",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Intake/HingeKD",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "HingeKI",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Intake/HingeKI",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "HingeKP",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Intake/HingeKP",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "HingeKS",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Intake/HingeKS",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "HingeKV",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Intake/HingeKV",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
                 }
               }
             ]
@@ -585,10 +501,10 @@
           },
           {
             "title": "Intake Settings",
-            "x": 1024.0,
+            "x": 512.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 256.0,
+            "height": 384.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -618,6 +534,90 @@
                   "topic": "Intake/Locked",
                   "period": 0.06,
                   "data_type": "boolean"
+                }
+              },
+              {
+                "title": "HingeKA",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Intake/HingeKA",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "HingeKD",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Intake/HingeKD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "HingeKI",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Intake/HingeKI",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "HingeKP",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Intake/HingeKP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "HingeKS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Intake/HingeKS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "HingeKV",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Intake/HingeKV",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
                 }
               }
             ]
