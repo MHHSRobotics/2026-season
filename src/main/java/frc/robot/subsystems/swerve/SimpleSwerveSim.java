@@ -20,6 +20,7 @@ public class SimpleSwerveSim extends SwerveSim {
     public SimpleSwerveSim(SwerveModuleSim[] moduleSims) {
         this.moduleSims = moduleSims;
         kinematics = new SwerveDriveKinematics(Swerve.getModuleTranslations());
+        currentPose = new Pose3d(Swerve.Constants.simInitialPose.get());
     }
 
     @Override

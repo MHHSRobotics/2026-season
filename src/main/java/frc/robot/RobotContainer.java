@@ -292,9 +292,9 @@ public class RobotContainer {
             shooter = new Shooter(feedMotor, flyMotor);
 
             if (Constants.currentMode == Mode.SIM) {
-                if(!Constants.enablePhysicsSim){
+                if (!Constants.enablePhysicsSim) {
                     new ShooterSim(feedMotor, flyMotor);
-                }else{
+                } else {
                     new ShooterPhysicsSim(feedMotor, flyMotor, "/MuJoCo/Shooter");
                 }
             }
@@ -315,9 +315,9 @@ public class RobotContainer {
             hopper = new Hopper(hopperMotor);
 
             if (Constants.currentMode == Mode.SIM) {
-                if(!Constants.enablePhysicsSim){
+                if (!Constants.enablePhysicsSim) {
                     new HopperSim(hopperMotor);
-                }else{
+                } else {
                     new HopperPhysicsSim(hopperMotor, "/MuJoCo/Hopper");
                 }
             }
@@ -368,9 +368,9 @@ public class RobotContainer {
             intake = new Intake(intakeMotor, hingeMotor, leftSwitch, rightSwitch);
 
             if (Constants.currentMode == Mode.SIM) {
-                if(!Constants.physicsSimEnabled){
+                if (!Constants.physicsSimEnabled) {
                     new IntakeSim(intakeMotor, hingeMotor);
-                }else{
+                } else {
                     new IntakePhysicsSim(intakeMotor, hingeMotor, "/MuJoCo/Intake");
                 }
             }
@@ -671,7 +671,7 @@ public class RobotContainer {
                     .circle()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setIntakeSpeed(() -> -0.1))
+                    .onTrue(intakeCommands.setHingeSpeed(() -> -0.1))
                     .onFalse(intakeCommands.hingeStop());
 
             testController

@@ -25,7 +25,7 @@ public class Intake extends SubsystemBase {
         public static final int rightSwitchId = 1;
         public static final int leftSwitchId = 2;
 
-        public static final double defaultSpeed = 0.5;
+        public static final double defaultSpeed = 1;
 
         public static final LoggedNetworkNumber hingeKP = new LoggedNetworkNumber("Intake/Hinge/kP", 10);
         public static final LoggedNetworkNumber hingeKI = new LoggedNetworkNumber("Intake/Hinge/kI", 0);
