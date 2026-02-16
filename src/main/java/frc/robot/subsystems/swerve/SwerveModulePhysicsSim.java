@@ -40,11 +40,9 @@ public class SwerveModulePhysicsSim extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // System.out.println(drivePos.get());
         driveMotor.setMechPosition(drivePos.get());
         driveMotor.setMechVelocity(driveVel.get());
 
-        // System.out.println(steerPos.get());
         steerMotor.setMechPosition(steerPos.get());
         steerMotor.setMechVelocity(steerVel.get());
 

@@ -31,10 +31,13 @@ import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.HopperPhysicsSim;
 import frc.robot.subsystems.hopper.HopperSim;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakePhysicsSim;
 import frc.robot.subsystems.intake.IntakeSim;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterPhysicsSim;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.SimpleSwerveSim;
@@ -289,7 +292,11 @@ public class RobotContainer {
             shooter = new Shooter(feedMotor, flyMotor);
 
             if (Constants.currentMode == Mode.SIM) {
-                new ShooterSim(feedMotor, flyMotor);
+                if(!Constants.enablePhysicsSim){
+                    new ShooterSim(feedMotor, flyMotor);
+                }else{
+                    new ShooterPhysicsSim(feedMotor, flyMotor, "/MuJoCo/Shooter");
+                }
             }
         }
 
@@ -308,7 +315,11 @@ public class RobotContainer {
             hopper = new Hopper(hopperMotor);
 
             if (Constants.currentMode == Mode.SIM) {
-                new HopperSim(hopperMotor);
+                if(!Constants.enablePhysicsSim){
+                    new HopperSim(hopperMotor);
+                }else{
+                    new HopperPhysicsSim(hopperMotor, "/MuJoCo/Hopper");
+                }
             }
         }
 
@@ -326,6 +337,7 @@ public class RobotContainer {
             }
             hang = new Hang(hangMotor);
         }
+
         if (Constants.intakeEnabled) {
             MotorIO intakeMotor;
             MotorIO hingeMotor;
@@ -356,7 +368,11 @@ public class RobotContainer {
             intake = new Intake(intakeMotor, hingeMotor, leftSwitch, rightSwitch);
 
             if (Constants.currentMode == Mode.SIM) {
-                new IntakeSim(intakeMotor, hingeMotor);
+                if(!Constants.physicsSimEnabled){
+                    new IntakeSim(intakeMotor, hingeMotor);
+                }else{
+                    new IntakePhysicsSim(intakeMotor, hingeMotor, "/MuJoCo/Intake");
+                }
             }
         }
     }
