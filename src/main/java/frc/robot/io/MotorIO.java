@@ -247,12 +247,12 @@ public class MotorIO {
     }
 
     // Connects a forward hardware limit switch
-    public void connectForwardLimitSwitch(int id) {
+    public void connectForwardLimitSwitch(BitIO limitSwitch) {
         unsupportedFeature();
     }
 
     // Connects a reverse hardware limit switch
-    public void connectReverseLimitSwitch(int id) {
+    public void connectReverseLimitSwitch(BitIO limitSwitch) {
         unsupportedFeature();
     }
 
