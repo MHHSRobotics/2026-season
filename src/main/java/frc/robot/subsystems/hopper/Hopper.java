@@ -16,7 +16,7 @@ public class Hopper extends SubsystemBase {
 
         public static final double rollerSpeed = 0.5;
 
-        public static final int[] sensorIDs = {8};
+        public static final int[] sensorIDs = {0};
 
         public static final int numSensors = sensorIDs.length;
 
