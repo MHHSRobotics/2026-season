@@ -11,7 +11,7 @@ public class LED extends SubsystemBase {
         public static final int startIndex = 0;
         public static final int endIndex = 59;
 
-        public static final int id = 18;
+        public static final int id = 20;
     }
 
     private LedIO leds;
@@ -22,5 +22,11 @@ public class LED extends SubsystemBase {
 
     public void setColor(RGBWColor color) {
         leds.setColor(Constants.startIndex, Constants.endIndex, color);
+    }
+
+    @Override
+    public void periodic() {
+        int m = (int) (Math.random() * 255);
+        leds.setColor(0, (int) (Math.random() * Constants.endIndex), new RGBWColor(0, 0, 0, m));
     }
 }
