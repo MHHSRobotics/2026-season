@@ -20,6 +20,7 @@ public class LedIOCANdle extends LedIO {
     public LedIOCANdle(String name, String logPath, int id, CANBus bus) {
         super(name, logPath);
         candle = new CANdle(id, bus);
+
         this.id = id;
     }
 
@@ -34,6 +35,8 @@ public class LedIOCANdle extends LedIO {
     @Override
     public void update() {
         inputs.connected = disconnected ? false : candle.isConnected();
+
+        super.update();
     }
 
     @Override

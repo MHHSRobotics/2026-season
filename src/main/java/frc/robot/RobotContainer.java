@@ -354,8 +354,10 @@ public class RobotContainer {
                 case REAL:
                 case SIM:
                     ledIO = new LedIOCANdle("leds", "LED", LED.Constants.id);
+                    break;
                 default:
                     ledIO = new LedIO("leds", "LED");
+                    break;
             }
             led = new LED(ledIO);
         }

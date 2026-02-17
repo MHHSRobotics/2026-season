@@ -46,11 +46,11 @@ public final class Constants {
 
     public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error
     // Toggles for susbsytems
-    public static final boolean swerveEnabled = true;
-    public static final boolean visionEnabled = true;
-    public static final boolean shooterEnabled = true;
-    public static final boolean hopperEnabled = true;
-    public static final boolean hangEnabled = true;
-    public static final boolean intakeEnabled = true;
+    public static final boolean swerveEnabled = false;
+    public static final boolean visionEnabled = false;
+    public static final boolean shooterEnabled = false;
+    public static final boolean hopperEnabled = false;
+    public static final boolean hangEnabled = false;
+    public static final boolean intakeEnabled = false;
     public static final boolean ledsEnabled = true;
 }

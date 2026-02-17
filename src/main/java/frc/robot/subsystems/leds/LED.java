@@ -15,6 +15,7 @@ public class LED extends SubsystemBase {
     }
 
     private LedIO leds;
+    private int t;
 
     public LED(LedIO ledIO) {
         leds = ledIO;
@@ -26,7 +27,13 @@ public class LED extends SubsystemBase {
 
     @Override
     public void periodic() {
-        int m = (int) (Math.random() * 255);
-        leds.setColor(0, (int) (Math.random() * Constants.endIndex), new RGBWColor(0, 0, 0, m));
+        t += 1;
+        int r = (int) (Math.random() * 255);
+        int g = (int) (Math.random() * 255);
+        int b = (int) (Math.random() * 255);
+        leds.setColor(t, t, new RGBWColor(r, g, b));
+        if (t >= 30) {
+            t = 10;
+        }
     }
 }
