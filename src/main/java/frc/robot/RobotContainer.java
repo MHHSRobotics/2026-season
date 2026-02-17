@@ -279,7 +279,7 @@ public class RobotContainer {
 
         if (Constants.hopperEnabled) {
             MotorIO hopperMotor;
-            BitIO[] hopperSensors = new BitIO[Hopper.Constants.numSensors];
+            BitIO[] hopperSensors = new BitIO[Hopper.Constants.sensorIDs.length];
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:

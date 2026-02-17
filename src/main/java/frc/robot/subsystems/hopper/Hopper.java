@@ -18,8 +18,6 @@ public class Hopper extends SubsystemBase {
 
         public static final int[] sensorIDs = {0};
 
-        public static final int numSensors = sensorIDs.length;
-
         public static final LoggedNetworkBoolean hopperLocked =
                 new LoggedNetworkBoolean("Hopper/Locked", false); // Toggle to enable braking when stopped
 
