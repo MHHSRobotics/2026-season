@@ -210,26 +210,33 @@ public class RobotContainer {
 
             if (Constants.visionEnabled) {
                 // Create camera variables
-                CameraIO brat;
-                CameraIO blat;
+                CameraIO hubCam, hubLeftCam, hubRightCam, hangCam;
                 switch (Constants.currentMode) {
                     case REAL:
                     case SIM:
                         // If in real bot or sim, use CameraIOPhotonCamera
-                        brat = new CameraIOPhotonCamera(
-                                "BackRight_AT", "Vision/BRAT", Swerve.VisionConstants.bratPose, 60);
-                        blat = new CameraIOPhotonCamera(
-                                "BackLeft_AT", "Vision/BLAT", Swerve.VisionConstants.blatPose, 60);
+                        hubCam = new CameraIOPhotonCamera(
+                                "hub camera", "Vision/HubCam", Swerve.VisionConstants.hubCamPose, 60);
+                        hubLeftCam = new CameraIOPhotonCamera(
+                                "left hub camera", "Vision/LeftHubCam", Swerve.VisionConstants.hubLeftCamPose, 60);
+                        hubRightCam = new CameraIOPhotonCamera(
+                                "right hub camera", "Vision/RightHubCam", Swerve.VisionConstants.hubRightCamPose, 60);
+                        hangCam = new CameraIOPhotonCamera(
+                                "hang camera", "Vision/HangCam", Swerve.VisionConstants.hangCamPose, 60);
                         break;
                     default:
                         // If in replay use an empty CameraIO
-                        brat = new CameraIO("BackRight_AT", "Vision/BRAT");
-                        blat = new CameraIO("BackLeft_AT", "Vision/BLAT");
+                        hubCam = new CameraIO("hub camera", "Vision/HubCam");
+                        hubLeftCam = new CameraIO("left hub camera", "Vision/LeftHubCam");
+                        hubRightCam = new CameraIO("right hub camera", "Vision/RightHubCam");
+                        hangCam = new CameraIO("hang camera", "Vision/HangCam");
                         break;
                 }
                 // Add cameras to swerve ododmetry
-                swerve.addCameraSource(brat);
-                swerve.addCameraSource(blat);
+                swerve.addCameraSource(hubCam);
+                swerve.addCameraSource(hubLeftCam);
+                swerve.addCameraSource(hubRightCam);
+                swerve.addCameraSource(hangCam);
             }
 
             // If mode is SIM, start the simulations for swerve modules and gyro
