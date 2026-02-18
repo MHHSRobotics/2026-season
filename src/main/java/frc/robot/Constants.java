@@ -43,7 +43,7 @@ public final class Constants {
 
     public static final double lowBatteryVoltage = 11.8; // Voltage at which low battery warning appears
 
-    public static final double lowBatteryTime = 0.5; // How long to wait before reporting low battery
+    public static final double lowBatteryTime = 5; // How long to wait before reporting low battery
 
     public static final boolean simIsRedAlliance = false; // Whether simulated FMS is on red alliance
 
