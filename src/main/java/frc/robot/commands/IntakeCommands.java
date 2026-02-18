@@ -24,6 +24,10 @@ public class IntakeCommands {
         return new InstantCommand(() -> intake.setHingeGoal(Constants.hingeUp));
     }
 
+    public Command switchHinge() {
+        return new InstantCommand(() -> intake.switchPos());
+    }
+
     public Command setHingeSpeed(DoubleSupplier speed) {
         return new InstantCommand(() -> intake.setHingeSpeed(speed.getAsDouble()));
     }

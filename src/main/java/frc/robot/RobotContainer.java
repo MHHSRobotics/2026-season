@@ -215,26 +215,33 @@ public class RobotContainer {
 
             if (Constants.visionEnabled) {
                 // Create camera variables
-                CameraIO brat;
-                CameraIO blat;
+                CameraIO hubCam, hubLeftCam, hubRightCam, hangCam;
                 switch (Constants.currentMode) {
                     case REAL:
                     case SIM:
                         // If in real bot or sim, use CameraIOPhotonCamera
-                        brat = new CameraIOPhotonCamera(
-                                "BackRight_AT", "Vision/BRAT", Swerve.VisionConstants.bratPose, 60);
-                        blat = new CameraIOPhotonCamera(
-                                "BackLeft_AT", "Vision/BLAT", Swerve.VisionConstants.blatPose, 60);
+                        hubCam = new CameraIOPhotonCamera(
+                                "hub camera", "Vision/HubCam", Swerve.VisionConstants.hubCamPose, 60);
+                        hubLeftCam = new CameraIOPhotonCamera(
+                                "left hub camera", "Vision/LeftHubCam", Swerve.VisionConstants.hubLeftCamPose, 60);
+                        hubRightCam = new CameraIOPhotonCamera(
+                                "right hub camera", "Vision/RightHubCam", Swerve.VisionConstants.hubRightCamPose, 60);
+                        hangCam = new CameraIOPhotonCamera(
+                                "hang camera", "Vision/HangCam", Swerve.VisionConstants.hangCamPose, 60);
                         break;
                     default:
                         // If in replay use an empty CameraIO
-                        brat = new CameraIO("BackRight_AT", "Vision/BRAT");
-                        blat = new CameraIO("BackLeft_AT", "Vision/BLAT");
+                        hubCam = new CameraIO("hub camera", "Vision/HubCam");
+                        hubLeftCam = new CameraIO("left hub camera", "Vision/LeftHubCam");
+                        hubRightCam = new CameraIO("right hub camera", "Vision/RightHubCam");
+                        hangCam = new CameraIO("hang camera", "Vision/HangCam");
                         break;
                 }
                 // Add cameras to swerve ododmetry
-                swerve.addCameraSource(brat);
-                swerve.addCameraSource(blat);
+                swerve.addCameraSource(hubCam);
+                swerve.addCameraSource(hubLeftCam);
+                swerve.addCameraSource(hubRightCam);
+                swerve.addCameraSource(hangCam);
             }
 
             // If mode is SIM, start the simulations for swerve modules and gyro
@@ -406,7 +413,7 @@ public class RobotContainer {
 
         if (Constants.swerveEnabled) {
             driveController.options().onTrue(swerveCommands.resetGyro());
-            driveController.L1().onTrue(swerveCommands.lock());
+            driveController.create().onTrue(swerveCommands.lock());
             /*
              * How this works:
              * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
@@ -420,6 +427,28 @@ public class RobotContainer {
                             () -> -driveController.getLeftX(),
                             () -> -driveController.getRightX(),
                             () -> Swerve.Constants.swerveFieldCentric.get()));
+
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
+        }
+        if (Constants.intakeEnabled) {
+            operator.L1().onTrue(intakeCommands.switchHinge());
+            operator.L2().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
+            operator.R1().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
+
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
+        }
+        if (Constants.hopperEnabled) {
+            operator.povUp().onTrue(hopperCommands.forward()).onFalse(hopperCommands.stop());
+            operator.povDown().onTrue(hopperCommands.reverse()).onFalse(hopperCommands.stop());
+
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
+        }
+        if (Constants.shooterEnabled) {
+            operator.R2().onTrue(shooterCommands.flyShoot()).onFalse(shooterCommands.flyStop());
+            operator.R2().onTrue(shooterCommands.feedShoot()).onFalse(shooterCommands.feedStop());
 
             driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
                     .cancelAll()));
