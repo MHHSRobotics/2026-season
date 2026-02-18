@@ -402,11 +402,11 @@ public class Swerve extends SubsystemBase {
         noVision.set(false);
     }
 
-    // Calculate vision standard deviations based on distance, ambiguity, and tag count
-    private Matrix<N3, N1> calculateVisionStdDevs(Pose2d visionPose, double ambiguity, int tagCount) {
-        // Distance from current pose to vision measurement
-        double distance = getPose().getTranslation().getDistance(visionPose.getTranslation());
-
+    /**
+     * Calculate vision standard deviations based on distance, ambiguity, and tag count.
+     * Returns a 3x1 matrix [xyStdDev, xyStdDev, thetaStdDev].
+     */
+    public static Matrix<N3, N1> calculateVisionStdDevs(double distance, double ambiguity, int tagCount) {
         // Select base standard deviations based on tag count
         // Multi-tag measurements are geometrically constrained and more reliable
         double xyStdDevBase = tagCount > 1 ? VisionConstants.multiTagXYStdDev : VisionConstants.singleTagXYStdDev;
@@ -536,8 +536,10 @@ public class Swerve extends SubsystemBase {
             cam.update();
             CameraIOInputs inputs = cam.getInputs();
             for (int i = 0; i < inputs.poses.length; i++) {
-                Matrix<N3, N1> stdDevs =
-                        calculateVisionStdDevs(inputs.poses[i].toPose2d(), inputs.ambiguities[i], inputs.tagCounts[i]);
+                double distance = getPose()
+                        .getTranslation()
+                        .getDistance(inputs.poses[i].toPose2d().getTranslation());
+                Matrix<N3, N1> stdDevs = calculateVisionStdDevs(distance, inputs.ambiguities[i], inputs.tagCounts[i]);
                 addVisionMeasurement(inputs.poses[i].toPose2d(), inputs.poseTimestamps[i], stdDevs);
             }
         }

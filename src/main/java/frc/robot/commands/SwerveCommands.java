@@ -28,43 +28,50 @@ public class SwerveCommands {
         return new InstantCommand(() -> swerve.resetGyro());
     }
 
+    /**
+     * Applies polar deadband and power-curve scaling to joystick translation inputs.
+     * Returns a two-element array [scaledX, scaledY] in the range [-1, 1].
+     */
+    public static double[] applyTranslationScaling(double x, double y, double deadband, double power) {
+        // Get the distance from (x,y) to the origin
+        double radius = Math.hypot(x, y);
+
+        // Apply the deadband to the radius and take it to the power of movePow for smoother control
+        double scale = Math.pow(MathUtil.applyDeadband(radius, deadband), power);
+
+        // Gets the angle in radians of the line from (0,0) to (x,y)
+        double angle = Math.atan2(y, x);
+
+        // Get the scaled values of x and y
+        return new double[] {scale * Math.cos(angle), scale * Math.sin(angle)};
+    }
+
+    /**
+     * Applies deadband and power-curve scaling to a joystick rotation input.
+     * Returns a value in the range [-1, 1] preserving the original sign.
+     */
+    public static double applyRotationScaling(double rotation, double deadband, double power) {
+        double rotationScale = Math.pow(MathUtil.applyDeadband(Math.abs(rotation), deadband), power);
+        return Math.copySign(rotationScale, rotation);
+    }
+
     // Drives using the given dx, dy, omega, and field relative inputs. Applies a deadband and scales the values.
     public Command drive(DoubleSupplier dx, DoubleSupplier dy, DoubleSupplier omega, BooleanSupplier fieldRelative) {
         return Commands.run(
                         () -> {
-                            double x = dx.getAsDouble();
-                            double y = dy.getAsDouble();
-
-                            // Get the distance from (x,y) to the origin
-                            double radius = Math.hypot(x, y);
-
-                            // Apply the deadband to the radius and take it to the power of movePow for smoother control
-                            double scale = Math.pow(
-                                    MathUtil.applyDeadband(radius, Swerve.Constants.moveDeadband),
+                            double[] scaled = applyTranslationScaling(
+                                    dx.getAsDouble(),
+                                    dy.getAsDouble(),
+                                    Swerve.Constants.moveDeadband,
                                     Swerve.Constants.movePow);
 
-                            // Gets the angle in radians of the line from (0,0) to (x,y)
-                            double angle = Math.atan2(y, x);
-
-                            // Get the scaled values of x and y
-                            x = scale * Math.cos(angle);
-                            y = scale * Math.sin(angle);
-                            double rotation = omega.getAsDouble();
-
-                            // Apply the deadband to the absolute value of rotation and take it to the power of turnPow
-                            // for
-                            // smoother control
-                            double rotationScale = Math.pow(
-                                    MathUtil.applyDeadband(Math.abs(rotation), Swerve.Constants.turnDeadband),
-                                    Swerve.Constants.turnPow);
-
-                            // Copy the sign of rotation to rotationScale to get the final rotation value
-                            rotation = Math.copySign(rotationScale, rotation);
+                            double rotation = applyRotationScaling(
+                                    omega.getAsDouble(), Swerve.Constants.turnDeadband, Swerve.Constants.turnPow);
 
                             // Run the swerve drive with the given values of x, y, and rotation
                             swerve.setPositionOutput(
-                                    x * Swerve.Constants.maxLinearSpeedMetersPerSec,
-                                    y * Swerve.Constants.maxLinearSpeedMetersPerSec);
+                                    scaled[0] * Swerve.Constants.maxLinearSpeedMetersPerSec,
+                                    scaled[1] * Swerve.Constants.maxLinearSpeedMetersPerSec);
                             swerve.setRotationOutput(rotation * Swerve.Constants.maxAngularSpeedRadPerSec);
                             swerve.setFieldOriented(fieldRelative.getAsBoolean());
                         },
