@@ -60,6 +60,8 @@ public class Intake extends SubsystemBase {
         // Simulation only
         public static final double intakeInertia = 0.000132; // kg m^2
         public static final double hingeInertia = 0.3; // kg m^2
+
+        public static boolean cat = true;
     }
 
     private MotorIO hingeMotor;
@@ -103,7 +105,19 @@ public class Intake extends SubsystemBase {
         hingeMotor.setDutyCycle(speed);
     }
 
+    public void switchPos() {
+        if (Constants.cat = false) {
+            setHingeGoal(Constants.hingeUp);
+        } else {
+            setHingeGoal(Constants.hingeDown);
+        }
+    }
+
     public void setHingeGoal(double goal) {
+        Constants.cat = false;
+        if (goal > 0) {
+            Constants.cat = true;
+        }
         hingeMotor.setGoalWithCurrentMagic(
                 goal,
                 () -> Constants.hingeKG.get()

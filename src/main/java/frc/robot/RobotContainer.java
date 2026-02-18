@@ -381,7 +381,7 @@ public class RobotContainer {
 
         if (Constants.swerveEnabled) {
             driveController.options().onTrue(swerveCommands.resetGyro());
-            driveController.L1().onTrue(swerveCommands.lock());
+            driveController.create().onTrue(swerveCommands.lock());
             /*
              * How this works:
              * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
@@ -395,6 +395,28 @@ public class RobotContainer {
                             () -> -driveController.getLeftX(),
                             () -> -driveController.getRightX(),
                             () -> Swerve.Constants.swerveFieldCentric.get()));
+
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
+        }
+        if (Constants.intakeEnabled) {
+            operator.L1().onTrue(intakeCommands.switchHinge());
+            operator.L2().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
+            operator.R1().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
+
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
+        }
+        if (Constants.hopperEnabled) {
+            operator.povUp().onTrue(hopperCommands.forward()).onFalse(hopperCommands.stop());
+            operator.povDown().onTrue(hopperCommands.reverse()).onFalse(hopperCommands.stop());
+
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
+        }
+        if (Constants.shooterEnabled) {
+            operator.R2().onTrue(shooterCommands.flyShoot()).onFalse(shooterCommands.flyStop());
+            operator.R2().onTrue(shooterCommands.feedShoot()).onFalse(shooterCommands.feedStop());
 
             driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
                     .cancelAll()));
