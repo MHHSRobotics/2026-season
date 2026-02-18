@@ -61,7 +61,7 @@ public class Intake extends SubsystemBase {
         public static final double intakeInertia = 0.000132; // kg m^2
         public static final double hingeInertia = 0.3; // kg m^2
 
-        public static boolean cat = true;
+        public static boolean intakeUp = true;
     }
 
     private MotorIO hingeMotor;
@@ -106,7 +106,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void switchPos() {
-        if (Constants.cat = false) {
+        if (Constants.intakeUp = false) {
             setHingeGoal(Constants.hingeUp);
         } else {
             setHingeGoal(Constants.hingeDown);
@@ -114,9 +114,9 @@ public class Intake extends SubsystemBase {
     }
 
     public void setHingeGoal(double goal) {
-        Constants.cat = false;
+        Constants.intakeUp = false;
         if (goal > 0) {
-            Constants.cat = true;
+            Constants.intakeUp = true;
         }
         hingeMotor.setGoalWithCurrentMagic(
                 goal,
@@ -156,6 +156,8 @@ public class Intake extends SubsystemBase {
         hingeMotor.setMaxAccel(Constants.hingeMaxAccel.get());
 
         updateVis();
+
+        Logger.recordOutput("IntakeUp", Constants.intakeUp);
     }
 
     // On-screen drawing of the wrist for dashboards (length is visual only)
