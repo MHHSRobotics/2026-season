@@ -60,7 +60,6 @@ public class Intake extends SubsystemBase {
         // Simulation only
         public static final double intakeInertia = 0.000132; // kg m^2
         public static final double hingeInertia = 0.3; // kg m^2
-
     }
 
     private MotorIO hingeMotor;
