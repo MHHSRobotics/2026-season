@@ -432,26 +432,17 @@ public class RobotContainer {
                     .cancelAll()));
         }
         if (Constants.intakeEnabled) {
-            operator.L1().onTrue(intakeCommands.switchHinge());
-            operator.L2().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
-            operator.R1().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
-
-            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                    .cancelAll()));
+            driveController.L1().onTrue(intakeCommands.switchHinge());
+            driveController.L2().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
+            driveController.R1().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
         }
         if (Constants.hopperEnabled) {
-            operator.povUp().onTrue(hopperCommands.forward()).onFalse(hopperCommands.stop());
-            operator.povDown().onTrue(hopperCommands.reverse()).onFalse(hopperCommands.stop());
-
-            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                    .cancelAll()));
+            driveController.povUp().onTrue(hopperCommands.forward()).onFalse(hopperCommands.stop());
+            driveController.povDown().onTrue(hopperCommands.reverse()).onFalse(hopperCommands.stop());
         }
         if (Constants.shooterEnabled) {
-            operator.R2().onTrue(shooterCommands.flyShoot()).onFalse(shooterCommands.flyStop());
-            operator.R2().onTrue(shooterCommands.feedShoot()).onFalse(shooterCommands.feedStop());
-
-            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                    .cancelAll()));
+            driveController.R2().onTrue(shooterCommands.flyShoot()).onFalse(shooterCommands.flyStop());
+            driveController.R2().onTrue(shooterCommands.feedShoot()).onFalse(shooterCommands.feedStop());
         }
     }
 
