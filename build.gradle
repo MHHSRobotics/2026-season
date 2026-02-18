@@ -83,6 +83,7 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.mockito:mockito-core:5.+'
 
     // Initialize AdvantageKit's annotation processor
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
