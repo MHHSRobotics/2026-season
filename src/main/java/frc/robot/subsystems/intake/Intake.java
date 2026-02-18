@@ -107,7 +107,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void switchPos() {
-        if (intakeUp = false) {
+        if (intakeUp == false) {
             setHingeGoal(Constants.hingeUp);
         } else {
             setHingeGoal(Constants.hingeDown);
