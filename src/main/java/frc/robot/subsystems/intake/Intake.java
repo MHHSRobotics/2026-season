@@ -27,11 +27,13 @@ public class Intake extends SubsystemBase {
 
         public static final double defaultSpeed = 0.5;
 
-        public static final LoggedNetworkNumber hingeKP = new LoggedNetworkNumber("Intake/Hinge/kP", 10);
+        public static final LoggedNetworkNumber hingeKP =
+                new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 0);
         public static final LoggedNetworkNumber hingeKI = new LoggedNetworkNumber("Intake/Hinge/kI", 0);
-        public static final LoggedNetworkNumber hingeKD = new LoggedNetworkNumber("Intake/Hinge/kD", 5);
+        public static final LoggedNetworkNumber hingeKD =
+                new LoggedNetworkNumber("Intake/Hinge/kD", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 0);
         public static final LoggedNetworkNumber hingeKG =
-                new LoggedNetworkNumber("Intake/Hinge/kG", frc.robot.Constants.currentMode == Mode.SIM ? 0 : 5);
+                new LoggedNetworkNumber("Intake/Hinge/kG", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 0);
         public static final LoggedNetworkNumber hingeKS = new LoggedNetworkNumber("Intake/Hinge/kS", 0);
         public static final LoggedNetworkNumber hingeKV = new LoggedNetworkNumber("Intake/Hinge/kV", 0);
         public static final LoggedNetworkNumber hingeKA = new LoggedNetworkNumber("Intake/Hinge/kA", 0);
@@ -39,8 +41,8 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkNumber hingeMaxVel = new LoggedNetworkNumber("Intake/Hinge/maxVel", 5);
         public static final LoggedNetworkNumber hingeMaxAccel = new LoggedNetworkNumber("Intake/Hinge/maxAccel", 10);
 
-        public static final LoggedNetworkNumber hingeVerticalPos =
-                new LoggedNetworkNumber("Intake/Hinge/VerticalPos", 0);
+        public static final LoggedNetworkNumber hingeVerticalPos = new LoggedNetworkNumber(
+                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : Math.PI / 2);
 
         public static final LoggedNetworkBoolean intakeLocked =
                 new LoggedNetworkBoolean("Intake/Locked", true); // Toggle to enable braking of the hinge when stopped
@@ -126,7 +128,7 @@ public class Intake extends SubsystemBase {
         hingeMotor.setGoalWithCurrentMagic(
                 goal,
                 () -> Constants.hingeKG.get()
-                        * Math.cos(hingeMotor.getInputs().position - Constants.hingeVerticalPos.get()));
+                        * Math.cos(hingeMotor.getInputs().position + Math.PI / 2 - Constants.hingeVerticalPos.get()));
     }
 
     public double getHingeGoal() {
