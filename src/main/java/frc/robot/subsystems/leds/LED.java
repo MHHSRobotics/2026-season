@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.signals.RGBWColor;
 
+import org.littletonrobotics.junction.Logger;
+
 import frc.robot.io.LedIO;
 
 public class LED extends SubsystemBase {
@@ -15,25 +17,20 @@ public class LED extends SubsystemBase {
     }
 
     private LedIO leds;
-    private int t;
+    private RGBWColor currentColor;
 
     public LED(LedIO ledIO) {
         leds = ledIO;
+        currentColor = new RGBWColor(0, 0, 0);
     }
 
     public void setColor(RGBWColor color) {
         leds.setColor(Constants.startIndex, Constants.endIndex, color);
+        currentColor = color;
     }
 
     @Override
     public void periodic() {
-        t += 1;
-        int r = (int) (Math.random() * 255);
-        int g = (int) (Math.random() * 255);
-        int b = (int) (Math.random() * 255);
-        leds.setColor(t, t, new RGBWColor(r, g, b));
-        if (t >= 30) {
-            t = 10;
-        }
+        Logger.recordOutput("LED/Color", new int[] {currentColor.Red, currentColor.Green, currentColor.Blue});
     }
 }

@@ -16,6 +16,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
 import frc.robot.commands.IntakeCommands;
+import frc.robot.commands.LEDCommands;
 import frc.robot.commands.MultiCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
@@ -68,6 +69,7 @@ public class RobotContainer {
     private HopperCommands hopperCommands;
     private IntakeCommands intakeCommands;
     private ShooterCommands shooterCommands;
+    private LEDCommands ledCommands;
 
     private MultiCommands multiCommands;
 
@@ -421,8 +423,11 @@ public class RobotContainer {
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
         }
-        if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled) {
-            multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands);
+        if (Constants.ledsEnabled) {
+            ledCommands = new LEDCommands(led);
+        }
+        if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled && Constants.ledsEnabled) {
+            multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands, ledCommands);
         }
     }
 
