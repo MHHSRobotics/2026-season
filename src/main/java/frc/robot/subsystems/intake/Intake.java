@@ -78,7 +78,7 @@ public class Intake extends SubsystemBase {
         hingeMotor.setInverted(Constants.hingeInverted);
         hingeMotor.connectInternalSensor(Constants.hingeRatio);
         hingeMotor.setPosition(Constants.hingeUp);
-        hingeMotor.setLimits(Constants.hingeDown,Constants.hingeUp);
+        hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
         // hingeMotor.connectForwardLimitSwitch(rightLimitSwitch);
 
         intakeMotor.setInverted(Constants.intakeInverted);
@@ -129,7 +129,7 @@ public class Intake extends SubsystemBase {
                         * Math.cos(hingeMotor.getInputs().position - Constants.hingeVerticalPos.get()));
     }
 
-    public double getHingeGoal(){
+    public double getHingeGoal() {
         return hingeMotor.getInputs().setpoint;
     }
 

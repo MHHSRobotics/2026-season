@@ -29,23 +29,23 @@ public class IntakeCommands {
         return new InstantCommand(() -> intake.switchPos());
     }
 
-    public Command changeGoal(DoubleSupplier change){
-        return Commands.run(()->intake.setHingeGoal(intake.getHingeGoal()+change.getAsDouble()),intake);
+    public Command changeGoal(DoubleSupplier change) {
+        return Commands.run(() -> intake.setHingeGoal(intake.getHingeGoal() + change.getAsDouble()), intake);
     }
 
     public Command setHingeSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> intake.setHingeSpeed(speed.getAsDouble()),()->intake.hingeStop(),intake);
+        return Commands.runEnd(() -> intake.setHingeSpeed(speed.getAsDouble()), () -> intake.hingeStop(), intake);
     }
 
     public Command setIntakeSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> intake.setIntakeSpeed(speed.getAsDouble()),()->intake.intakeStop(),intake);
+        return Commands.runEnd(() -> intake.setIntakeSpeed(speed.getAsDouble()), () -> intake.intakeStop(), intake);
     }
 
     public Command intake() {
-        return Commands.startEnd(() -> intake.intake(),()->intake.intakeStop(),intake);
+        return Commands.startEnd(() -> intake.intake(), () -> intake.intakeStop(), intake);
     }
 
     public Command outtake() {
-        return Commands.startEnd(() -> intake.outtake(),()->intake.intakeStop(),intake);
+        return Commands.startEnd(() -> intake.outtake(), () -> intake.intakeStop(), intake);
     }
 }

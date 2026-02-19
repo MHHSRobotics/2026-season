@@ -403,8 +403,8 @@ public class RobotContainer {
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
         }
-        if(Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled){
-            multiCommands=new MultiCommands(hopperCommands, intakeCommands, shooterCommands);
+        if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled) {
+            multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands);
         }
     }
 
@@ -463,7 +463,6 @@ public class RobotContainer {
         testControllerManual.addOption("Fast", "Fast");
         testControllerManual.addOption("PID", "PID");
         testControllerManual.addOption("PIDChange", "PIDChange");
-        
 
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addDefaultOption("", ""); // Add default option so code doesn't crash on read
@@ -707,20 +706,18 @@ public class RobotContainer {
                     .cross()
                     .and(() -> testControllerManual.get().equals("PIDChange"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .whileTrue(intakeCommands.changeGoal(()->0.02));
+                    .whileTrue(intakeCommands.changeGoal(() -> 0.02));
 
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("PIDChange"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .whileTrue(intakeCommands.changeGoal(()->-0.02));
+                    .whileTrue(intakeCommands.changeGoal(() -> -0.02));
         }
     }
 
     // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)
-    public void configureManualBindings() {
-
-    }
+    public void configureManualBindings() {}
 
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {

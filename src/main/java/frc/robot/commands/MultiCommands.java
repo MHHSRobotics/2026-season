@@ -7,14 +7,13 @@ public class MultiCommands {
     private IntakeCommands intake;
     private ShooterCommands shooter;
 
-    public MultiCommands(HopperCommands hopper,IntakeCommands intake,ShooterCommands shooter){
-        this.hopper=hopper;
-        this.intake=intake;
-        this.shooter=shooter;
+    public MultiCommands(HopperCommands hopper, IntakeCommands intake, ShooterCommands shooter) {
+        this.hopper = hopper;
+        this.intake = intake;
+        this.shooter = shooter;
     }
 
-    public Command shoot(){
-        return hopper.forward().alongWith(shooter.feedShoot(),shooter.flyShoot());
+    public Command shoot() {
+        return hopper.forward().alongWith(shooter.feedShoot(), shooter.flyShoot());
     }
-
 }
