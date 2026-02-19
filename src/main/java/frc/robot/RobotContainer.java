@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
@@ -81,6 +82,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         initSubsystems(); // Initialize all the IO objects, subsystems, and mechanism simulators
+
         initCommands(); // Initialize command classes
 
         configureBindings(); // Add drive controller bindings
@@ -91,7 +93,6 @@ public class RobotContainer {
         if (!DriverStation.isFMSAttached()) {
             configureTestBindings();
         }
-
         configureAutoChooser(); // Set up the auto chooser
 
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
@@ -364,6 +365,7 @@ public class RobotContainer {
         }
         if (Constants.intakeEnabled) {
             intakeCommands = new IntakeCommands(intake);
+            NamedCommands.registerCommand("intake", intakeCommands.intake());
         }
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
@@ -691,7 +693,7 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("AutoSelection");
         autoChooser.addOption("Left", "Left");
         autoChooser.addOption("Right", "Right");
-        autoChooser.addDefaultOption("Leave", "Leave");
+        autoChooser.addDefaultOption("Cat", "Cat");
     }
 
     public Command getAutonomousCommand() {
