@@ -25,6 +25,9 @@ public class Shooter extends SubsystemBase {
         public static final double feedRatio = 1;
         public static final double flyRatio = 1;
 
+        // Flywheel speed tolerance as a relative factor of speed
+        public static final double tol = 0.05;
+
         // Used for simulation only
         public static final double feedInertia = 0.000066; // Inertia of feed wheels in kg m^2
         public static final double flyInertia = 0.005; // Inertia of fly wheels in kg m^2
@@ -35,6 +38,8 @@ public class Shooter extends SubsystemBase {
 
     private BangBangController controller;
 
+    private double targetSpeed;
+
     public Shooter(MotorIO feedIO, MotorIO flyIO) {
         this.feed = feedIO;
         this.fly = flyIO;
@@ -44,10 +49,10 @@ public class Shooter extends SubsystemBase {
         feed.setInverted(Constants.feedInverted);
         feed.connectInternalSensor(Constants.feedRatio);
 
-        setFlyTargetSpeed(0);
+        controller = new BangBangController();
     }
 
-    public double getFlyVelocity(){
+    public double getFlyVelocity() {
         return fly.getInputs().velocity;
     }
 
@@ -62,7 +67,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public void setFlyTargetSpeed(double speed) {
-        controller.setSetpoint(speed);
+        targetSpeed = speed;
+    }
+
+    public boolean atTargetSpeed() {
+        return Math.abs(getFlyVelocity() - targetSpeed) / targetSpeed < Constants.tol;
     }
 
     public void flyShoot() {
@@ -94,7 +103,7 @@ public class Shooter extends SubsystemBase {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
 
-        fly.setDutyCycle(controller.calculate(getFlyVelocity()));
+        fly.setDutyCycle(controller.calculate(getFlyVelocity(), targetSpeed));
         fly.update();
         feed.update();
     }

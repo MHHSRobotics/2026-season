@@ -14,6 +14,6 @@ public class MultiCommands {
     }
 
     public Command shoot() {
-        return hopper.forward().alongWith(shooter.feedShoot(), shooter.flyShoot());
+        return hopper.forward().alongWith(shooter.feedShootWhenAtTarget(), shooter.flyShoot());
     }
 }

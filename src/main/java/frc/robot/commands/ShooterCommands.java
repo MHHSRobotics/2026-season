@@ -26,6 +26,18 @@ public class ShooterCommands {
         return Commands.runEnd(() -> shooter.setFeedSpeed(speed.getAsDouble()), () -> shooter.feedStop());
     }
 
+    public Command feedShootWhenAtTarget() {
+        return Commands.startEnd(
+                () -> {
+                    if (shooter.atTargetSpeed()) {
+                        shooter.feedShoot();
+                    } else {
+                        shooter.feedStop();
+                    }
+                },
+                () -> shooter.feedStop());
+    }
+
     public Command feedShoot() {
         return Commands.startEnd(() -> shooter.feedShoot(), () -> shooter.feedStop());
     }
