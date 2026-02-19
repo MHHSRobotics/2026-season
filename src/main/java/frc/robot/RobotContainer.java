@@ -16,6 +16,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
 import frc.robot.commands.IntakeCommands;
+import frc.robot.commands.MultiCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.BitIO;
@@ -63,6 +64,8 @@ public class RobotContainer {
     private HopperCommands hopperCommands;
     private IntakeCommands intakeCommands;
     private ShooterCommands shooterCommands;
+
+    private MultiCommands multiCommands;
 
     private final CommandPS5Controller driveController = new CommandPS5Controller(0);
 
@@ -400,6 +403,9 @@ public class RobotContainer {
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
         }
+        if(Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled){
+            multiCommands=new MultiCommands(hopperCommands, intakeCommands, shooterCommands);
+        }
     }
 
     private void configureBindings() {
@@ -433,16 +439,15 @@ public class RobotContainer {
         }
         if (Constants.intakeEnabled) {
             driveController.L1().onTrue(intakeCommands.switchHinge());
-            driveController.L2().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
-            driveController.R1().onTrue(intakeCommands.intake()).onFalse(intakeCommands.intakeStop());
+            driveController.L2().whileTrue(intakeCommands.intake());
+            driveController.R1().whileTrue(intakeCommands.outtake());
         }
         if (Constants.hopperEnabled) {
-            driveController.povUp().onTrue(hopperCommands.forward()).onFalse(hopperCommands.stop());
-            driveController.povDown().onTrue(hopperCommands.reverse()).onFalse(hopperCommands.stop());
+            driveController.povUp().whileTrue(hopperCommands.forward());
+            driveController.povDown().whileTrue(hopperCommands.reverse());
         }
         if (Constants.shooterEnabled) {
-            driveController.R2().onTrue(shooterCommands.flyShoot()).onFalse(shooterCommands.flyStop());
-            driveController.R2().onTrue(shooterCommands.feedShoot()).onFalse(shooterCommands.feedStop());
+            driveController.R2().whileTrue(multiCommands.shoot());
         }
     }
 
@@ -455,8 +460,10 @@ public class RobotContainer {
 
         testControllerManual = new LoggedDashboardChooser<>("Test/Type");
         testControllerManual.addDefaultOption("Manual", "Manual");
-        testControllerManual.addOption("PID", "PID");
         testControllerManual.addOption("Fast", "Fast");
+        testControllerManual.addOption("PID", "PID");
+        testControllerManual.addOption("PIDChange", "PIDChange");
+        
 
         testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
         testControllerChooser.addDefaultOption("", ""); // Add default option so code doesn't crash on read
@@ -515,32 +522,28 @@ public class RobotContainer {
                     .cross()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.setSpeed(() -> 0.1))
-                    .onFalse(hangCommands.stop());
+                    .whileTrue(hangCommands.setSpeed(() -> 0.1));
 
             // Hang move down test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.setSpeed(() -> -0.1))
-                    .onFalse(hangCommands.stop());
+                    .whileTrue(hangCommands.setSpeed(() -> -0.1));
 
             // Hang move up test
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.moveUp())
-                    .onFalse(hangCommands.stop());
+                    .whileTrue(hangCommands.moveUp());
 
             // Hang move down test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.moveDown())
-                    .onFalse(hangCommands.stop());
+                    .whileTrue(hangCommands.moveDown());
         }
 
         if (Constants.hopperEnabled) {
@@ -551,32 +554,28 @@ public class RobotContainer {
                     .cross()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.setSpeed(() -> 0.1))
-                    .onFalse(hopperCommands.stop());
+                    .whileTrue(hopperCommands.setSpeed(() -> 0.1));
 
             // Hopper slow reverse test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.setSpeed(() -> -0.1))
-                    .onFalse(hopperCommands.stop());
+                    .whileTrue(hopperCommands.setSpeed(() -> -0.1));
 
             // Hopper fast forward test
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.forward())
-                    .onFalse(hopperCommands.stop());
+                    .whileTrue(hopperCommands.forward());
 
             // Hopper fast reverse test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.reverse())
-                    .onFalse(hopperCommands.stop());
+                    .whileTrue(hopperCommands.reverse());
         }
 
         if (Constants.shooterEnabled) {
@@ -588,64 +587,56 @@ public class RobotContainer {
                     .cross()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.setFlySpeed(() -> 0.1))
-                    .onFalse(shooterCommands.flyStop());
+                    .whileTrue(shooterCommands.setFlySpeed(() -> 0.1));
 
             // Slow flywheel reverse test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.setFlySpeed(() -> -0.1))
-                    .onFalse(shooterCommands.flyStop());
+                    .whileTrue(shooterCommands.setFlySpeed(() -> -0.1));
 
             // Fast flywheel forward test
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.flyShoot())
-                    .onFalse(shooterCommands.flyStop());
+                    .whileTrue(shooterCommands.flyShoot());
 
             // Fast flywheel reverse test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.flyReverse())
-                    .onFalse(shooterCommands.flyStop());
+                    .whileTrue(shooterCommands.flyReverse());
 
             // Slow feed forward test
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.setFeedSpeed(() -> 0.1))
-                    .onFalse(shooterCommands.feedStop());
+                    .whileTrue(shooterCommands.setFeedSpeed(() -> 0.1));
 
             // Slow feed reverse test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.setFeedSpeed(() -> -0.1))
-                    .onFalse(shooterCommands.feedStop());
+                    .whileTrue(shooterCommands.setFeedSpeed(() -> -0.1));
 
             // Fast feed forward test
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.feedShoot())
-                    .onFalse(shooterCommands.feedStop());
+                    .whileTrue(shooterCommands.feedShoot());
 
             // Fast feed reverse test
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.feedReverse())
-                    .onFalse(shooterCommands.feedStop());
+                    .whileTrue(shooterCommands.feedReverse());
         }
 
         if (Constants.intakeEnabled) {
@@ -656,57 +647,49 @@ public class RobotContainer {
                     .cross()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.setIntakeSpeed(() -> 0.1))
-                    .onFalse(intakeCommands.intakeStop());
+                    .whileTrue(intakeCommands.setIntakeSpeed(() -> 0.1));
 
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.setIntakeSpeed(() -> -0.1))
-                    .onFalse(intakeCommands.intakeStop());
+                    .whileTrue(intakeCommands.setIntakeSpeed(() -> -0.1));
 
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.intake())
-                    .onFalse(intakeCommands.intakeStop());
+                    .whileTrue(intakeCommands.intake());
 
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.outtake())
-                    .onFalse(intakeCommands.intakeStop());
+                    .whileTrue(intakeCommands.outtake());
 
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setHingeSpeed(() -> 0.1))
-                    .onFalse(intakeCommands.hingeStop());
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> 0.1));
 
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setHingeSpeed(() -> -0.1))
-                    .onFalse(intakeCommands.hingeStop());
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> -0.1));
 
             testController
                     .cross()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setHingeSpeed(() -> 0.5))
-                    .onFalse(intakeCommands.hingeStop());
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> 0.5));
 
             testController
                     .circle()
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setHingeSpeed(() -> -0.5))
-                    .onFalse(intakeCommands.hingeStop());
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> -0.5));
 
             testController
                     .cross()
@@ -719,11 +702,25 @@ public class RobotContainer {
                     .and(() -> testControllerManual.get().equals("PID"))
                     .and(() -> testControllerChooser.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.hingeDown());
+
+            testController
+                    .cross()
+                    .and(() -> testControllerManual.get().equals("PIDChange"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.changeGoal(()->0.02));
+
+            testController
+                    .circle()
+                    .and(() -> testControllerManual.get().equals("PIDChange"))
+                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.changeGoal(()->-0.02));
         }
     }
 
     // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)
-    public void configureManualBindings() {}
+    public void configureManualBindings() {
+
+    }
 
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {
