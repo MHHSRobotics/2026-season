@@ -3,6 +3,7 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import frc.robot.io.MotorIO;
@@ -106,5 +107,8 @@ public class Shooter extends SubsystemBase {
         fly.setDutyCycle(controller.calculate(getFlyVelocity(), targetSpeed));
         fly.update();
         feed.update();
+
+        Logger.recordOutput("Shooter/TargetSpeed", targetSpeed);
+        Logger.recordOutput("Shooter/AtTarget", atTargetSpeed());
     }
 }
