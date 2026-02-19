@@ -586,14 +586,7 @@ public class RobotContainer {
                     .cross()
                     .and(() -> testControllerManual.get().equals("Manual"))
                     .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .whileTrue(shooterCommands.setFlySpeed(() -> 0.1));
-
-            // Slow flywheel reverse test
-            testController
-                    .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .whileTrue(shooterCommands.setFlySpeed(() -> -0.1));
+                    .whileTrue(shooterCommands.setFlySpeed(() -> 50));
 
             // Fast flywheel forward test
             testController
@@ -601,13 +594,6 @@ public class RobotContainer {
                     .and(() -> testControllerManual.get().equals("Fast"))
                     .and(() -> testControllerChooser.get().equals("ShooterFly"))
                     .whileTrue(shooterCommands.flyShoot());
-
-            // Fast flywheel reverse test
-            testController
-                    .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .whileTrue(shooterCommands.flyReverse());
 
             // Slow feed forward test
             testController

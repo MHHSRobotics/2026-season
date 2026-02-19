@@ -15,15 +15,11 @@ public class ShooterCommands {
     }
 
     public Command setFlySpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> shooter.setFlySpeed(speed.getAsDouble()), () -> shooter.flyStop());
+        return Commands.runEnd(() -> shooter.setFlyTargetSpeed(speed.getAsDouble()), () -> shooter.flyStop());
     }
 
     public Command flyShoot() {
         return Commands.startEnd(() -> shooter.flyShoot(), () -> shooter.flyStop());
-    }
-
-    public Command flyReverse() {
-        return Commands.startEnd(() -> shooter.flyReverse(), () -> shooter.flyStop());
     }
 
     public Command setFeedSpeed(DoubleSupplier speed) {

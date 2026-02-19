@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -12,7 +13,7 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", true);
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
-        public static final double flySpeed = 1.0;
+        public static final double flySpeed = 350; // Target velocity in rad/s
         public static final double feedSpeed = 0.5;
 
         public static final boolean flyInverted = false;
@@ -32,6 +33,8 @@ public class Shooter extends SubsystemBase {
     private MotorIO feed;
     private MotorIO fly;
 
+    private BangBangController controller;
+
     public Shooter(MotorIO feedIO, MotorIO flyIO) {
         this.feed = feedIO;
         this.fly = flyIO;
@@ -40,6 +43,12 @@ public class Shooter extends SubsystemBase {
         fly.connectInternalSensor(Constants.flyRatio);
         feed.setInverted(Constants.feedInverted);
         feed.connectInternalSensor(Constants.feedRatio);
+
+        setFlyTargetSpeed(0);
+    }
+
+    public double getFlyVelocity(){
+        return fly.getInputs().velocity;
     }
 
     private void setLocked(boolean locked) {
@@ -52,20 +61,16 @@ public class Shooter extends SubsystemBase {
         fly.setDisabled(disabled);
     }
 
-    public void setFlySpeed(double speed) {
-        fly.setDutyCycle(speed);
+    public void setFlyTargetSpeed(double speed) {
+        controller.setSetpoint(speed);
     }
 
     public void flyShoot() {
-        setFlySpeed(Constants.flySpeed);
-    }
-
-    public void flyReverse() {
-        setFlySpeed(-Constants.flySpeed);
+        setFlyTargetSpeed(Constants.flySpeed);
     }
 
     public void flyStop() {
-        setFlySpeed(0);
+        setFlyTargetSpeed(0);
     }
 
     public void setFeedSpeed(double speed) {
@@ -89,6 +94,7 @@ public class Shooter extends SubsystemBase {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
 
+        fly.setDutyCycle(controller.calculate(getFlyVelocity()));
         fly.update();
         feed.update();
     }
