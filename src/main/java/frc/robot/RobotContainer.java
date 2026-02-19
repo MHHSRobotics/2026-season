@@ -27,6 +27,8 @@ import frc.robot.io.EncoderIO;
 import frc.robot.io.EncoderIOCANcoder;
 import frc.robot.io.GyroIO;
 import frc.robot.io.GyroIOPigeon;
+import frc.robot.io.LedIO;
+import frc.robot.io.LedIOCANdle;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
@@ -37,6 +39,7 @@ import frc.robot.subsystems.hopper.HopperSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakePhysicsSim;
 import frc.robot.subsystems.intake.IntakeSim;
+import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterPhysicsSim;
 import frc.robot.subsystems.shooter.ShooterSim;
@@ -58,6 +61,7 @@ public class RobotContainer {
     private Hopper hopper;
     private Intake intake;
     private Shooter shooter;
+    private LED led;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
@@ -384,6 +388,20 @@ public class RobotContainer {
                     new IntakePhysicsSim(intakeMotor, hingeMotor, "/MuJoCo/Intake");
                 }
             }
+        }
+
+        if (Constants.ledsEnabled) {
+            LedIO ledIO;
+            switch (Constants.currentMode) {
+                case REAL:
+                case SIM:
+                    ledIO = new LedIOCANdle("leds", "LED", LED.Constants.id);
+                    break;
+                default:
+                    ledIO = new LedIO("leds", "LED");
+                    break;
+            }
+            led = new LED(ledIO);
         }
     }
 
