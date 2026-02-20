@@ -19,8 +19,8 @@ import frc.robot.io.MotorIO;
 
 public class Intake extends SubsystemBase {
     public static class Constants {
-        public static final int intakeMotorId = 22;
-        public static final int hingeMotorId = 23;
+        public static final int intakeMotorId = 14;
+        public static final int hingeMotorId = 15;
         // These are DIO IDs, separate from CAN IDs
         public static final int rightSwitchId = 1;
         public static final int leftSwitchId = 2;
