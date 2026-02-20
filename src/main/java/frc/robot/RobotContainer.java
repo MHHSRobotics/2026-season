@@ -4,11 +4,10 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -73,7 +72,7 @@ public class RobotContainer {
 
     private MultiCommands multiCommands;
 
-    private final CommandPS5Controller driveController = new CommandPS5Controller(0);
+    private final CommandXboxController driveController = new CommandXboxController(0);
 
     private final CommandPS5Controller operator =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
@@ -427,7 +426,7 @@ public class RobotContainer {
             ledCommands = new LEDCommands(led);
         }
         if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled && Constants.ledsEnabled) {
-            multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands, ledCommands);
+            multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands, ledCommands, shooter);
         }
     }
 
@@ -441,8 +440,8 @@ public class RobotContainer {
          */
 
         if (Constants.swerveEnabled) {
-            driveController.options().onTrue(swerveCommands.resetGyro());
-            driveController.create().onTrue(swerveCommands.lock());
+            // driveController.options().onTrue(swerveCommands.resetGyro());
+            // driveController.create().onTrue(swerveCommands.lock());
             /*
              * How this works:
              * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
@@ -457,20 +456,20 @@ public class RobotContainer {
                             () -> -driveController.getRightX(),
                             () -> Swerve.Constants.swerveFieldCentric.get()));
 
-            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                    .cancelAll()));
+            // driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+            //        .cancelAll()));
         }
         if (Constants.intakeEnabled) {
-            driveController.L1().onTrue(intakeCommands.switchHinge());
-            driveController.L2().whileTrue(intakeCommands.intake());
-            driveController.R1().whileTrue(intakeCommands.outtake());
+            driveController.leftBumper().onTrue(intakeCommands.switchHinge());
+            driveController.leftTrigger().whileTrue(intakeCommands.intake());
+            driveController.rightBumper().whileTrue(intakeCommands.outtake());
         }
         if (Constants.hopperEnabled) {
             driveController.povUp().whileTrue(hopperCommands.forward());
             driveController.povDown().whileTrue(hopperCommands.reverse());
         }
         if (Constants.shooterEnabled) {
-            driveController.R2().whileTrue(multiCommands.shoot());
+            driveController.rightTrigger().whileTrue(multiCommands.shoot());
         }
     }
 
