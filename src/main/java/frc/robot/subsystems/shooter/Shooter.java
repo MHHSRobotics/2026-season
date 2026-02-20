@@ -14,7 +14,7 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", true);
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
-        public static final double flySpeed = 350; // Target velocity in rad/s
+        public static final double flySpeed = 400; // Target velocity in rad/s
         public static final double feedSpeed = 0.5;
 
         public static final boolean flyInverted = false;
@@ -27,7 +27,7 @@ public class Shooter extends SubsystemBase {
         public static final double flyRatio = 1;
 
         // Flywheel speed tolerance as a relative factor of speed
-        public static final double tol = 0.05;
+        public static final double tol = 0.1;
 
         // Used for simulation only
         public static final double feedInertia = 0.000066; // Inertia of feed wheels in kg m^2
