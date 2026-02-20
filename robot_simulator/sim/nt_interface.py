@@ -34,6 +34,16 @@ class DrivePIDGains:
 
 
 @dataclass
+class MechanismInputs:
+    """Voltage inputs for intake, hopper, and shooter mechanisms."""
+    intake_hinge_voltage: float = 0.0
+    intake_roller_voltage: float = 0.0
+    hopper_roller_voltage: float = 0.0
+    shooter_feed_voltage: float = 0.0
+    shooter_flywheel_voltage: float = 0.0
+
+
+@dataclass
 class SwerveInputs:
     """All motor voltage inputs from WPILib."""
     fl: SwerveModuleState
@@ -42,6 +52,7 @@ class SwerveInputs:
     br: SwerveModuleState
     steer_pid: SteerPIDGains = None
     drive_pid: DrivePIDGains = None
+    mechanisms: MechanismInputs = None
 
 
 @dataclass
@@ -81,6 +92,23 @@ class SwerveOutputs:
 
     # Fuel ball poses
     fuel_poses: List[Pose3d] = field(default_factory=list)
+
+    # Shooting stats
+    shots_fired: int = 0
+    balls_scored: int = 0
+    balls_missed: int = 0
+
+    # Mechanism feedback
+    intake_hinge_pos: float = 0.0
+    intake_hinge_vel: float = 0.0
+    intake_roller_pos: float = 0.0
+    intake_roller_vel: float = 0.0
+    hopper_roller_pos: float = 0.0
+    hopper_roller_vel: float = 0.0
+    shooter_feed_pos: float = 0.0
+    shooter_feed_vel: float = 0.0
+    shooter_flywheel_pos: float = 0.0
+    shooter_flywheel_vel: float = 0.0
 
 
 # AdvantageKit NT path names for each module
@@ -125,6 +153,14 @@ class NetworkTablesInterface:
             self._steer_setpoint[key] = mod.getDoubleTopic("Setpoint").subscribe(0.0, pub_opts)
             self._drive_velocity_setpoint[key] = mod.getDoubleTopic("Drive/Setpoint").subscribe(0.0, pub_opts)
 
+        # Mechanism voltage subscribers
+        ak = self.inst.getTable("AdvantageKit")
+        self._intake_hinge_voltage = ak.getDoubleTopic("Intake/Hinge/AppliedVoltage").subscribe(0.0, pub_opts)
+        self._intake_roller_voltage = ak.getDoubleTopic("Intake/Flywheel/AppliedVoltage").subscribe(0.0, pub_opts)
+        self._hopper_roller_voltage = ak.getDoubleTopic("Hopper/Motor/AppliedVoltage").subscribe(0.0, pub_opts)
+        self._shooter_feed_voltage = ak.getDoubleTopic("Shooter/Feed/AppliedVoltage").subscribe(0.0, pub_opts)
+        self._shooter_flywheel_voltage = ak.getDoubleTopic("Shooter/Flywheel/AppliedVoltage").subscribe(0.0, pub_opts)
+
         # PID gains from Swerve/ table (NOT AdvantageKit/Swerve/)
         pid_table = self.inst.getTable("Swerve")
         self._steer_kP = pid_table.getDoubleTopic("SteerKP").subscribe(0.0, pub_opts)
@@ -158,12 +194,35 @@ class NetworkTablesInterface:
         self._gyro_pitch = imu.getDoubleTopic("Pitch").publish(pub_opts)
         self._gyro_roll = imu.getDoubleTopic("Roll").publish(pub_opts)
 
+        # Mechanism output publishers
+        sim_mech = self.inst.getTable("MuJoCo")
+        self._intake_hinge_pos_pub = sim_mech.getDoubleTopic("Intake/Hinge/Position").publish(pub_opts)
+        self._intake_hinge_vel_pub = sim_mech.getDoubleTopic("Intake/Hinge/Velocity").publish(pub_opts)
+        self._intake_roller_pos_pub = sim_mech.getDoubleTopic("Intake/Flywheel/Position").publish(pub_opts)
+        self._intake_roller_vel_pub = sim_mech.getDoubleTopic("Intake/Flywheel/Velocity").publish(pub_opts)
+        self._hopper_roller_pos_pub = sim_mech.getDoubleTopic("Hopper/Roller/Position").publish(pub_opts)
+        self._hopper_roller_vel_pub = sim_mech.getDoubleTopic("Hopper/Roller/Velocity").publish(pub_opts)
+        self._shooter_feed_pos_pub = sim_mech.getDoubleTopic("Shooter/Feed/Position").publish(pub_opts)
+        self._shooter_feed_vel_pub = sim_mech.getDoubleTopic("Shooter/Feed/Velocity").publish(pub_opts)
+        self._shooter_flywheel_pos_pub = sim_mech.getDoubleTopic("Shooter/Flywheel/Position").publish(pub_opts)
+        self._shooter_flywheel_vel_pub = sim_mech.getDoubleTopic("Shooter/Flywheel/Velocity").publish(pub_opts)
+
         # Robot pose output (struct-encoded Pose3d)
         self._pose = self.inst.getStructTopic("MuJoCo/Swerve/Pose", Pose3d).publish(pub_opts)
+
+        # Shooting stats
+        shooter_stats = self.inst.getTable("MuJoCo/Shooter")
+        self._shots_fired_pub = shooter_stats.getIntegerTopic("ShotsFired").publish(pub_opts)
+        self._balls_scored_pub = shooter_stats.getIntegerTopic("BallsScored").publish(pub_opts)
+        self._balls_missed_pub = shooter_stats.getIntegerTopic("BallsMissed").publish(pub_opts)
+        self._accuracy_pub = shooter_stats.getDoubleTopic("Accuracy").publish(pub_opts)
 
         # Fuel ball poses (struct array of Pose3d) - disabled to reduce NT load
         # fuel_opts = ntcore.PubSubOptions(periodic=0.05)
         # self._fuel_poses = self.inst.getStructArrayTopic("MuJoCo/Fuel", Pose3d).publish(fuel_opts)
+
+        # LED color subscriber (integer array [R, G, B], 0-255)
+        self._led_color = ak.getIntegerArrayTopic("RealOutputs/LED/Color").subscribe([0, 0, 0], pub_opts)
 
         # Debug: tick counter to verify publish rate in AdvantageScope
         # self._tick = self.inst.getTable("MuJoCo").getDoubleTopic("Tick").publish(pub_opts)
@@ -184,6 +243,13 @@ class NetworkTablesInterface:
             fr=module("fr"),
             bl=module("bl"),
             br=module("br"),
+            mechanisms=MechanismInputs(
+                intake_hinge_voltage=self._intake_hinge_voltage.get(),
+                intake_roller_voltage=self._intake_roller_voltage.get(),
+                hopper_roller_voltage=self._hopper_roller_voltage.get(),
+                shooter_feed_voltage=self._shooter_feed_voltage.get(),
+                shooter_flywheel_voltage=self._shooter_flywheel_voltage.get(),
+            ),
             steer_pid=SteerPIDGains(
                 kP=self._steer_kP.get(),
                 kI=self._steer_kI.get(),
@@ -224,8 +290,26 @@ class NetworkTablesInterface:
         self._gyro_pitch.set(outputs.gyro_pitch)
         self._gyro_roll.set(outputs.gyro_roll)
 
+        self._intake_hinge_pos_pub.set(outputs.intake_hinge_pos)
+        self._intake_hinge_vel_pub.set(outputs.intake_hinge_vel)
+        self._intake_roller_pos_pub.set(outputs.intake_roller_pos)
+        self._intake_roller_vel_pub.set(outputs.intake_roller_vel)
+        self._hopper_roller_pos_pub.set(outputs.hopper_roller_pos)
+        self._hopper_roller_vel_pub.set(outputs.hopper_roller_vel)
+        self._shooter_feed_pos_pub.set(outputs.shooter_feed_pos)
+        self._shooter_feed_vel_pub.set(outputs.shooter_feed_vel)
+        self._shooter_flywheel_pos_pub.set(outputs.shooter_flywheel_pos)
+        self._shooter_flywheel_vel_pub.set(outputs.shooter_flywheel_vel)
+
         if outputs.pose is not None:
             self._pose.set(outputs.pose)
+
+        # Shooting stats
+        self._shots_fired_pub.set(outputs.shots_fired)
+        self._balls_scored_pub.set(outputs.balls_scored)
+        self._balls_missed_pub.set(outputs.balls_missed)
+        accuracy = outputs.balls_scored / outputs.shots_fired if outputs.shots_fired > 0 else 0.0
+        self._accuracy_pub.set(accuracy)
 
         # if outputs.fuel_poses:
         #     self._fuel_poses.set(outputs.fuel_poses)
@@ -234,6 +318,13 @@ class NetworkTablesInterface:
         # self._tick.set(self._tick_count)
 
         self.inst.flush()
+
+    def get_led_color(self) -> tuple:
+        """Get LED color as (r, g, b) floats in [0, 1]."""
+        rgb = self._led_color.get()
+        if len(rgb) >= 3:
+            return (rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0)
+        return (0.0, 0.0, 0.0)
 
     def is_connected(self) -> bool:
         """Check if connected to NetworkTables server."""

@@ -9,7 +9,7 @@
 
   <default>
     <joint damping="0.1" armature="0.001"/>
-    <geom friction="1.0 0.005 0.0001" condim="3"/>
+    <geom friction="0.3 0.005 0.0001" condim="3"/>
     <motor ctrllimited="true" ctrlrange="-100 100"/>
     <default class="fuel">
       <geom friction="0.8 0.005 0.0001" condim="3"/>
@@ -21,6 +21,20 @@
     <material name="bumper_mat" rgba="0.8 0.1 0.1 1"/>
     <material name="wheel_mat" rgba="0.1 0.1 0.1 1"/>
     <material name="module_mat" rgba="0.4 0.4 0.4 1"/>
+    <material name="roller_mat" rgba="0.2 0.6 0.2 1"/>
+    <material name="bar_mat" rgba="0.5 0.5 0.5 1"/>
+    <material name="polycarb_mat" rgba="0.8 0.85 0.9 0.3"/>
+    <material name="aluminum_mat" rgba="0.75 0.78 0.8 1"/>
+    <material name="dark_green_mat" rgba="0.1 0.4 0.1 1"/>
+    <material name="dark_blue_mat" rgba="0.1 0.15 0.6 1"/>
+    <material name="red_mat" rgba="0.8 0.1 0.1 1"/>
+    <material name="white_mat" rgba="0.95 0.95 0.95 1"/>
+    <material name="gold_mat" rgba="0.83 0.69 0.22 1"/>
+    <material name="led_mat" rgba="0.1 0.1 0.1 1" emission="1"/>
+    <!-- Right-triangle prism: right angle at origin, legs along +X and +Y, 3" legs, chassis height -->
+    <mesh name="corner_wedge"
+          vertex="0 0 -0.0254  0.18 0 -0.0254  0 0.18 -0.0254  0 0 0.0254  0.18 0 0.0254  0 0.18 0.0254"
+          face="0 2 1  3 4 5  0 3 5  0 5 2  0 1 4  0 4 3  1 2 5  1 5 4"/>
   </asset>
 
   <include file="field.xml"/>
@@ -28,72 +42,252 @@
   <worldbody>
     <!-- Robot base (chassis) - freejoint allows 6DOF movement -->
     <!-- Starting position: blue alliance zone, centered on field width -->
-    <body name="chassis" pos="2.0 4.035 0.12">
+    <body name="chassis" pos="2.0 4.035 0.07">
       <freejoint name="chassis_joint"/>
 
       <!-- IMU site for sensors -->
       <site name="imu_site" pos="0 0 0" size="0.01"/>
 
       <!-- Chassis geometry (27.5" x 27.5" x ~4" frame) -->
-      <geom name="chassis_geom" type="box" size="0.349 0.349 0.05"
-            mass="49.5" material="chassis_mat"/>
+      <geom name="chassis_geom" type="box" size="0.349 0.349 0.027"
+            mass="34.6" material="chassis_mat" contype="2" conaffinity="1"/>
 
-      <!-- Bumpers (3.25" thick, 5" tall) -->
-      <geom name="bumper_front" type="box" pos="0.39 0 -0.02365" size="0.04 0.39 0.065"
-            mass="2" material="bumper_mat"/>
-      <geom name="bumper_back" type="box" pos="-0.39 0 -0.02365" size="0.04 0.39 0.065"
-            mass="2" material="bumper_mat"/>
-      <geom name="bumper_left" type="box" pos="0 0.39 -0.02365" size="0.39 0.04 0.065"
-            mass="2" material="bumper_mat"/>
-      <geom name="bumper_right" type="box" pos="0 -0.39 -0.02365" size="0.39 0.04 0.065"
-            mass="2" material="bumper_mat"/>
+      <!-- Corner wedges (swerve module mounts) -->
+      <geom name="corner_fl" type="mesh" mesh="corner_wedge" pos="0.349 0.349 0.0524"
+            euler="0 0 3.14159" mass="0.2" material="wheel_mat" contype="0" conaffinity="0"/>
+      <geom name="corner_fr" type="mesh" mesh="corner_wedge" pos="0.349 -0.349 0.0524"
+            euler="0 0 1.5708" mass="0.2" material="wheel_mat" contype="0" conaffinity="0"/>
+      <geom name="corner_bl" type="mesh" mesh="corner_wedge" pos="-0.349 0.349 0.0524"
+            euler="0 0 -1.5708" mass="0.2" material="wheel_mat" contype="0" conaffinity="0"/>
+      <geom name="corner_br" type="mesh" mesh="corner_wedge" pos="-0.349 -0.349 0.0524"
+            mass="0.2" material="wheel_mat" contype="0" conaffinity="0"/>
+
+      <!-- Bumpers (3.25" thick, 5.5" tall, top 3" above chassis) -->
+      <geom name="bumper_front" type="box" pos="0.39 0 0.03128" size="0.04 0.39 0.06993"
+            mass="2" material="bumper_mat" friction="0.4 0.005 0.0001" contype="2" conaffinity="1"/>
+      <geom name="bumper_back" type="box" pos="-0.39 0 0.03128" size="0.04 0.39 0.06993"
+            mass="2" material="bumper_mat" friction="0.4 0.005 0.0001" contype="2" conaffinity="1"/>
+      <geom name="bumper_left" type="box" pos="0 0.39 0.03128" size="0.39 0.04 0.06993"
+            mass="2" material="bumper_mat" friction="0.4 0.005 0.0001" contype="2" conaffinity="1"/>
+      <geom name="bumper_right" type="box" pos="0 -0.39 0.03128" size="0.39 0.04 0.06993"
+            mass="2" material="bumper_mat" friction="0.4 0.005 0.0001" contype="2" conaffinity="1"/>
 
       <!-- Front Left Module -->
-      <body name="fl_module" pos="0.28 0.28 -0.07">
+      <body name="fl_module" pos="0.28 0.28 -0.02">
         <joint name="fl_steer" type="hinge" axis="0 0 1" damping="1.0" armature="0.011" frictionloss="2.0"/>
         <geom name="fl_housing" type="cylinder" size="0.04 0.03"
-              mass="1" material="module_mat" contype="0" conaffinity="0"/>
+              mass="1" material="wheel_mat" contype="0" conaffinity="0"/>
         <body name="fl_wheel_body" pos="0 0 0">
-          <joint name="fl_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.003"/>
+          <joint name="fl_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.0025"/>
           <geom name="fl_wheel" type="cylinder" size="0.05 0.02"
                 euler="1.5708 0 0" mass="0.5" material="wheel_mat" friction="1.5 0.005 0.0001" contype="2" conaffinity="1"/>
         </body>
       </body>
 
       <!-- Front Right Module -->
-      <body name="fr_module" pos="0.28 -0.28 -0.07">
+      <body name="fr_module" pos="0.28 -0.28 -0.02">
         <joint name="fr_steer" type="hinge" axis="0 0 1" damping="1.0" armature="0.011" frictionloss="2.0"/>
         <geom name="fr_housing" type="cylinder" size="0.04 0.03"
-              mass="1" material="module_mat" contype="0" conaffinity="0"/>
+              mass="1" material="wheel_mat" contype="0" conaffinity="0"/>
         <body name="fr_wheel_body" pos="0 0 0">
-          <joint name="fr_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.003"/>
+          <joint name="fr_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.0025"/>
           <geom name="fr_wheel" type="cylinder" size="0.05 0.02"
                 euler="1.5708 0 0" mass="0.5" material="wheel_mat" friction="1.5 0.005 0.0001" contype="2" conaffinity="1"/>
         </body>
       </body>
 
       <!-- Back Left Module -->
-      <body name="bl_module" pos="-0.28 0.28 -0.07">
+      <body name="bl_module" pos="-0.28 0.28 -0.02">
         <joint name="bl_steer" type="hinge" axis="0 0 1" damping="1.0" armature="0.011" frictionloss="2.0"/>
         <geom name="bl_housing" type="cylinder" size="0.04 0.03"
-              mass="1" material="module_mat" contype="0" conaffinity="0"/>
+              mass="1" material="wheel_mat" contype="0" conaffinity="0"/>
         <body name="bl_wheel_body" pos="0 0 0">
-          <joint name="bl_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.003"/>
+          <joint name="bl_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.0025"/>
           <geom name="bl_wheel" type="cylinder" size="0.05 0.02"
                 euler="1.5708 0 0" mass="0.5" material="wheel_mat" friction="1.5 0.005 0.0001" contype="2" conaffinity="1"/>
         </body>
       </body>
 
       <!-- Back Right Module -->
-      <body name="br_module" pos="-0.28 -0.28 -0.07">
+      <body name="br_module" pos="-0.28 -0.28 -0.02">
         <joint name="br_steer" type="hinge" axis="0 0 1" damping="1.0" armature="0.011" frictionloss="2.0"/>
         <geom name="br_housing" type="cylinder" size="0.04 0.03"
-              mass="1" material="module_mat" contype="0" conaffinity="0"/>
+              mass="1" material="wheel_mat" contype="0" conaffinity="0"/>
         <body name="br_wheel_body" pos="0 0 0">
-          <joint name="br_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.003"/>
+          <joint name="br_drive" type="hinge" axis="0 1 0" damping="0.01" armature="0.0025"/>
           <geom name="br_wheel" type="cylinder" size="0.05 0.02"
                 euler="1.5708 0 0" mass="0.5" material="wheel_mat" friction="1.5 0.005 0.0001" contype="2" conaffinity="1"/>
         </body>
+      </body>
+
+      <!-- Hopper rollers: 4 coupled rollers along Y axis -->
+      <body name="hopper_roller_1" pos="-0.121 -0.0285 0.056">
+        <joint name="hopper_roller_1_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="hopper_roller_1_geom" type="cylinder" size="0.0255 0.2035"
+              euler="1.5708 0 0" mass="0.65" material="dark_green_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+      <body name="hopper_roller_2" pos="-0.045 -0.0285 0.063">
+        <joint name="hopper_roller_2_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="hopper_roller_2_geom" type="cylinder" size="0.0255 0.2035"
+              euler="1.5708 0 0" mass="0.65" material="dark_green_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+      <body name="hopper_roller_3" pos="0.031 -0.0285 0.070">
+        <joint name="hopper_roller_3_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="hopper_roller_3_geom" type="cylinder" size="0.0255 0.2035"
+              euler="1.5708 0 0" mass="0.65" material="dark_green_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+      <body name="hopper_roller_4" pos="0.107 -0.0285 0.077">
+        <joint name="hopper_roller_4_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="hopper_roller_4_geom" type="cylinder" size="0.0255 0.2035"
+              euler="1.5708 0 0" mass="0.65" material="dark_green_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+
+      <!-- Hopper walls -->
+      <geom name="hopper_wall_left" type="box" pos="0.02 0.1925 0.2225"
+            size="0.177 0.0175 0.1955" mass="1.0" material="gold_mat" contype="2" conaffinity="1"/>
+      <geom name="hopper_wall_right" type="box" pos="0.02 -0.2495 0.2225"
+            size="0.177 0.0175 0.1955" mass="1.0" material="gold_mat" contype="2" conaffinity="1"/>
+
+      <!-- LED strips on outside of hopper walls (inverted U shape) -->
+      <!-- Left wall LEDs (outer face y=0.21, strips 2mm out) -->
+      <geom name="led_left_0" type="box" pos="-0.142 0.212 0.2225"
+            size="0.005 0.002 0.1805" mass="0.003" material="led_mat" contype="0" conaffinity="0"/>
+      <geom name="led_left_1" type="box" pos="0.02 0.212 0.403"
+            size="0.167 0.002 0.005" mass="0.003" material="led_mat" contype="0" conaffinity="0"/>
+      <geom name="led_left_2" type="box" pos="0.182 0.212 0.2225"
+            size="0.005 0.002 0.1805" mass="0.003" material="led_mat" contype="0" conaffinity="0"/>
+      <!-- Right wall LEDs (outer face y=-0.267, strips 2mm out) -->
+      <geom name="led_right_0" type="box" pos="-0.142 -0.269 0.2225"
+            size="0.005 0.002 0.1805" mass="0.003" material="led_mat" contype="0" conaffinity="0"/>
+      <geom name="led_right_1" type="box" pos="0.02 -0.269 0.403"
+            size="0.167 0.002 0.005" mass="0.003" material="led_mat" contype="0" conaffinity="0"/>
+      <geom name="led_right_2" type="box" pos="0.182 -0.269 0.2225"
+            size="0.005 0.002 0.1805" mass="0.003" material="led_mat" contype="0" conaffinity="0"/>
+
+      <!-- Polycarbonate plate between hopper and intake -->
+      <geom name="hopper_intake_plate" type="box" pos="0.2116 -0.0254 0.1143"
+            size="0.0615 0.2413 0.0016" mass="0.3" material="polycarb_mat" contype="2" conaffinity="1"/>
+
+      <!-- Shooter base: U-shaped mount on back of frame -->
+      <geom name="shooter_base_back" type="box" pos="-0.3363 0 0.0524"
+            size="0.0127 0.166 0.0254" mass="0.5" material="aluminum_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_base_left" type="box" pos="-0.2475 0.146 0.0524"
+            size="0.1015 0.02 0.0254" mass="0.5" material="aluminum_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_base_right" type="box" pos="-0.2475 -0.146 0.0524"
+            size="0.1015 0.02 0.0254" mass="0.5" material="aluminum_mat" contype="2" conaffinity="1"/>
+
+      <!-- Shooter walls: two side walls + center divider, 0.33m tall from chassis top -->
+      <geom name="shooter_wall_left" type="box" pos="-0.2475 0.166 0.192"
+            size="0.1015 0.003 0.165" mass="0.3" material="polycarb_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_wall_right" type="box" pos="-0.2475 -0.166 0.192"
+            size="0.1015 0.003 0.165" mass="0.3" material="polycarb_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_wall_center" type="box" pos="-0.2475 0 0.192"
+            size="0.1015 0.003 0.165" mass="0.3" material="polycarb_mat" contype="2" conaffinity="1"/>
+
+      <!-- Shooter feeding wheels: 4 wheels (2 per channel), all coupled -->
+      <body name="shooter_feed_inner_left" pos="-0.098 0.0285 0.247">
+        <joint name="shooter_feed_inner_left_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="shooter_feed_inner_left_geom" type="cylinder" size="0.0283 0.0125"
+              euler="1.5708 0 0" mass="0.036" material="dark_blue_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+      <body name="shooter_feed_inner_right" pos="-0.098 -0.0285 0.247">
+        <joint name="shooter_feed_inner_right_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="shooter_feed_inner_right_geom" type="cylinder" size="0.0283 0.0125"
+              euler="1.5708 0 0" mass="0.036" material="dark_blue_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+      <body name="shooter_feed_outer_left" pos="-0.098 0.1371 0.247">
+        <joint name="shooter_feed_outer_left_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="shooter_feed_outer_left_geom" type="cylinder" size="0.0283 0.0125"
+              euler="1.5708 0 0" mass="0.036" material="dark_blue_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+      <body name="shooter_feed_outer_right" pos="-0.098 -0.1371 0.247">
+        <joint name="shooter_feed_outer_right_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="shooter_feed_outer_right_geom" type="cylinder" size="0.0283 0.0125"
+              euler="1.5708 0 0" mass="0.036" material="dark_blue_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+
+      <!-- Shooter flywheels: one per channel, each independently driven -->
+      <body name="shooter_flywheel_left" pos="-0.142 0.083 0.285">
+        <joint name="shooter_flywheel_left_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="shooter_flywheel_left_geom" type="cylinder" size="0.05 0.026"
+              euler="1.5708 0 0" mass="0.54" material="white_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+      <body name="shooter_flywheel_right" pos="-0.142 -0.083 0.285">
+        <joint name="shooter_flywheel_right_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+        <geom name="shooter_flywheel_right_geom" type="cylinder" size="0.05 0.026"
+              euler="1.5708 0 0" mass="0.54" material="white_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+      </body>
+
+      <!-- Shooter churros: 10 track guides from left to right wall -->
+      <geom name="shooter_churro_1" type="cylinder" pos="-0.160 0 0.086"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_2" type="cylinder" pos="-0.198 0 0.086"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_3" type="cylinder" pos="-0.234 0 0.101"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_4" type="cylinder" pos="-0.266 0 0.123"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_5" type="cylinder" pos="-0.294 0 0.151"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_6" type="cylinder" pos="-0.315 0 0.184"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_7" type="cylinder" pos="-0.328 0 0.221"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_8" type="cylinder" pos="-0.335 0 0.260"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_9" type="cylinder" pos="-0.333 0 0.299"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+      <geom name="shooter_churro_10" type="cylinder" pos="-0.323 0 0.337"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.1" material="wheel_mat" contype="2" conaffinity="1"/>
+
+      <!-- Shooter feed axle -->
+      <geom name="shooter_feed_axle" type="cylinder" pos="-0.098 0 0.247"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.3" material="wheel_mat" contype="2" conaffinity="1"/>
+
+      <!-- Shooter flywheel axle -->
+      <geom name="shooter_flywheel_axle" type="cylinder" pos="-0.142 0 0.285"
+            size="0.007 0.166" euler="1.5708 0 0" mass="0.3" material="wheel_mat" contype="2" conaffinity="1"/>
+
+      <!-- Intake support blocks: 2x1" aluminum, 5.875" tall from chassis top -->
+      <geom name="intake_support_left" type="box" pos="0.324 0.1207 0.1016"
+            size="0.0254 0.0127 0.0746" mass="0.4" material="bar_mat" contype="2" conaffinity="1"/>
+      <geom name="intake_support_right" type="box" pos="0.324 -0.1207 0.1016"
+            size="0.0254 0.0127 0.0746" mass="0.4" material="bar_mat" contype="2" conaffinity="1"/>
+
+      <!-- Intake assembly: pivots on hinge 0.025m behind frame edge, 4.875" above chassis top -->
+      <body name="intake" pos="0.324 0 0.151">
+        <joint name="intake_hinge" type="hinge" axis="0 1 0" damping="0.5" armature="0.005" limited="true" range="-1.5708 0.21"/>
+
+        <!-- Axle bar through shields -->
+        <geom name="intake_axle_bar" type="cylinder" pos="0 0 0"
+              size="0.01 0.2275" euler="1.5708 0 0" mass="0.8" material="wheel_mat" contype="2" conaffinity="1"/>
+
+        <!-- Roller: spinning cylinder -->
+        <body name="intake_roller" pos="0.279 0 0">
+          <joint name="intake_roller_joint" type="hinge" axis="0 1 0" damping="0.001" armature="0.001"/>
+          <geom name="intake_roller_geom" type="cylinder" size="0.0508 0.2275"
+                euler="1.5708 0 0" mass="0.5" material="roller_mat" friction="2.0 0.005 0.0001" contype="2" conaffinity="1"/>
+        </body>
+
+        <!-- Backing bar -->
+        <geom name="intake_backing_bar" type="cylinder" pos="0.127 0 -0.021"
+              size="0.00735 0.2275" euler="1.5708 0 0" mass="1.5" material="bar_mat" contype="2" conaffinity="1"/>
+
+        <!-- Side bars -->
+        <geom name="intake_bar_left" type="box" pos="0.1395 0.235 0.003"
+              size="0.1715 0.005 0.03" mass="0.6" material="bar_mat" contype="2" conaffinity="1"/>
+        <geom name="intake_bar_right" type="box" pos="0.1395 -0.235 0.003"
+              size="0.1715 0.005 0.03" mass="0.6" material="bar_mat" contype="2" conaffinity="1"/>
+
+        <!-- Polycarbonate side shields -->
+        <geom name="intake_shield_left" type="box" pos="0.1395 0.2285 0.152"
+              size="0.1715 0.0015 0.119" mass="0.3" material="polycarb_mat" contype="2" conaffinity="1"/>
+        <geom name="intake_shield_right" type="box" pos="0.1395 -0.2285 0.152"
+              size="0.1715 0.0015 0.119" mass="0.3" material="polycarb_mat" contype="2" conaffinity="1"/>
+
+        <!-- Front polycarbonate shield -->
+        <geom name="intake_shield_front" type="box" pos="0.3125 0 0.152"
+              size="0.0015 0.2275 0.119" mass="0.4" material="polycarb_mat" contype="2" conaffinity="1"/>
       </body>
 
     </body>
@@ -110,6 +304,15 @@
     <motor name="fr_drive_motor" joint="fr_drive" gear="1"/>
     <motor name="bl_drive_motor" joint="bl_drive" gear="1"/>
     <motor name="br_drive_motor" joint="br_drive" gear="1"/>
+
+    <motor name="intake_hinge_motor" joint="intake_hinge" gear="1"/>
+    <motor name="intake_roller_motor" joint="intake_roller_joint" gear="1"/>
+
+    <motor name="hopper_roller_motor" joint="hopper_roller_1_joint" gear="1"/>
+
+    <motor name="shooter_feed_motor" joint="shooter_feed_inner_left_joint" gear="1"/>
+
+    <motor name="shooter_flywheel_motor" joint="shooter_flywheel_left_joint" gear="1"/>
   </actuator>
 
   <!-- Sensors for feedback to WPILib -->
@@ -138,11 +341,17 @@
     <accelerometer name="chassis_accel" site="imu_site"/>
   </sensor>
 
+  <equality>
+    <joint joint1="hopper_roller_1_joint" joint2="hopper_roller_2_joint" polycoef="0 1 0 0 0"/>
+    <joint joint1="hopper_roller_1_joint" joint2="hopper_roller_3_joint" polycoef="0 1 0 0 0"/>
+    <joint joint1="hopper_roller_1_joint" joint2="hopper_roller_4_joint" polycoef="0 1 0 0 0"/>
+    <joint joint1="shooter_feed_inner_left_joint" joint2="shooter_feed_inner_right_joint" polycoef="0 1 0 0 0"/>
+    <joint joint1="shooter_feed_inner_left_joint" joint2="shooter_feed_outer_left_joint" polycoef="0 1 0 0 0"/>
+    <joint joint1="shooter_feed_inner_left_joint" joint2="shooter_feed_outer_right_joint" polycoef="0 1 0 0 0"/>
+    <joint joint1="shooter_flywheel_left_joint" joint2="shooter_flywheel_right_joint" polycoef="0 1 0 0 0"/>
+  </equality>
+
   <contact>
-    <exclude body1="chassis" body2="fl_wheel_body"/>
-    <exclude body1="chassis" body2="fr_wheel_body"/>
-    <exclude body1="chassis" body2="bl_wheel_body"/>
-    <exclude body1="chassis" body2="br_wheel_body"/>
   </contact>
 
 </mujoco>

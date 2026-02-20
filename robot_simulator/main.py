@@ -100,6 +100,9 @@ def main():
             if nt is not None:
                 inputs = nt.get_inputs()
                 sim.set_voltages(inputs)
+                # Update LED colors
+                r, g, b = nt.get_led_color()
+                sim.set_led_color(r, g, b)
 
             # Step physics
             sim.step(physics_steps_per_update)
@@ -116,9 +119,14 @@ def main():
                 frame_count = 0
                 last_print_time = now
                 connected = "connected" if nt is not None and nt.is_connected() else "disconnected"
+                shots = sim.balls_scored + sim.balls_missed
+                scored = sim.balls_scored
+                acc = scored / shots * 100 if shots > 0 else 0.0
+                stats = f"Shots: {scored}/{shots} ({acc:.0f}%)"
+
                 if nt is not None:
                     print(
-                        f"[{connected}] {fps:5.1f} Hz  "
+                        f"[{connected}] {fps:5.1f} Hz  {stats}  "
                         f"FL({inputs.fl.drive_voltage:+5.1f}V/{inputs.fl.steer_voltage:+5.1f}V) "
                         f"FR({inputs.fr.drive_voltage:+5.1f}V/{inputs.fr.steer_voltage:+5.1f}V) "
                         f"BL({inputs.bl.drive_voltage:+5.1f}V/{inputs.bl.steer_voltage:+5.1f}V) "
@@ -126,7 +134,7 @@ def main():
                         end="\r",
                     )
                 else:
-                    print(f"{fps:5.1f} Hz", end="\r")
+                    print(f"{fps:5.1f} Hz  {stats}", end="\r")
 
             # Update viewer
             if not args.no_viewer:
