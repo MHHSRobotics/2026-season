@@ -15,10 +15,7 @@ public final class Constants {
         SIM,
 
         /** Replaying from a log file. */
-        REPLAY,
-
-        // WIP physics simulator
-        PHYSICS_SIM,
+        REPLAY
     }
 
     public static final Mode simMode =
@@ -27,7 +24,13 @@ public final class Constants {
     public static final Mode currentMode =
             RobotBase.isReal() ? Mode.REAL : simMode; // Current mode the robot program is in
 
-    public static final double loopTime = 0.02; // Period of main robot loop, 20ms default
+    public static final boolean enablePhysicsSim =
+            true; // Whether to enable the physics sim connector (for SIM mode only)
+
+    public static final boolean physicsSimEnabled = currentMode == Mode.SIM
+            && enablePhysicsSim; // Whether to enable the physics sim connector (for SIM mode only)
+
+    public static final double loopTime = physicsSimEnabled ? 0.005 : 0.02; // Period of main robot loop, 20ms default
 
     public static final CANBus defaultBus = new CANBus("rio"); // CAN bus used for non-swerve motors
 
@@ -40,16 +43,18 @@ public final class Constants {
 
     public static final double lowBatteryVoltage = 11.8; // Voltage at which low battery warning appears
 
-    public static final double lowBatteryTime = 0.5; // How long to wait before reporting low battery
+    public static final double lowBatteryTime = 5; // How long to wait before reporting low battery
 
     public static final boolean simIsRedAlliance = false; // Whether simulated FMS is on red alliance
 
     public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error
+
     // Toggles for susbsytems
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = true;
-    public static final boolean shooterEnabled = false;
-    public static final boolean hopperEnabled = false;
-    public static final boolean hangEnabled = false;
-    public static final boolean intakeEnabled = false;
+    public static final boolean shooterEnabled = true;
+    public static final boolean hopperEnabled = true;
+    public static final boolean hangEnabled = true;
+    public static final boolean intakeEnabled = true;
+    public static final boolean ledsEnabled = true;
 }

@@ -1,0 +1,5 @@
+mujoco>=3.0.0
+pyntcore>=2024.0.0
+robotpy-wpimath>=2024.0.0
+numpy>=1.24.0
+# cadquery>=2.4.0  # optional, for tools/step_to_mujoco.py (STEP->MuJoCo converter)

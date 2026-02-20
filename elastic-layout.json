@@ -104,6 +104,18 @@
             }
           },
           {
+            "title": "PhotonAlerts",
+            "x": 1536.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/PhotonAlerts",
+              "period": 0.06
+            }
+          },
+          {
             "title": "Match Time",
             "x": 0.0,
             "y": 0.0,
@@ -488,50 +500,11 @@
             ]
           },
           {
-            "title": "Hang Settings",
-            "x": 1280.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Disabled",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Switch",
-                "properties": {
-                  "topic": "Hang/Disabled",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              },
-              {
-                "title": "Locked",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Switch",
-                "properties": {
-                  "topic": "Hang/Locked",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              }
-            ]
-          },
-          {
-            "title": "Intake",
+            "title": "Intake Settings",
             "x": 512.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 896.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -606,20 +579,6 @@
                 }
               },
               {
-                "title": "kG",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Intake/Hinge/kG",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": true
-                }
-              },
-              {
                 "title": "kS",
                 "x": 0.0,
                 "y": 0.0,
@@ -628,6 +587,20 @@
                 "type": "Text Display",
                 "properties": {
                   "topic": "Intake/Hinge/kS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              },
+              {
+                "title": "kG",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Intake/Hinge/kG",
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": true
@@ -704,6 +677,45 @@
                 }
               }
             ]
+          },
+          {
+            "title": "Hang Settings",
+            "x": 1280.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Disabled",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "Hang/Disabled",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              },
+              {
+                "title": "Locked",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Toggle Switch",
+                "properties": {
+                  "topic": "Hang/Locked",
+                  "period": 0.06,
+                  "data_type": "boolean"
+                }
+              }
+            ]
           }
         ],
         "containers": [
@@ -716,6 +728,18 @@
             "type": "Alerts",
             "properties": {
               "topic": "/SmartDashboard/Alerts",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "PhotonAlerts",
+            "x": 0.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/PhotonAlerts",
               "period": 0.06
             }
           },
@@ -748,7 +772,7 @@
           {
             "title": "Alliance",
             "x": 0.0,
-            "y": 384.0,
+            "y": 768.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -795,14 +819,14 @@
             }
           },
           {
-            "title": "Intake Position (Radians)",
-            "x": 512.0,
+            "title": "Position",
+            "x": 768.0,
             "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/AdvantageKit/Hopper/Motor/Position",
+              "topic": "/AdvantageKit/Intake/Hinge/Position",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false

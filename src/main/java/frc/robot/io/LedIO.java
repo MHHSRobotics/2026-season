@@ -3,6 +3,8 @@ package frc.robot.io;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
+import com.ctre.phoenix6.signals.RGBWColor;
+
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
@@ -10,17 +12,10 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.util.Alerts;
 
-public class GyroIO {
+public class LedIO {
     @AutoLog
-    public static class GyroIOInputs {
+    public static class LedIOInputs {
         public boolean connected;
-        public double yawPositionRad;
-        public double yawVelocityRadPerSec;
-        public double pitchPositionRad;
-        public double pitchVelocityRadPerSec;
-        public double rollPositionRad;
-        public double rollVelocityRadPerSec;
-        public boolean hardwareFault;
     }
 
     private String logPath;
@@ -29,22 +24,20 @@ public class GyroIO {
 
     // Alert objects to show gyro problems on the dashboard
     private Alert disconnectAlert;
-    private Alert hardwareFaultAlert;
 
-    public GyroIO(String name, String logPath) {
+    public LedIO(String name, String logPath) {
         this.name = name;
         this.logPath = logPath;
 
         // Create alerts with descriptive names for this gyro
         disconnectAlert = new Alert("The " + name + " is disconnected", AlertType.kError);
-        hardwareFaultAlert = new Alert("The " + name + " has encountered a hardware fault", AlertType.kError);
     }
 
     public String getName() {
         return name;
     }
 
-    protected GyroIOInputsAutoLogged inputs = new GyroIOInputsAutoLogged();
+    protected LedIOInputsAutoLogged inputs = new LedIOInputsAutoLogged();
 
     // Find out the latest values from the gyro and store them in inputs
     public void update() {
@@ -54,10 +47,9 @@ public class GyroIO {
         // Update alerts based on the current gyro status (this runs after subclass updates inputs)
         // Only update alerts if they've been created (setName() was called)
         disconnectAlert.set(!inputs.connected);
-        hardwareFaultAlert.set(inputs.hardwareFault);
     }
 
-    public GyroIOInputs getInputs() {
+    public LedIOInputs getInputs() {
         return inputs;
     }
 
@@ -67,31 +59,7 @@ public class GyroIO {
         }
     }
 
-    public void setYaw(double yaw) {
-        unsupportedFeature();
-    }
-
-    public void setMechYaw(double yaw) {
-        unsupportedFeature();
-    }
-
-    public void setMechYawVelocity(double yawVelocity) {
-        unsupportedFeature();
-    }
-
-    public void setMechPitch(double yaw) {
-        unsupportedFeature();
-    }
-
-    public void setMechPitchVelocity(double yawVelocity) {
-        unsupportedFeature();
-    }
-
-    public void setMechRoll(double yaw) {
-        unsupportedFeature();
-    }
-
-    public void setMechRollVelocity(double yawVelocity) {
+    public void setColor(int startIndex, int endIndex, RGBWColor color) {
         unsupportedFeature();
     }
 
