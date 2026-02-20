@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import com.ctre.phoenix6.signals.RGBWColor;
 
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.hopper.Hopper;
 
 public class MultiCommands {
     private HopperCommands hopperCommands;
@@ -28,9 +29,9 @@ public class MultiCommands {
 
     public Command shoot() {
         return hopperCommands
-                .forward()
+                .setSpeed(()->shooter.atTargetSpeed()?Hopper.Constants.rollerSpeed:0)
                 .alongWith(
-                        shooterCommands.feedShootWhenAtTarget(),
+                        shooterCommands.setFeedSpeed(()->shooter.atTargetSpeed()?Shooter.Constants.feedSpeed:0),
                         shooterCommands.flyShoot(),
                         ledCommands.setColor(
                                 () -> shooter.atTargetSpeed() ? new RGBWColor(0, 255, 0) : new RGBWColor(255, 0, 0)));
