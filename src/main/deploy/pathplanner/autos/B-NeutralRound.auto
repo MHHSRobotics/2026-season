@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-NeutralRound-1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-NeutalRound-2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-NeutalRound-3"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-NeutralRound-4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "B-NeutralRound-5"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

@@ -1,0 +1,95 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.524327628361857,
+        "y": 0.7196821515892429
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.604691862846136,
+        "y": 0.724572363840481
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.686491442542787,
+        "y": 0.7196821515892429
+      },
+      "prevControl": {
+        "x": 5.33885612231143,
+        "y": 0.6833339688912053
+      },
+      "nextControl": {
+        "x": 6.846717968348323,
+        "y": 0.8409935468267088
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 9.64491442542787,
+        "y": 0.86
+      },
+      "prevControl": {
+        "x": 9.151900265346065,
+        "y": 0.5636865865559407
+      },
+      "nextControl": {
+        "x": 10.64470977263502,
+        "y": 1.460901142529619
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 9.94429095354523,
+        "y": 2.9040220048899767
+      },
+      "prevControl": {
+        "x": 10.03522196884492,
+        "y": 2.662781762131767
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 57.03059609653788
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 157.28558764683277
+  },
+  "reversed": false,
+  "folder": "R-NeutralRound-Folder",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -1.2453642667683138
+  },
+  "useDefaultConstraints": true
+}
