@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B-NeutralRound-1"
+            "pathName": "B-NeutralCross-1"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B-NeutalRound-2"
+            "pathName": "B-NeutralCross-2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B-NeutalRound-3"
+            "pathName": "B-NeutralCross-3"
           }
         },
         {
@@ -31,13 +31,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B-NeutralRound-4"
+            "pathName": "B-NeutralCross-4"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B-NeutralRound-5"
+            "pathName": "B-NeutralCross-5"
           }
         }
       ]
