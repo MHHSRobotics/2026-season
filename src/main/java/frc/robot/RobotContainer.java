@@ -731,6 +731,9 @@ public class RobotContainer {
         autoChooserC = AutoBuilder.buildAutoChooser("B-Corral");
         autoChooserC = AutoBuilder.buildAutoChooser("R-Corral");
         autoChooserC = AutoBuilder.buildAutoChooser("B-NeutralCross");
+        autoChooserC = AutoBuilder.buildAutoChooser("R-NeutralCross");
+        autoChooserC = AutoBuilder.buildAutoChooser("B-BackUp");
+        autoChooserC = AutoBuilder.buildAutoChooser("R-BackUp");
         autoChooser = new LoggedDashboardChooser<>("AutoSelection");
         autoChooser.addOption("Left", "Left");
         autoChooser.addOption("Right", "Right");
