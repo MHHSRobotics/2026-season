@@ -3,12 +3,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -49,7 +46,6 @@ import frc.robot.subsystems.swerve.SwerveModuleSim;
 import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
-import frc.robot.util.Alerts;
 import frc.robot.util.RobotUtils;
 
 public class RobotContainer {
@@ -78,8 +74,7 @@ public class RobotContainer {
     private LoggedDashboardChooser<String>
             testControllerManual; // Whether to use manual or PID mode for the test controller
 
-    private SendableChooser<Command> autoChooserC;
-    private LoggedDashboardChooser<String> autoChooser; // Choice of auto
+    private LoggedDashboardChooser<Command> autoChooser; // Choice of auto
 
     private RobotPublisher publisher; // Publishes 3D robot data to AdvantageScope for visualization
 
@@ -723,25 +718,11 @@ public class RobotContainer {
                 config,
                 (() -> RobotUtils.onRedAlliance()),
                 swerve);
-        autoChooserC = AutoBuilder.buildAutoChooser("CATS");
-        autoChooser = new LoggedDashboardChooser<>("AutoSelection");
-        autoChooser.addOption("Left", "Left");
-        autoChooser.addOption("Right", "Right");
-        autoChooser.addDefaultOption("Cat", "Cat");
+        autoChooser = new LoggedDashboardChooser<>("AutoSelection", AutoBuilder.buildAutoChooser("CATS"));
     }
 
     public Command getAutonomousCommand() {
-        if (autoChooser.get().equals("Leave")) {
-            return swerveCommands
-                    .setPositionOutput(-2, 0)
-                    .andThen(new WaitCommand(3))
-                    .andThen(swerveCommands.setPositionOutput(0, 0));
-        } else if (autoChooser.get().equals("Cat")) {
-            return autoChooserC.getSelected();
-        } else {
-            Alerts.create("Unknown auto specified", AlertType.kWarning);
-            return new InstantCommand();
-        }
+        return autoChooser.get();
     }
 
     public void periodic() {
