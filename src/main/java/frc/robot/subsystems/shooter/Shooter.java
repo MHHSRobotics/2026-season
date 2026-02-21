@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import frc.robot.io.MotorIO;
 
@@ -14,11 +15,15 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", true);
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
-        public static final double flySpeed = 400; // Target velocity in rad/s
+        public static final LoggedNetworkNumber flySpeed =
+                new LoggedNetworkNumber("Shooter/TargetSpeed", 500); // Target velocity in rad/s
         public static final double feedSpeed = 0.5;
 
+        public static final LoggedNetworkNumber lowDutyCycle = new LoggedNetworkNumber("Shooter/LowDutyCycle", 0.75);
+        public static final double highDutyCycle = 1;
+
         public static final boolean flyInverted = false;
-        public static final boolean feedInverted = false;
+        public static final boolean feedInverted = true;
 
         public static final int flyMotorId = 16;
         public static final int feedMotorId = 17;
@@ -76,7 +81,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void flyShoot() {
-        setFlyTargetSpeed(Constants.flySpeed);
+        setFlyTargetSpeed(Constants.flySpeed.get());
     }
 
     public void flyStop() {
@@ -104,7 +109,17 @@ public class Shooter extends SubsystemBase {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
 
-        fly.setDutyCycle(controller.calculate(getFlyVelocity(), targetSpeed));
+        if (targetSpeed == 0) {
+            fly.setDutyCycle(0);
+        } else {
+            if (getFlyVelocity() < targetSpeed) {
+                fly.setDutyCycle(Constants.highDutyCycle);
+            } else {
+                fly.setDutyCycle(Constants.lowDutyCycle.get());
+            }
+        }
+
+        // fly.setDutyCycle(controller.calculate(getFlyVelocity(), targetSpeed));
         fly.update();
         feed.update();
 

@@ -13,7 +13,7 @@ public class Hopper extends SubsystemBase {
         // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
 
-        public static final double rollerSpeed = 0.5;
+        public static final double rollerSpeed = 0.25;
 
         public static final LoggedNetworkBoolean hopperLocked =
                 new LoggedNetworkBoolean("Hopper/Locked", false); // Toggle to enable braking when stopped

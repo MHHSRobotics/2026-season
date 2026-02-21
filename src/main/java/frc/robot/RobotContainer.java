@@ -426,7 +426,7 @@ public class RobotContainer {
         if (Constants.ledsEnabled) {
             ledCommands = new LEDCommands(led);
         }
-        if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled && Constants.ledsEnabled) {
+        if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled) {
             multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands, ledCommands, shooter);
         }
     }
