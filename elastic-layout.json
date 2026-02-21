@@ -744,32 +744,6 @@
             }
           },
           {
-            "title": "Subsystem Test",
-            "x": 1280.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Test/Subsystem",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Test Type",
-            "x": 1280.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Test/Type",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
             "title": "Alliance",
             "x": 0.0,
             "y": 768.0,
@@ -830,6 +804,73 @@
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
+            }
+          },
+          {
+            "title": "TargetSpeed",
+            "x": 768.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Shooter/TargetSpeed",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "LowDutyCycle",
+            "x": 768.0,
+            "y": 640.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Shooter/LowDutyCycle",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "Enabled",
+            "x": 1280.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Test/Enabled",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Type",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Test/Type",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Subsystem",
+            "x": 1280.0,
+            "y": 384.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Test/Subsystem",
+              "period": 0.06,
+              "sort_options": false
             }
           }
         ]

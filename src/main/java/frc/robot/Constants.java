@@ -51,7 +51,7 @@ public final class Constants {
 
     // Toggles for susbsytems
     public static final boolean swerveEnabled = true;
-    public static final boolean visionEnabled = true;
+    public static final boolean visionEnabled = false;
     public static final boolean shooterEnabled = true;
     public static final boolean hopperEnabled = true;
     public static final boolean hangEnabled = false;
