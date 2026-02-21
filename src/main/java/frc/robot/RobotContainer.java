@@ -386,7 +386,7 @@ public class RobotContainer {
         }
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
-            NamedCommands.registerCommand("feed shoot", shooterCommands.feedShoot()); 
+            NamedCommands.registerCommand("feed shoot", shooterCommands.feedShoot());
             NamedCommands.registerCommand("fly shoot", shooterCommands.flyShoot());
             NamedCommands.registerCommand("stop feed shoot", shooterCommands.feedStop());
             NamedCommands.registerCommand("stop fly shoot", shooterCommands.flyStop());
