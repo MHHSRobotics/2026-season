@@ -728,8 +728,8 @@ public class RobotContainer {
         autoChooserC = AutoBuilder.buildAutoChooser("CATS"); // TODO: change auto name
         autoChooserC = AutoBuilder.buildAutoChooser("B-Depot");
         autoChooserC = AutoBuilder.buildAutoChooser("R-Depot");
-        autoChooserC = AutoBuilder.buildAutoChooser("B-Corral");
-        autoChooserC = AutoBuilder.buildAutoChooser("R-Corral");
+        autoChooserC = AutoBuilder.buildAutoChooser("B-Outpost");
+        autoChooserC = AutoBuilder.buildAutoChooser("R-Outpost");
         autoChooserC = AutoBuilder.buildAutoChooser("B-NeutralCross");
         autoChooserC = AutoBuilder.buildAutoChooser("R-NeutralCross");
         autoChooserC = AutoBuilder.buildAutoChooser("B-BackUp");
