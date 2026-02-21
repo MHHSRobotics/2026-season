@@ -11,15 +11,71 @@
           }
         },
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "feed shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "fly shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "hopper forward"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "wait",
           "data": {
             "waitTime": 3.0
           }
         },
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop feed shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop fly shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop hopper"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "B-BackUp-2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "hang up"
           }
         }
       ]

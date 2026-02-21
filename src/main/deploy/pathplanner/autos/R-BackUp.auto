@@ -5,6 +5,31 @@
     "data": {
       "commands": [
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "hopper forward"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "feed shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "fly shoot"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "R-BackUp-1"
@@ -17,9 +42,40 @@
           }
         },
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop hopper"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop feed shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop fly shoot"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "R-BackUp-2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "hang up"
           }
         }
       ]

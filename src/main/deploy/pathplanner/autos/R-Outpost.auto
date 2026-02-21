@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "intake"
+          }
+        },
+        {
           "type": "wait",
           "data": {
             "waitTime": 3.0
@@ -32,6 +38,12 @@
           "type": "path",
           "data": {
             "pathName": "R-Outpost-3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "hang"
           }
         }
       ]

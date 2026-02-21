@@ -5,9 +5,40 @@
     "data": {
       "commands": [
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "hopper reverse"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "R-NeutralCross-1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "hinge down"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop hinge"
           }
         },
         {
@@ -17,9 +48,65 @@
           }
         },
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "hinge up"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop hopper"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop hinge"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "R-NeutralCross-3"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "hopper forward"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "feed shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "fly shoot"
+                }
+              }
+            ]
           }
         },
         {
@@ -29,9 +116,40 @@
           }
         },
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop hopper"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop feed shoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "stop fly shoot"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "R-NeutralCross-4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "hang up"
           }
         }
       ]
