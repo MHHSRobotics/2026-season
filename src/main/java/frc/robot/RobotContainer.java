@@ -366,18 +366,30 @@ public class RobotContainer {
         }
         if (Constants.hopperEnabled) {
             hopperCommands = new HopperCommands(hopper);
+            NamedCommands.registerCommand("hopper reverse", hopperCommands.reverse());
+            NamedCommands.registerCommand("hopper forward", hopperCommands.forward());
+            NamedCommands.registerCommand("stop hopper", hopperCommands.stop());
         }
         if (Constants.hangEnabled) {
             hangCommands = new HangCommands(hang);
-            NamedCommands.registerCommand("hang", hangCommands.moveUp());
+            NamedCommands.registerCommand("hang up", hangCommands.moveUp());
+            NamedCommands.registerCommand("hang down", hangCommands.moveDown());
+            NamedCommands.registerCommand("stop hang", hangCommands.stop());
         }
         if (Constants.intakeEnabled) { // TODO: add more NamedCommands
             intakeCommands = new IntakeCommands(intake);
+            NamedCommands.registerCommand("hinge up", intakeCommands.hingeUp());
+            NamedCommands.registerCommand("hinge down", intakeCommands.hingeDown());
+            NamedCommands.registerCommand("stop hinge", intakeCommands.hingeStop());
             NamedCommands.registerCommand("intake", intakeCommands.intake());
+            NamedCommands.registerCommand("stop intake", intakeCommands.intakeStop());
         }
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
-            NamedCommands.registerCommand("shoot", shooterCommands.feedShoot().andThen(shooterCommands.flyShoot()));
+            NamedCommands.registerCommand("feed shoot", shooterCommands.feedShoot()); 
+            NamedCommands.registerCommand("fly shoot", shooterCommands.flyShoot());
+            NamedCommands.registerCommand("stop feed shoot", shooterCommands.feedStop());
+            NamedCommands.registerCommand("stop fly shoot", shooterCommands.flyStop());
         }
     }
 
