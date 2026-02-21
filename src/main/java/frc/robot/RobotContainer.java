@@ -369,13 +369,15 @@ public class RobotContainer {
         }
         if (Constants.hangEnabled) {
             hangCommands = new HangCommands(hang);
+            NamedCommands.registerCommand("hang", hangCommands.moveUp());
         }
-        if (Constants.intakeEnabled) {
+        if (Constants.intakeEnabled) { // TODO: add more NamedCommands
             intakeCommands = new IntakeCommands(intake);
             NamedCommands.registerCommand("intake", intakeCommands.intake());
         }
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
+            NamedCommands.registerCommand("shoot", shooterCommands.feedShoot().andThen(shooterCommands.flyShoot()));
         }
     }
 
@@ -723,7 +725,12 @@ public class RobotContainer {
                 config,
                 (() -> RobotUtils.onRedAlliance()),
                 swerve);
-        autoChooserC = AutoBuilder.buildAutoChooser("CATS");
+        autoChooserC = AutoBuilder.buildAutoChooser("CATS"); // TODO: change auto name
+        autoChooserC = AutoBuilder.buildAutoChooser("B-Depot");
+        autoChooserC = AutoBuilder.buildAutoChooser("R-Depot");
+        autoChooserC = AutoBuilder.buildAutoChooser("B-Corral");
+        autoChooserC = AutoBuilder.buildAutoChooser("R-Corral");
+        autoChooserC = AutoBuilder.buildAutoChooser("B-NeutralCross");
         autoChooser = new LoggedDashboardChooser<>("AutoSelection");
         autoChooser.addOption("Left", "Left");
         autoChooser.addOption("Right", "Right");
