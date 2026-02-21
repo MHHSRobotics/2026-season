@@ -469,7 +469,7 @@ public class RobotContainer {
             driveController.povUp().whileTrue(hopperCommands.forward());
             driveController.povDown().whileTrue(hopperCommands.reverse());
         }
-        if (Constants.shooterEnabled) {
+        if (multiCommands != null) {
             driveController.R2().whileTrue(multiCommands.shoot());
         }
     }
