@@ -128,7 +128,6 @@ public class Hang extends SubsystemBase {
         motor.setLimits(Constants.minAngle, Constants.maxAngle);
 
         motor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
-        
     }
 
     public void setSpeed(double speed) {
