@@ -4,12 +4,12 @@
   "holonomicMode": true,
   "pathFolders": [
     "B-BackUp-Folder",
-    "B-Corral-Folder",
+    "B-Outpost-Folder",
     "B-Depot-Folder",
     "B-NeutralCross-Folder",
     "Misc",
     "R-BackUp-Folder",
-    "R-Corral-Folder",
+    "R-Outpost-Folder",
     "R-Depot-Folder",
     "R-NeutralCross-Folder"
   ],

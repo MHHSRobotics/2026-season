@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.7835085574572118,
-        "y": 3.3142787286063573
+        "x": 13.004584352078238,
+        "y": 7.416845965770172
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.6698252063735581,
-        "y": 3.5369356298836157
+        "x": 14.03353120222661,
+        "y": 7.41711812890685
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.6061002444987769,
-        "y": 3.3142787286063573
+        "x": 15.565916870415649,
+        "y": 7.416845965770172
       },
       "prevControl": {
-        "x": 1.7130229817188662,
-        "y": 3.0569115632081436
+        "x": 14.584601111496335,
+        "y": 7.41186248275027
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "intake",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -42,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "B-Corral-Folder",
+  "folder": "R-Outpost-Folder",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 88.56790381583536
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

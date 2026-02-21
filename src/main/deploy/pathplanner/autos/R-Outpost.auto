@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-Corral-1"
+            "pathName": "R-Outpost-1"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-Corral-2"
+            "pathName": "R-Outpost-2"
           }
         },
         {
@@ -31,13 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-Corral-3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R-Corral-4"
+            "pathName": "R-Outpost-3"
           }
         }
       ]
