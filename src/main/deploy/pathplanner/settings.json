@@ -3,9 +3,12 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
+    "B-BackUp-Folder",
     "B-Corral-Folder",
     "B-Depot-Folder",
+    "B-NeutralCross-Folder",
     "Misc",
+    "R-BackUp-Folder",
     "R-Corral-Folder",
     "R-Depot-Folder",
     "R-NeutralCross-Folder"
