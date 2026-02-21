@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.4374351742021021,
-        "y": 5.517429337862788
+        "x": 0.7332270962542626,
+        "y": 5.674564565328239
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.3600855745721265,
-        "y": 4.8998655256723715
+        "x": 3.3403708987161194,
+        "y": 4.559015691868759
       },
       "prevControl": {
-        "x": 2.5912781836698042,
-        "y": 4.8047341559849315
+        "x": 3.5717667668325275,
+        "y": 4.464379799002184
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -28.810793742973008
+    "rotation": -24.304549265936764
   },
   "reversed": false,
   "folder": "B-Depot-Folder",
