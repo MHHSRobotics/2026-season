@@ -52,6 +52,32 @@ HOPPER_ROLLER_BACK_EMF_DAMPING = _KT * _KV * HOPPER_ROLLER_GEAR_RATIO**2 / MOTOR
 SHOOTER_FEED_BACK_EMF_DAMPING = _KT * _KV * SHOOTER_FEED_GEAR_RATIO**2 / MOTOR_RESISTANCE  # ~0.015 Nm·s/rad
 SHOOTER_FLYWHEEL_BACK_EMF_DAMPING = _KT * _KV * SHOOTER_FLYWHEEL_GEAR_RATIO**2 / MOTOR_RESISTANCE  # ~0.015 Nm·s/rad
 
+# Shooter analytical launch parameters
+SHOOTER_EXIT_ANGLE = 1.2741        # 73° from horizontal (radians)
+SHOOTER_SPEED_EFFICIENCY = 0.376   # ball_speed / flywheel_surface_speed → 31 ft/s at 4800 RPM
+SHOOTER_SPEED_NOISE_STD = 0.05     # 5% speed noise (1 sigma)
+SHOOTER_ANGLE_NOISE_STD = 0.03     # ~1.7° angle noise (1 sigma)
+SHOOTER_MIN_LAUNCH_SPEED = 450.0   # min flywheel rad/s to trigger launch (~75% of free speed)
+FLYWHEEL_RADIUS = 0.05             # meters (0.1m diameter / 2)
+# Exit point in robot local frame (above last churro, behind frame center)
+SHOOTER_EXIT_POS_LOCAL = np.array([-0.31, 0.0, 0.3618])  # 17" above ground (0.4318m - 0.07m chassis center)
+
+
+def _quat_rotate(quat, vec):
+    """Rotate vec by quaternion [w,x,y,z]. Returns rotated numpy array."""
+    w, x, y, z = quat
+    # q * v * q_conj using expanded formula
+    vx, vy, vz = vec
+    # t = 2 * cross(q_xyz, v)
+    tx = 2.0 * (y * vz - z * vy)
+    ty = 2.0 * (z * vx - x * vz)
+    tz = 2.0 * (x * vy - y * vx)
+    return np.array([
+        vx + w * tx + (y * tz - z * ty),
+        vy + w * ty + (z * tx - x * tz),
+        vz + w * tz + (x * ty - y * tx),
+    ])
+
 
 def voltage_to_torque(voltage: float, angular_velocity: float,
                       gear_ratio: float) -> float:
@@ -258,6 +284,14 @@ class SwerveSimulator:
             if gid >= 0:
                 self._flywheel_geom_ids.add(gid)
 
+        # Feed wheel geom IDs for analytical launch detection
+        self._feed_geom_ids = set()
+        for name in ["shooter_feed_inner_left_geom", "shooter_feed_inner_right_geom",
+                      "shooter_feed_outer_left_geom", "shooter_feed_outer_right_geom"]:
+            gid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, name)
+            if gid >= 0:
+                self._feed_geom_ids.add(gid)
+
         # Fuel geom ID → ball index mapping for per-ball state tracking
         self._fuel_geom_to_ball = {}
         ball_idx = 0
@@ -275,6 +309,7 @@ class SwerveSimulator:
                 ball_idx += 1
 
         self._step_counter = 0  # for throttling ball stats updates
+        self._rng = np.random.default_rng()
 
         # Start intake stowed (up, -90 degrees)
         intake_jnt = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, "intake_hinge")
@@ -494,6 +529,45 @@ class SwerveSimulator:
             balls_missed=self.balls_missed,
         )
 
+    def _launch_ball(self, ball_idx: int) -> None:
+        """Analytically launch a ball from the shooter exit point.
+
+        Computes exit velocity from flywheel speed with noise, teleports ball
+        to the exit point in world frame, and sets its velocity.
+        """
+        # Chassis pose
+        a = self._chassis_qpos_adr
+        chassis_pos = self.data.qpos[a:a + 3].copy()
+        chassis_quat = self.data.qpos[a + 3:a + 7].copy()
+
+        # Flywheel surface speed → ball exit speed
+        flywheel_omega = abs(self.data.qvel[self._mech_jnt_dofs["shooter_flywheel_left_joint"]])
+        base_speed = flywheel_omega * FLYWHEEL_RADIUS * SHOOTER_SPEED_EFFICIENCY
+        speed = base_speed * (1.0 + self._rng.normal(0, SHOOTER_SPEED_NOISE_STD))
+
+        # Exit angle with noise (pitch and yaw)
+        pitch = SHOOTER_EXIT_ANGLE + self._rng.normal(0, SHOOTER_ANGLE_NOISE_STD)
+        yaw = self._rng.normal(0, SHOOTER_ANGLE_NOISE_STD)
+
+        # Local-frame velocity (shooter fires toward +X in robot frame, upward in Z)
+        local_vel = np.array([
+            speed * math.cos(pitch) * math.cos(yaw),
+            speed * math.cos(pitch) * math.sin(yaw),
+            speed * math.sin(pitch),
+        ])
+
+        # Transform to world frame
+        world_vel = _quat_rotate(chassis_quat, local_vel)
+        world_pos = chassis_pos + _quat_rotate(chassis_quat, SHOOTER_EXIT_POS_LOCAL)
+
+        # Set ball state
+        qpos_adr = self._fuel_qpos_adrs[ball_idx]
+        dof_adr = self._fuel_dof_starts[ball_idx]
+        self.data.qpos[qpos_adr:qpos_adr + 3] = world_pos
+        self.data.qpos[qpos_adr + 3:qpos_adr + 7] = [1, 0, 0, 0]  # identity quaternion
+        self.data.qvel[dof_adr:dof_adr + 3] = world_vel
+        self.data.qvel[dof_adr + 3:dof_adr + 6] = 0  # zero angular velocity
+
     def _update_ball_stats(self) -> None:
         """Track ball shooting stats via per-ball state machine.
 
@@ -504,20 +578,21 @@ class SwerveSimulator:
         if len(self._fuel_x_indices) == 0:
             return
 
-        # IDLE → IN_FLIGHT: ball is in contact with a spinning flywheel
+        # IDLE → IN_FLIGHT: ball contacts a feed wheel while flywheels spinning
         flywheel_vel = abs(self.data.qvel[self._mech_jnt_dofs["shooter_flywheel_left_joint"]])
-        if flywheel_vel > 50.0:
+        if flywheel_vel > SHOOTER_MIN_LAUNCH_SPEED:
             for i in range(self.data.ncon):
                 c = self.data.contact[i]
                 g1, g2 = int(c.geom1), int(c.geom2)
-                # Check if one geom is a flywheel and the other is a fuel ball
-                if g1 in self._flywheel_geom_ids and g2 in self._fuel_geom_to_ball:
+                # Check if one geom is a feed wheel and the other is a fuel ball
+                if g1 in self._feed_geom_ids and g2 in self._fuel_geom_to_ball:
                     ball_idx = self._fuel_geom_to_ball[g2]
-                elif g2 in self._flywheel_geom_ids and g1 in self._fuel_geom_to_ball:
+                elif g2 in self._feed_geom_ids and g1 in self._fuel_geom_to_ball:
                     ball_idx = self._fuel_geom_to_ball[g1]
                 else:
                     continue
                 if self._ball_states[ball_idx] == 0:
+                    self._launch_ball(ball_idx)
                     self._ball_states[ball_idx] = 1
 
         # IN_FLIGHT → check scoring then return to IDLE
