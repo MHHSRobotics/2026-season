@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -12,6 +13,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
@@ -44,6 +50,7 @@ import frc.robot.subsystems.swerve.SwerveSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
+import frc.robot.util.RobotUtils;
 
 public class RobotContainer {
     // Subsystems
@@ -72,6 +79,7 @@ public class RobotContainer {
             testControllerManual; // Whether to use manual or PID mode for the test controller
 
     private LoggedDashboardChooser<String> autoChooser; // Choice of auto
+    private SendableChooser<Command> selectedAuto;
 
     private RobotPublisher publisher; // Publishes 3D robot data to AdvantageScope for visualization
 
@@ -83,16 +91,18 @@ public class RobotContainer {
         initSubsystems(); // Initialize all the IO objects, subsystems, and mechanism simulators
         initCommands(); // Initialize command classes
 
-        configureBindings(); // Add drive controller bindings
-
-        configureManualBindings(); // Configure bindings for manual controller
-
         // Configure bindings for test controller when not in match
         if (!DriverStation.isFMSAttached()) {
             configureTestBindings();
         }
 
+        configureAutoPaths(); // Set up the auto path commands
+
         configureAutoChooser(); // Set up the auto chooser
+
+        configureBindings(); // Add drive controller bindings
+
+        configureManualBindings(); // Configure bindings for manual controller
 
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
     }
@@ -688,10 +698,54 @@ public class RobotContainer {
 
     // Initialize dashboard auto chooser
     public void configureAutoChooser() {
+        RobotConfig config;
+
+        try {
+            config = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        AutoBuilder.configure(
+                swerve::getPose,
+                swerve::setPose,
+                swerve::getChassisSpeeds,
+                swerve::setChassisSpeeds,
+                new PPHolonomicDriveController(
+                        new PIDConstants(
+                                Swerve.Constants.driveKP.get(),
+                                Swerve.Constants.driveKI.get(),
+                                Swerve.Constants.driveKD.get()),
+                        new PIDConstants(
+                                Swerve.Constants.rotationKP.get(),
+                                Swerve.Constants.rotationKI.get(),
+                                Swerve.Constants.rotationKD.get())),
+                config,
+                (() -> RobotUtils.onRedAlliance()),
+                swerve);
+
+        selectedAuto = AutoBuilder.buildAutoChooser("Auto");
         autoChooser = new LoggedDashboardChooser<>("AutoSelection");
-        autoChooser.addOption("Left", "Left");
-        autoChooser.addOption("Right", "Right");
+        autoChooser.addOption("B M", "B M");
         autoChooser.addDefaultOption("Leave", "Leave");
+    }
+
+    public void configureAutoPaths() {
+
+        NamedCommands.registerCommand("IntakeDown", new IntakeCommands(intake).hingeDown());
+        NamedCommands.registerCommand("IntakeUp", new IntakeCommands(intake).hingeUp());
+        NamedCommands.registerCommand("IntakeStart", new IntakeCommands(intake).intake());
+        NamedCommands.registerCommand("IntakeStop", new IntakeCommands(intake).intakeStop());
+
+        NamedCommands.registerCommand("Feed", new ShooterCommands(shooter).feedShoot());
+        NamedCommands.registerCommand("Shoot", new ShooterCommands(shooter).flyShoot());
+        NamedCommands.registerCommand("StopShoot", new ShooterCommands(shooter).flyStop());
+        NamedCommands.registerCommand("StopFeed", new ShooterCommands(shooter).feedStop());
+
+        NamedCommands.registerCommand("HopperStart", new HopperCommands(hopper).forward());
+        NamedCommands.registerCommand("HopperStop", new HopperCommands(hopper).stop());
+        NamedCommands.registerCommand("HangUp", new HangCommands(hang).moveUp());
+        NamedCommands.registerCommand("HangDown", new HangCommands(hang).moveDown());
     }
 
     public Command getAutonomousCommand() {
@@ -700,6 +754,9 @@ public class RobotContainer {
                     .setPositionOutput(-2, 0)
                     .andThen(new WaitCommand(3))
                     .andThen(swerveCommands.setPositionOutput(0, 0));
+        }
+        if (autoChooser.get().equals("B M")) {
+            return selectedAuto.getSelected();
         } else {
             Alerts.create("Unknown auto specified", AlertType.kWarning);
             return new InstantCommand();

@@ -321,13 +321,21 @@ public class Swerve extends SubsystemBase {
     }
 
     // Tell the modules to reach a target chassis speed: vx (m/s), vy (m/s), omega (rad/s)
-    private void setChassisSpeeds(ChassisSpeeds speeds) {
+    public void setChassisSpeeds(ChassisSpeeds speeds) {
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, frc.robot.Constants.loopTime);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, Constants.maxLinearSpeedMetersPerSec);
         for (int i = 0; i < 4; i++) {
             modules[i].runSetpoint(setpointStates[i]);
         }
+    }
+
+    public ChassisSpeeds getChassisSpeeds() {
+        SwerveModuleState[] states = new SwerveModuleState[4];
+        for (int i = 0; i < modules.length; i++) {
+            states[i] = modules[i].getState();
+        }
+        return kinematics.toChassisSpeeds(states);
     }
 
     // Make the modules point in an X pattern so it's harder to push the robot.
