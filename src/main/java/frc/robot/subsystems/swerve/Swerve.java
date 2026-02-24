@@ -103,7 +103,8 @@ public class Swerve extends SubsystemBase {
         public static final LoggedNetworkNumber driveKA = new LoggedNetworkNumber("Swerve/DriveKA", 0);
 
         // Steer motor PID
-        public static final LoggedNetworkNumber steerKP = new LoggedNetworkNumber("Swerve/SteerKP", 20);
+        public static final LoggedNetworkNumber steerKP =
+                new LoggedNetworkNumber("Swerve/SteerKP", frc.robot.Constants.physicsSimEnabled ? 10 : 20);
         public static final LoggedNetworkNumber steerKI = new LoggedNetworkNumber("Swerve/SteerKI", 0);
         public static final LoggedNetworkNumber steerKD = new LoggedNetworkNumber("Swerve/SteerKD", 0);
         public static final LoggedNetworkNumber steerKS = new LoggedNetworkNumber("Swerve/SteerKS", 0);

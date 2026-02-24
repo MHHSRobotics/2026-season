@@ -41,6 +41,12 @@ public class GyroIOPigeon extends GyroIO {
         inputs.yawPositionRad = Units.degreesToRadians(gyro.getYaw().getValueAsDouble());
         inputs.yawVelocityRadPerSec =
                 Units.degreesToRadians(gyro.getAngularVelocityZWorld().getValueAsDouble());
+        inputs.pitchPositionRad = Units.degreesToRadians(gyro.getPitch().getValueAsDouble());
+        inputs.pitchVelocityRadPerSec =
+                Units.degreesToRadians(gyro.getAngularVelocityYWorld().getValueAsDouble());
+        inputs.rollPositionRad = Units.degreesToRadians(gyro.getRoll().getValueAsDouble());
+        inputs.rollVelocityRadPerSec =
+                Units.degreesToRadians(gyro.getAngularVelocityXWorld().getValueAsDouble());
         inputs.hardwareFault = gyro.getFault_Hardware().getValue();
 
         // Update alerts using the base class method (this checks all fault conditions and updates dashboard alerts)
@@ -68,6 +74,42 @@ public class GyroIOPigeon extends GyroIO {
             return;
         }
         sim.setAngularVelocityZ(Units.radiansToDegrees(yawVelocity));
+    }
+
+    @Override
+    public void setMechPitch(double pitch) {
+        if (Constants.currentMode == Mode.REAL) {
+            Alerts.create("Used sim-only method setMechPitch on " + getName(), AlertType.kWarning);
+            return;
+        }
+        sim.setPitch(Units.radiansToDegrees(pitch));
+    }
+
+    @Override
+    public void setMechPitchVelocity(double pitchVelocity) {
+        if (Constants.currentMode == Mode.REAL) {
+            Alerts.create("Used sim-only method setMechPitchVelocity on " + getName(), AlertType.kWarning);
+            return;
+        }
+        sim.setAngularVelocityY(Units.radiansToDegrees(pitchVelocity));
+    }
+
+    @Override
+    public void setMechRoll(double roll) {
+        if (Constants.currentMode == Mode.REAL) {
+            Alerts.create("Used sim-only method setMechRoll on " + getName(), AlertType.kWarning);
+            return;
+        }
+        sim.setRoll(Units.radiansToDegrees(roll));
+    }
+
+    @Override
+    public void setMechRollVelocity(double rollVelocity) {
+        if (Constants.currentMode == Mode.REAL) {
+            Alerts.create("Used sim-only method setMechRollVelocity on " + getName(), AlertType.kWarning);
+            return;
+        }
+        sim.setAngularVelocityX(Units.radiansToDegrees(rollVelocity));
     }
 
     @Override
