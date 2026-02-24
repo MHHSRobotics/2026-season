@@ -344,14 +344,15 @@ public class RobotContainer {
                 case SIM:
                     hangMotor = new MotorIOTalonFX(
                             Hang.Constants.motorId, Constants.defaultBus, "hang motor", "Hang/Motor");
-                    hangEncoder=new EncoderIOCANcoder(Hang.Constants.encoderId, Constants.defaultBus, "hang encoder","Hang/Encoder");
+                    hangEncoder = new EncoderIOCANcoder(
+                            Hang.Constants.encoderId, Constants.defaultBus, "hang encoder", "Hang/Encoder");
                     break;
                 default:
                     hangMotor = new MotorIO("hang motor", "Hang/Motor");
-                    hangEncoder=new EncoderIO("hang encoder", "Hang/Encoder");
+                    hangEncoder = new EncoderIO("hang encoder", "Hang/Encoder");
                     break;
             }
-            hang = new Hang(hangMotor,hangEncoder);
+            hang = new Hang(hangMotor, hangEncoder);
         }
 
         if (Constants.intakeEnabled) {
@@ -557,7 +558,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Fast"))
                     .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.setSpeed(()->0.5));
+                    .whileTrue(hangCommands.setSpeed(() -> 0.5));
 
             // Hang move down test
             driveController
@@ -565,7 +566,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Fast"))
                     .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.setSpeed(()->-0.5));
+                    .whileTrue(hangCommands.setSpeed(() -> -0.5));
         }
 
         if (Constants.hopperEnabled) {
