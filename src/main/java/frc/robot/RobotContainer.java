@@ -22,6 +22,8 @@ import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.HopperCommands;
 import frc.robot.commands.IntakeCommands;
+import frc.robot.commands.LEDCommands;
+import frc.robot.commands.MultiCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.BitIO;
@@ -32,21 +34,29 @@ import frc.robot.io.EncoderIO;
 import frc.robot.io.EncoderIOCANcoder;
 import frc.robot.io.GyroIO;
 import frc.robot.io.GyroIOPigeon;
+import frc.robot.io.LedIO;
+import frc.robot.io.LedIOCANdle;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
 import frc.robot.subsystems.hopper.Hopper;
+import frc.robot.subsystems.hopper.HopperPhysicsSim;
 import frc.robot.subsystems.hopper.HopperSim;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakePhysicsSim;
 import frc.robot.subsystems.intake.IntakeSim;
+import frc.robot.subsystems.leds.LED;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterPhysicsSim;
 import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.swerve.GyroSim;
+import frc.robot.subsystems.swerve.SimpleSwerveSim;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveModule;
+import frc.robot.subsystems.swerve.SwerveModulePhysicsSim;
 import frc.robot.subsystems.swerve.SwerveModuleSim;
-import frc.robot.subsystems.swerve.SwerveSim;
+import frc.robot.subsystems.swerve.SwervePhysicsSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
@@ -59,24 +69,25 @@ public class RobotContainer {
     private Hopper hopper;
     private Intake intake;
     private Shooter shooter;
+    private LED led;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
     private HopperCommands hopperCommands;
     private IntakeCommands intakeCommands;
     private ShooterCommands shooterCommands;
+    private LEDCommands ledCommands;
+
+    private MultiCommands multiCommands;
 
     private final CommandPS5Controller driveController = new CommandPS5Controller(0);
 
     private final CommandPS5Controller operator =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
 
-    private final CommandPS5Controller testController = new CommandPS5Controller(
-            2); // Test controller for controlling one subsystem at a time, for full manual and PID movements
-
-    private LoggedDashboardChooser<String> testControllerChooser; // Which subsystem the test controller is applied to
-    private LoggedDashboardChooser<String>
-            testControllerManual; // Whether to use manual or PID mode for the test controller
+    private LoggedDashboardChooser<Boolean> testEnabled;
+    private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
+    private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
 
     private LoggedDashboardChooser<String> autoChooser; // Choice of auto
     private SendableChooser<Command> selectedAuto;
@@ -251,18 +262,32 @@ public class RobotContainer {
 
             // If mode is SIM, start the simulations for swerve modules and gyro
             if (Constants.currentMode == Mode.SIM) {
-                SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
-                    new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
-                    new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight),
-                    new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft),
-                    new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight)
-                };
+                if (!Constants.enablePhysicsSim) {
+                    SwerveModuleSim[] moduleSims = new SwerveModuleSim[] {
+                        new SwerveModuleSim(flDriveMotor, flAngleMotor, flEncoder, TunerConstants.FrontLeft),
+                        new SwerveModuleSim(frDriveMotor, frAngleMotor, frEncoder, TunerConstants.FrontRight),
+                        new SwerveModuleSim(blDriveMotor, blAngleMotor, blEncoder, TunerConstants.BackLeft),
+                        new SwerveModuleSim(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight)
+                    };
 
-                SwerveSim swerveSim = new SwerveSim(moduleSims);
+                    SimpleSwerveSim swerveSim = new SimpleSwerveSim(moduleSims);
 
-                new GyroSim(gyro, swerveSim);
-                if (Constants.visionEnabled) {
-                    new VisionSim(swerve.getCameras(), swerveSim);
+                    new GyroSim(gyro, swerveSim);
+                    if (Constants.visionEnabled) {
+                        new VisionSim(swerve.getCameras(), swerveSim);
+                    }
+                } else {
+                    new SwerveModulePhysicsSim(flDriveMotor, flAngleMotor, flEncoder, "/MuJoCo/Swerve/FrontLeft");
+                    new SwerveModulePhysicsSim(frDriveMotor, frAngleMotor, frEncoder, "/MuJoCo/Swerve/FrontRight");
+                    new SwerveModulePhysicsSim(blDriveMotor, blAngleMotor, blEncoder, "/MuJoCo/Swerve/BackLeft");
+                    new SwerveModulePhysicsSim(brDriveMotor, brAngleMotor, brEncoder, "/MuJoCo/Swerve/BackRight");
+
+                    SwervePhysicsSim swerveSim = new SwervePhysicsSim("MuJoCo/Swerve/Pose");
+
+                    new GyroSim(gyro, swerveSim);
+                    if (Constants.visionEnabled) {
+                        new VisionSim(swerve.getCameras(), swerveSim);
+                    }
                 }
             }
         }
@@ -290,7 +315,11 @@ public class RobotContainer {
             shooter = new Shooter(feedMotor, flyMotor);
 
             if (Constants.currentMode == Mode.SIM) {
-                new ShooterSim(feedMotor, flyMotor);
+                if (!Constants.enablePhysicsSim) {
+                    new ShooterSim(feedMotor, flyMotor);
+                } else {
+                    new ShooterPhysicsSim(feedMotor, flyMotor, "/MuJoCo/Shooter");
+                }
             }
         }
 
@@ -309,7 +338,11 @@ public class RobotContainer {
             hopper = new Hopper(hopperMotor);
 
             if (Constants.currentMode == Mode.SIM) {
-                new HopperSim(hopperMotor);
+                if (!Constants.enablePhysicsSim) {
+                    new HopperSim(hopperMotor);
+                } else {
+                    new HopperPhysicsSim(hopperMotor, "/MuJoCo/Hopper");
+                }
             }
         }
 
@@ -327,6 +360,7 @@ public class RobotContainer {
             }
             hang = new Hang(hangMotor);
         }
+
         if (Constants.intakeEnabled) {
             MotorIO intakeMotor;
             MotorIO hingeMotor;
@@ -357,8 +391,26 @@ public class RobotContainer {
             intake = new Intake(intakeMotor, hingeMotor, leftSwitch, rightSwitch);
 
             if (Constants.currentMode == Mode.SIM) {
-                new IntakeSim(intakeMotor, hingeMotor);
+                if (!Constants.physicsSimEnabled) {
+                    new IntakeSim(intakeMotor, hingeMotor);
+                } else {
+                    new IntakePhysicsSim(intakeMotor, hingeMotor, "/MuJoCo/Intake");
+                }
             }
+        }
+
+        if (Constants.ledsEnabled) {
+            LedIO ledIO;
+            switch (Constants.currentMode) {
+                case REAL:
+                case SIM:
+                    ledIO = new LedIOCANdle("leds", "LED", LED.Constants.id);
+                    break;
+                default:
+                    ledIO = new LedIO("leds", "LED");
+                    break;
+            }
+            led = new LED(ledIO);
         }
     }
 
@@ -378,6 +430,12 @@ public class RobotContainer {
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
         }
+        if (Constants.ledsEnabled) {
+            ledCommands = new LEDCommands(led);
+        }
+        if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled) {
+            multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands, ledCommands, shooter);
+        }
     }
 
     private void configureBindings() {
@@ -388,10 +446,13 @@ public class RobotContainer {
          * Right stick X: turn
          * Touchpad: cancel all commands
          */
+        testEnabled = new LoggedDashboardChooser<>("Test/Enabled");
+        testEnabled.addDefaultOption("false", false);
+        testEnabled.addOption("true", true);
 
         if (Constants.swerveEnabled) {
-            driveController.options().onTrue(swerveCommands.resetGyro());
-            driveController.L1().onTrue(swerveCommands.lock());
+            driveController.options().and(() -> !testEnabled.get()).onTrue(swerveCommands.resetGyro());
+            driveController.create().and(() -> !testEnabled.get()).onTrue(swerveCommands.lock());
             /*
              * How this works:
              * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
@@ -409,6 +470,18 @@ public class RobotContainer {
             driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
                     .cancelAll()));
         }
+        if (Constants.intakeEnabled) {
+            driveController.L1().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
+            driveController.L2().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
+            driveController.R1().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
+        }
+        if (Constants.hopperEnabled) {
+            driveController.povUp().and(() -> !testEnabled.get()).whileTrue(hopperCommands.forward());
+            driveController.povDown().and(() -> !testEnabled.get()).whileTrue(hopperCommands.reverse());
+        }
+        if (multiCommands != null) {
+            driveController.R2().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
+        }
     }
 
     private void configureTestBindings() {
@@ -418,272 +491,266 @@ public class RobotContainer {
          * Backward manual/PID: circle
          */
 
-        testControllerManual = new LoggedDashboardChooser<>("Test/Type");
-        testControllerManual.addDefaultOption("Manual", "Manual");
-        testControllerManual.addOption("PID", "PID");
-        testControllerManual.addOption("Fast", "Fast");
+        testType = new LoggedDashboardChooser<>("Test/Type");
+        testType.addDefaultOption("Manual", "Manual");
+        testType.addOption("Fast", "Fast");
+        testType.addOption("PID", "PID");
+        testType.addOption("PIDChange", "PIDChange");
 
-        testControllerChooser = new LoggedDashboardChooser<>("Test/Subsystem");
-        testControllerChooser.addDefaultOption("", ""); // Add default option so code doesn't crash on read
+        testSubsystem = new LoggedDashboardChooser<>("Test/Subsystem");
+        testSubsystem.addDefaultOption("", ""); // Add default option so code doesn't crash on read
 
         if (Constants.swerveEnabled) {
-            testControllerChooser.addOption("Swerve", "Swerve");
-
-            // Test controller swerve control for convenience
-            testController
-                    .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
-                    .or(() -> Math.hypot(testController.getLeftX(), testController.getLeftY())
-                            > Swerve.Constants.moveDeadband)
-                    .onTrue(swerveCommands.drive(
-                            () -> -testController.getLeftY(),
-                            () -> -testController.getLeftX(),
-                            () -> -testController.getRightX(),
-                            () -> Swerve.Constants.swerveFieldCentric.get()));
+            testSubsystem.addOption("Swerve", "Swerve");
 
             // Manual duty cycle forward test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Swerve"))
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(0.2, 0, 0))
                     .onFalse(swerveCommands.stop());
 
             // Manual duty cycle backward test
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Swerve"))
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(-0.2, 0, 0))
                     .onFalse(swerveCommands.stop());
 
             // Manual duty cycle forward test, fast
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Swerve"))
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(1, 0, 0))
                     .onFalse(swerveCommands.stop());
 
             // Manual duty cycle backward test, fast
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Swerve"))
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(-1, 0, 0))
                     .onFalse(swerveCommands.stop());
         }
 
         if (Constants.hangEnabled) {
-            testControllerChooser.addOption("Hang", "Hang");
+            testSubsystem.addOption("Hang", "Hang");
             // Hang move up test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.setSpeed(() -> 0.1))
-                    .onFalse(hangCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Hang"))
+                    .whileTrue(hangCommands.setSpeed(() -> 0.1));
 
             // Hang move down test
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.setSpeed(() -> -0.1))
-                    .onFalse(hangCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Hang"))
+                    .whileTrue(hangCommands.setSpeed(() -> -0.1));
 
             // Hang move up test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.moveUp())
-                    .onFalse(hangCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Hang"))
+                    .whileTrue(hangCommands.moveUp());
 
             // Hang move down test
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Hang"))
-                    .onTrue(hangCommands.moveDown())
-                    .onFalse(hangCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Hang"))
+                    .whileTrue(hangCommands.moveDown());
         }
 
         if (Constants.hopperEnabled) {
-            testControllerChooser.addOption("Hopper", "Hopper");
+            testSubsystem.addOption("Hopper", "Hopper");
 
             // Hopper slow forward test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.setSpeed(() -> 0.1))
-                    .onFalse(hopperCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Hopper"))
+                    .whileTrue(hopperCommands.setSpeed(() -> 0.1));
 
             // Hopper slow reverse test
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.setSpeed(() -> -0.1))
-                    .onFalse(hopperCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Hopper"))
+                    .whileTrue(hopperCommands.setSpeed(() -> -0.1));
 
             // Hopper fast forward test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.forward())
-                    .onFalse(hopperCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Hopper"))
+                    .whileTrue(hopperCommands.forward());
 
             // Hopper fast reverse test
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Hopper"))
-                    .onTrue(hopperCommands.reverse())
-                    .onFalse(hopperCommands.stop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Hopper"))
+                    .whileTrue(hopperCommands.reverse());
         }
 
         if (Constants.shooterEnabled) {
-            testControllerChooser.addOption("ShooterFeed", "ShooterFeed");
-            testControllerChooser.addOption("ShooterFly", "ShooterFly");
+            testSubsystem.addOption("ShooterFeed", "ShooterFeed");
+            testSubsystem.addOption("ShooterFly", "ShooterFly");
 
             // Slow flywheel forward test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.setFlySpeed(() -> 0.1))
-                    .onFalse(shooterCommands.flyStop());
-
-            // Slow flywheel reverse test
-            testController
-                    .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.setFlySpeed(() -> -0.1))
-                    .onFalse(shooterCommands.flyStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("ShooterFly"))
+                    .whileTrue(shooterCommands.setFlySpeed(() -> 50));
 
             // Fast flywheel forward test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.flyShoot())
-                    .onFalse(shooterCommands.flyStop());
-
-            // Fast flywheel reverse test
-            testController
-                    .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFly"))
-                    .onTrue(shooterCommands.flyReverse())
-                    .onFalse(shooterCommands.flyStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("ShooterFly"))
+                    .whileTrue(shooterCommands.flyShoot());
 
             // Slow feed forward test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.setFeedSpeed(() -> 0.1))
-                    .onFalse(shooterCommands.feedStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("ShooterFeed"))
+                    .whileTrue(shooterCommands.setFeedSpeed(() -> 0.1));
 
             // Slow feed reverse test
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.setFeedSpeed(() -> -0.1))
-                    .onFalse(shooterCommands.feedStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("ShooterFeed"))
+                    .whileTrue(shooterCommands.setFeedSpeed(() -> -0.1));
 
             // Fast feed forward test
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.feedShoot())
-                    .onFalse(shooterCommands.feedStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("ShooterFeed"))
+                    .whileTrue(shooterCommands.feedShoot());
 
             // Fast feed reverse test
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("ShooterFeed"))
-                    .onTrue(shooterCommands.feedReverse())
-                    .onFalse(shooterCommands.feedStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("ShooterFeed"))
+                    .whileTrue(shooterCommands.feedReverse());
         }
 
         if (Constants.intakeEnabled) {
-            testControllerChooser.addOption("Intake", "Intake");
-            testControllerChooser.addOption("IntakeHinge", "IntakeHinge");
+            testSubsystem.addOption("Intake", "Intake");
+            testSubsystem.addOption("IntakeHinge", "IntakeHinge");
 
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.setIntakeSpeed(() -> 0.1))
-                    .onFalse(intakeCommands.intakeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Intake"))
+                    .whileTrue(intakeCommands.setIntakeSpeed(() -> 0.1));
 
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.setIntakeSpeed(() -> -0.1))
-                    .onFalse(intakeCommands.intakeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Intake"))
+                    .whileTrue(intakeCommands.setIntakeSpeed(() -> -0.1));
 
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.intake())
-                    .onFalse(intakeCommands.intakeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Intake"))
+                    .whileTrue(intakeCommands.intake());
 
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("Intake"))
-                    .onTrue(intakeCommands.outtake())
-                    .onFalse(intakeCommands.intakeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("Intake"))
+                    .whileTrue(intakeCommands.outtake());
 
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setHingeSpeed(() -> 0.1))
-                    .onFalse(intakeCommands.hingeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> 0.1));
 
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Manual"))
-                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setIntakeSpeed(() -> -0.1))
-                    .onFalse(intakeCommands.hingeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> -0.1));
 
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setHingeSpeed(() -> 0.5))
-                    .onFalse(intakeCommands.hingeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> 0.5));
 
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("Fast"))
-                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.setHingeSpeed(() -> -0.5))
-                    .onFalse(intakeCommands.hingeStop());
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Fast"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.setHingeSpeed(() -> -0.5));
 
-            testController
+            driveController
                     .cross()
-                    .and(() -> testControllerManual.get().equals("PID"))
-                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PID"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.hingeUp());
 
-            testController
+            driveController
                     .circle()
-                    .and(() -> testControllerManual.get().equals("PID"))
-                    .and(() -> testControllerChooser.get().equals("IntakeHinge"))
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PID"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.hingeDown());
+
+            driveController
+                    .cross()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PIDChange"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.changeGoal(() -> 0.02));
+
+            driveController
+                    .circle()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PIDChange"))
+                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
+                    .whileTrue(intakeCommands.changeGoal(() -> -0.02));
         }
     }
 

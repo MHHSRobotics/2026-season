@@ -1,0 +1,2947 @@
+<!-- 2026 REBUILT Field
+     Origin: Blue alliance wall corner (WPILib convention)
+     X: along field length (0 to 16.54m), blue-to-red
+     Y: along field width (0 to 8.07m)
+     Z: up
+
+     Field: 16.54m x 8.07m
+     Blue/red halves are exact 180-degree rotations about field center
+-->
+
+<mujoco model="rebuilt_field">
+  <asset>
+    <!-- Field surface -->
+    <material name="carpet_mat" rgba="0.3 0.3 0.3 1"/>
+    <!-- Structural -->
+    <material name="wall_mat" rgba="0.35 0.38 0.4 1"/>
+    <material name="metal_mat" rgba="0.5 0.5 0.5 1"/>
+    <!-- Alliance colors -->
+    <material name="blue_wall_mat" rgba="0.1 0.2 0.7 1"/>
+    <material name="red_wall_mat" rgba="0.7 0.1 0.1 1"/>
+    <material name="blue_accent_mat" rgba="0.2 0.35 0.8 1"/>
+    <material name="red_accent_mat" rgba="0.8 0.2 0.15 1"/>
+    <!-- Hub -->
+    <material name="hub_mat" rgba="0.65 0.68 0.7 1"/>
+    <material name="blue_hub_mat" rgba="0.5 0.6 0.85 1"/>
+    <material name="red_hub_mat" rgba="0.85 0.5 0.5 1"/>
+    <material name="net_mat" rgba="0.9 0.9 0.9 0.4"/>
+    <!-- Depot -->
+    <material name="depot_mat" rgba="0.6 0.6 0.55 1"/>
+    <!-- Lines -->
+    <material name="line_white_mat" rgba="1.0 1.0 1.0 1"/>
+    <material name="line_blue_mat" rgba="0.1 0.1 0.8 1"/>
+    <material name="line_red_mat" rgba="0.8 0.1 0.1 1"/>
+    <!-- Bumps/ramps -->
+    <material name="bump_mat" rgba="0.35 0.35 0.35 1"/>
+    <!-- Fuel -->
+    <material name="fuel_mat" rgba="1.0 0.85 0.0 1"/>
+    <!-- Rung -->
+    <material name="rung_mat" rgba="0.9 0.6 0.1 1"/>
+  </asset>
+
+  <worldbody>
+    <!-- ========== FIELD FLOOR ========== -->
+    <!-- Carpet: 16.54m x 8.07m, centered at (8.27, 4.035, 0) -->
+    <geom name="field_floor" type="box" pos="8.27 4.035 -0.005"
+          size="8.27 4.035 0.005" material="carpet_mat"
+          friction="1.0 0.005 0.0001" contype="1" conaffinity="3"/>
+
+    <!-- ========== FIELD LINES (visual only, no collision) ========== -->
+    <!-- Center line: X=8.27, 0.05m wide -->
+    <geom name="center_line" type="box" pos="8.27 4.035 0.001"
+          size="0.025 4.035 0.001" material="line_white_mat"
+          contype="0" conaffinity="0"/>
+    <!-- Blue alliance line: 4.0m from blue wall, 0.05m wide -->
+    <geom name="blue_alliance_line" type="box" pos="4.0 4.035 0.001"
+          size="0.025 4.035 0.001" material="line_blue_mat"
+          contype="0" conaffinity="0"/>
+    <!-- Red alliance line: 4.0m from red wall (16.54 - 4.0 = 12.54m) -->
+    <geom name="red_alliance_line" type="box" pos="12.54 4.035 0.001"
+          size="0.025 4.035 0.001" material="line_red_mat"
+          contype="0" conaffinity="0"/>
+
+    <!-- ========== GUARDRAILS (long edges, 0.5m tall) ========== -->
+    <!-- Wall thickness: 0.03m -->
+    <!-- Near guardrail (Y=0 side) -->
+    <geom name="guardrail_near" type="box" pos="8.27 -0.015 0.25"
+          size="8.27 0.015 0.25" material="wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Far guardrail (Y=8.07m side) -->
+    <geom name="guardrail_far" type="box" pos="8.27 8.085 0.25"
+          size="8.27 0.015 0.25" material="wall_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- ========== ALLIANCE WALLS (short edges, 2.0m tall, 0.05m thick) ========== -->
+    <!-- Blue alliance wall (X=0), split around corral hole
+         Corral: 0.813m wide, 0.178m tall, bottom at Z=0.047
+         Right edge at Y=0.26, left edge at Y=1.073 -->
+    <!-- Right of hole (Y=0 to 0.26) -->
+    <geom name="blue_wall_r" type="box" pos="-0.025 0.13 1.0"
+          size="0.025 0.13 1.0" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Left of hole (Y=1.073 to 8.07) -->
+    <geom name="blue_wall_l" type="box" pos="-0.025 4.5715 1.0"
+          size="0.025 3.4985 1.0" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Below hole (Z=0 to 0.047) -->
+    <geom name="blue_wall_below" type="box" pos="-0.025 0.6665 0.0235"
+          size="0.025 0.4065 0.0235" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Above hole (Z=0.225 to 2.0) -->
+    <geom name="blue_wall_above" type="box" pos="-0.025 0.6665 1.1125"
+          size="0.025 0.4065 0.8875" material="blue_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Corral divider cylinder in middle of hole -->
+    <geom name="blue_corral_post" type="cylinder" pos="-0.025 0.6665 0.136"
+          size="0.021 0.089" material="metal_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Blue CORRAL: 0.9x0.9m area behind wall, 0.2m tall walls
+         Centered on hole (Y=0.6665), extends X=-0.05 to X=-0.95 -->
+    <body name="blue_corral" pos="-0.5 0.6665 0">
+      <!-- Back wall -->
+      <geom name="blue_corral_back" type="box" pos="-0.45 0 0.1"
+            size="0.015 0.45 0.1" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right wall -->
+      <geom name="blue_corral_right" type="box" pos="0 -0.45 0.1"
+            size="0.45 0.015 0.1" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left wall -->
+      <geom name="blue_corral_left" type="box" pos="0 0.45 0.1"
+            size="0.45 0.015 0.1" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Ramp from hole lip (X=-0.05, Z=0.047) down to ground (X=-0.8, Z=0)
+           Length=0.75m, drop=0.047m, angle=0.063 rad -->
+      <geom name="blue_corral_ramp" type="box" pos="0.075 0 0.0235"
+            size="0.376 0.4065 0.005" euler="0 -0.063 0" material="wall_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red alliance wall (X=16.54m), split around corral hole (180° mirror)
+         Hole spans Y=6.997 to 7.81 -->
+    <!-- Right of hole (from red perspective, Y=7.81 to 8.07) -->
+    <geom name="red_wall_r" type="box" pos="16.565 7.94 1.0"
+          size="0.025 0.13 1.0" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Left of hole (from red perspective, Y=0 to 6.997) -->
+    <geom name="red_wall_l" type="box" pos="16.565 3.4985 1.0"
+          size="0.025 3.4985 1.0" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Below hole -->
+    <geom name="red_wall_below" type="box" pos="16.565 7.4035 0.0235"
+          size="0.025 0.4065 0.0235" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Above hole -->
+    <geom name="red_wall_above" type="box" pos="16.565 7.4035 1.1125"
+          size="0.025 0.4065 0.8875" material="red_wall_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Corral divider cylinder in middle of hole -->
+    <geom name="red_corral_post" type="cylinder" pos="16.565 7.4035 0.136"
+          size="0.021 0.089" material="metal_mat"
+          contype="1" conaffinity="3"/>
+    <!-- Red CORRAL: 180° mirror, extends X=16.59 to X=17.49 -->
+    <body name="red_corral" pos="17.04 7.4035 0">
+      <!-- Back wall -->
+      <geom name="red_corral_back" type="box" pos="0.45 0 0.1"
+            size="0.015 0.45 0.1" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right wall (from red perspective) -->
+      <geom name="red_corral_right" type="box" pos="0 0.45 0.1"
+            size="0.45 0.015 0.1" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left wall (from red perspective) -->
+      <geom name="red_corral_left" type="box" pos="0 -0.45 0.1"
+            size="0.45 0.015 0.1" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Ramp from hole lip down to ground -->
+      <geom name="red_corral_ramp" type="box" pos="-0.075 0 0.0235"
+            size="0.376 0.4065 0.005" euler="0 0.063 0" material="wall_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- ========== BLUE ALLIANCE ELEMENTS ========== -->
+
+    <!-- Blue DEPOT: against blue wall, 0.685m deep (X) x 1.06m wide (Y)
+         Left edge 1.57m from left wall (Y=8.07), so Y spans 5.44 to 6.50
+         3 sides: 0.076m thick, 0.028m tall. Blue wall is the 4th side. -->
+    <body name="blue_depot" pos="0.3425 5.97 0">
+      <!-- Front side (facing red, at X=0.685 from wall) -->
+      <geom name="blue_depot_front" type="box" pos="0.3045 0 0.014"
+            size="0.038 0.53 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left side (Y=6.50, toward far guardrail) -->
+      <geom name="blue_depot_left" type="box" pos="0 0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right side (Y=5.44, toward near guardrail) -->
+      <geom name="blue_depot_right" type="box" pos="0 -0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Blue TOWER: 0.0889m (X) x 0.0381m (Y) posts, 1.83m tall
+         Back of posts at X=1.02, so center X = 1.02 + 0.0889/2 = 1.064
+         Right post nearest edge at Y=3.3, center Y = 3.319
+         Left post nearest edge at Y=4.155, center Y = 4.174
+         Rungs: 0.042m dia cylinders, centered between posts, extend 0.15m beyond each -->
+    <body name="blue_tower" pos="1.064 3.747 0">
+      <!-- Right post (center Y offset = 3.319 - 3.747 = -0.428) -->
+      <geom name="blue_tower_post_r" type="box" pos="0 -0.428 0.915"
+            size="0.04445 0.01905 0.915" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left post (center Y offset = 4.174 - 3.747 = 0.427) -->
+      <geom name="blue_tower_post_l" type="box" pos="0 0.427 0.915"
+            size="0.04445 0.01905 0.915" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Rungs: span from Y=3.3-0.15=3.15 to Y=4.193+0.15=4.343
+           half-length = (4.343-3.15)/2 = 0.597, centered at body origin -->
+      <geom name="blue_rung_low" type="cylinder" pos="0 0 0.686"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_rung_mid" type="cylinder" pos="0 0 1.143"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_rung_high" type="cylinder" pos="0 0 1.6"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Supports: 0.044x0.044m beams from posts to alliance wall (X=0 to X=1.02)
+           Bottom at Z=0.89, center Z=0.912, half-length X=0.51, center X=0.51
+           Relative to body: X = 0.51 - 1.064 = -0.554 -->
+      <geom name="blue_tower_support_r" type="box" pos="-0.554 -0.428 0.912"
+            size="0.51 0.022 0.022" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_tower_support_l" type="box" pos="-0.554 0.427 0.912"
+            size="0.51 0.022 0.022" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Blue HUB: 1.194x1.194m walls, 1.435m tall, with hexagonal funnel on top
+         Back face at X=4.025 (front of alliance line), centered on Y=4.035
+         Center X = 4.025 + 0.597 = 4.622
+         Funnel: bottom hex 0.7m across-flats at Z=1.435, top 1.22m at Z=1.825 -->
+    <body name="blue_hub" pos="4.622 4.035 0">
+      <!-- Hub walls (1.435m tall) -->
+      <geom name="blue_hub_back" type="box" pos="-0.597 0 0.7175"
+            size="0.015 0.597 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Front wall split around output hole: 1.09m wide, 0.225m tall, bottom at Z=0.765 -->
+      <geom name="blue_hub_front_l" type="box" pos="0.597 0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_front_r" type="box" pos="0.597 -0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_front_below" type="box" pos="0.597 0 0.3825"
+            size="0.015 0.545 0.3825" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_front_above" type="box" pos="0.597 0 1.2125"
+            size="0.015 0.545 0.2225" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Interior ramp: 21° from back wall (Z=1.223) down to front hole (Z=0.765)
+           Slope length = 1.279m, width = 1.09m -->
+      <geom name="blue_hub_ramp" type="box" pos="0 0 0.994"
+            size="0.640 0.545 0.005" euler="0 0.3665 0" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_left" type="box" pos="0 0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_right" type="box" pos="0 -0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Gap panels at hub top (Z=1.435) sealing square-to-hexagon transition -->
+      <geom name="blue_hub_gap_px" type="box" pos="0.465 0 1.435"
+            size="0.115 0.58 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_gap_nx" type="box" pos="-0.465 0 1.435"
+            size="0.115 0.58 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_gap_py" type="box" pos="0 0.465 1.435"
+            size="0.35 0.115 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_hub_gap_ny" type="box" pos="0 -0.465 1.435"
+            size="0.35 0.115 0.005" material="blue_hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Hexagonal funnel: 6 panels, each 0.005m thick
+           Panel size=(0.005, 0.352, 0.234), normal initially along +X
+           Tilt outward 0.588 rad, then yaw by face angle
+           Slope height=0.469m, avg apothem=0.48m -->
+      <!-- Hexagonal funnel rotated 30° so vertices face alliance walls -->
+      <geom name="blue_funnel_30" type="box" pos="0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 -0.075 0.280 0.248"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_90" type="box" pos="0 0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 -0.205 0.205 0.677"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_150" type="box" pos="-0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 -0.280 0.075 0.924"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_210" type="box" pos="-0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 0.280 0.075 -0.924"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_270" type="box" pos="0 -0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 0.205 0.205 -0.677"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="blue_funnel_330" type="box" pos="0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 0.075 0.280 -0.248"
+            material="blue_hub_mat" contype="1" conaffinity="3"/>
+      <!-- Net: vertical plane, bottom at Z=1.67, 1.35m tall, 1.47m wide
+           0.23m in front of top funnel vertex (X = 0.704 + 0.23 = 0.934) -->
+      <geom name="blue_hub_net" type="box" pos="0.934 0 2.345"
+            size="0.005 0.735 0.675" material="net_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Blue BUMP/TRENCH WALLS: 1.194m (X) x 0.3m (Y), 0.7m tall
+         Back face at X=4.025 (same as hub), 1.867m gap to hub on each side
+         Right wall center Y=1.421, left wall center Y=6.649 -->
+    <geom name="blue_wall_right" type="box" pos="4.622 1.421 0.35"
+          size="0.597 0.15 0.35" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="blue_wall_left" type="box" pos="4.622 6.649 0.35"
+          size="0.597 0.15 0.35" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Blue TRENCH POSTS: 0.102x0.102m horizontal beams, bottom at Z=0.565
+         X centered on bump/trench walls (X=4.622)
+         Right: from guardrail (Y=0) to right wall (Y=1.271), center Y=0.636
+         Left: from left wall (Y=6.799) to guardrail (Y=8.07), center Y=7.435 -->
+    <geom name="blue_trench_right" type="box" pos="4.622 0.636 0.616"
+          size="0.051 0.636 0.051" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="blue_trench_left" type="box" pos="4.622 7.435 0.616"
+          size="0.051 0.636 0.051" material="blue_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Blue BUMPS: 1.12m (X) x 1.867m (Y), 0.165m peak, two angled ramps
+         Starts 0.036m in front of alliance line (X=4.061 to 5.181), center X=4.621
+         Right bump: Y=1.571 to 3.438, center Y=2.505
+         Left bump: Y=4.632 to 6.499, center Y=5.566
+         Ramp angle: atan(0.165/0.56) = 0.287 rad, slope length = 0.584m -->
+    <body name="blue_bump_right" pos="4.621 2.505 0">
+      <geom name="blue_bump_r_back" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_bump_r_front" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_bump_left" pos="4.621 5.566 0">
+      <geom name="blue_bump_l_back" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="blue_bump_l_front" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="blue_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- ========== RED ALLIANCE ELEMENTS (180-degree rotation of blue about field center) ========== -->
+
+    <!-- Red DEPOT: 180° rotation of blue depot about (8.27, 4.035)
+         Against red wall, Y spans 1.57 to 2.63 -->
+    <body name="red_depot" pos="16.1975 2.10 0">
+      <!-- Front side (facing blue, at X=16.54-0.685 from blue wall) -->
+      <geom name="red_depot_front" type="box" pos="-0.3045 0 0.014"
+            size="0.038 0.53 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left side (toward near guardrail from red perspective) -->
+      <geom name="red_depot_left" type="box" pos="0 -0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Right side (toward far guardrail from red perspective) -->
+      <geom name="red_depot_right" type="box" pos="0 0.492 0.014"
+            size="0.3425 0.038 0.014" material="depot_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red BUMPS: 180° rotation of blue bumps -->
+    <body name="red_bump_right" pos="11.919 5.565 0">
+      <geom name="red_bump_r_back" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_bump_r_front" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_bump_left" pos="11.919 2.504 0">
+      <geom name="red_bump_l_back" type="box" pos="0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_bump_l_front" type="box" pos="-0.28 0 0.0825"
+            size="0.292 0.9335 0.01" euler="0 -0.287 0" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red TRENCH POSTS: 180° rotation of blue trench posts -->
+    <geom name="red_trench_right" type="box" pos="11.918 7.435 0.616"
+          size="0.051 0.636 0.051" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="red_trench_left" type="box" pos="11.918 0.636 0.616"
+          size="0.051 0.636 0.051" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Red BUMP/TRENCH WALLS: 180° rotation of blue walls -->
+    <geom name="red_wall_right" type="box" pos="11.918 6.649 0.35"
+          size="0.597 0.15 0.35" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+    <geom name="red_wall_left" type="box" pos="11.918 1.421 0.35"
+          size="0.597 0.15 0.35" material="red_accent_mat"
+          contype="1" conaffinity="3"/>
+
+    <!-- Red HUB: 180° rotation of blue hub about (8.27, 4.035)
+         Center X = 16.54 - 4.622 = 11.918 -->
+    <body name="red_hub" pos="11.918 4.035 0">
+      <!-- Hub walls (1.435m tall) -->
+      <geom name="red_hub_back" type="box" pos="0.597 0 0.7175"
+            size="0.015 0.597 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Front wall split around output hole -->
+      <geom name="red_hub_front_l" type="box" pos="-0.597 -0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_front_r" type="box" pos="-0.597 0.571 0.7175"
+            size="0.015 0.026 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_front_below" type="box" pos="-0.597 0 0.3825"
+            size="0.015 0.545 0.3825" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_front_above" type="box" pos="-0.597 0 1.2125"
+            size="0.015 0.545 0.2225" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Interior ramp: 21° from back wall down to front hole -->
+      <geom name="red_hub_ramp" type="box" pos="0 0 0.994"
+            size="0.640 0.545 0.005" euler="0 -0.3665 0" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_left" type="box" pos="0 -0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_right" type="box" pos="0 0.597 0.7175"
+            size="0.597 0.015 0.7175" material="hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Gap panels at hub top -->
+      <geom name="red_hub_gap_px" type="box" pos="0.465 0 1.435"
+            size="0.115 0.58 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_gap_nx" type="box" pos="-0.465 0 1.435"
+            size="0.115 0.58 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_gap_py" type="box" pos="0 0.465 1.435"
+            size="0.35 0.115 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_hub_gap_ny" type="box" pos="0 -0.465 1.435"
+            size="0.35 0.115 0.005" material="red_hub_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Hexagonal funnel rotated 30° so vertices face alliance walls -->
+      <geom name="red_funnel_30" type="box" pos="0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 -0.075 0.280 0.248"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_90" type="box" pos="0 0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 -0.205 0.205 0.677"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_150" type="box" pos="-0.416 0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 -0.280 0.075 0.924"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_210" type="box" pos="-0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.248 0.280 0.075 -0.924"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_270" type="box" pos="0 -0.48 1.63"
+            size="0.005 0.352 0.234" quat="0.677 0.205 0.205 -0.677"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <geom name="red_funnel_330" type="box" pos="0.416 -0.24 1.63"
+            size="0.005 0.352 0.234" quat="0.924 0.075 0.280 -0.248"
+            material="red_hub_mat" contype="1" conaffinity="3"/>
+      <!-- Net: vertical plane, 0.23m in front of top funnel vertex -->
+      <geom name="red_hub_net" type="box" pos="-0.934 0 2.345"
+            size="0.005 0.735 0.675" material="net_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red TOWER: 180° rotation of blue tower about (8.27, 4.035)
+         Center X = 16.54 - 1.064 = 15.476, Center Y = 8.07 - 3.747 = 4.323 -->
+    <body name="red_tower" pos="15.476 4.323 0">
+      <!-- Right post (from red perspective) -->
+      <geom name="red_tower_post_r" type="box" pos="0 0.428 0.915"
+            size="0.04445 0.01905 0.915" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Left post (from red perspective) -->
+      <geom name="red_tower_post_l" type="box" pos="0 -0.427 0.915"
+            size="0.04445 0.01905 0.915" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_rung_low" type="cylinder" pos="0 0 0.686"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_rung_mid" type="cylinder" pos="0 0 1.143"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_rung_high" type="cylinder" pos="0 0 1.6"
+            size="0.021 0.597" euler="1.5708 0 0" material="rung_mat"
+            contype="1" conaffinity="3"/>
+      <!-- Supports: beams from posts to red alliance wall -->
+      <geom name="red_tower_support_r" type="box" pos="0.554 0.428 0.912"
+            size="0.51 0.022 0.022" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+      <geom name="red_tower_support_l" type="box" pos="0.554 -0.427 0.912"
+            size="0.51 0.022 0.022" material="red_accent_mat"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- ========== FUEL (Yellow Balls, 5.91" diameter) ========== -->
+
+    <!-- Blue depot fuel: 6x4 grid -->
+    <body name="blue_fuel_0" pos="0.075 5.595 0.075">
+      <freejoint name="blue_fuel_0_jnt"/>
+      <geom name="blue_fuel_0_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_1" pos="0.075 5.745 0.075">
+      <freejoint name="blue_fuel_1_jnt"/>
+      <geom name="blue_fuel_1_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_2" pos="0.075 5.895 0.075">
+      <freejoint name="blue_fuel_2_jnt"/>
+      <geom name="blue_fuel_2_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_3" pos="0.075 6.045 0.075">
+      <freejoint name="blue_fuel_3_jnt"/>
+      <geom name="blue_fuel_3_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_4" pos="0.075 6.195 0.075">
+      <freejoint name="blue_fuel_4_jnt"/>
+      <geom name="blue_fuel_4_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_5" pos="0.075 6.345 0.075">
+      <freejoint name="blue_fuel_5_jnt"/>
+      <geom name="blue_fuel_5_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_6" pos="0.225 5.595 0.075">
+      <freejoint name="blue_fuel_6_jnt"/>
+      <geom name="blue_fuel_6_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_7" pos="0.225 5.745 0.075">
+      <freejoint name="blue_fuel_7_jnt"/>
+      <geom name="blue_fuel_7_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_8" pos="0.225 5.895 0.075">
+      <freejoint name="blue_fuel_8_jnt"/>
+      <geom name="blue_fuel_8_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_9" pos="0.225 6.045 0.075">
+      <freejoint name="blue_fuel_9_jnt"/>
+      <geom name="blue_fuel_9_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_10" pos="0.225 6.195 0.075">
+      <freejoint name="blue_fuel_10_jnt"/>
+      <geom name="blue_fuel_10_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_11" pos="0.225 6.345 0.075">
+      <freejoint name="blue_fuel_11_jnt"/>
+      <geom name="blue_fuel_11_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_12" pos="0.375 5.595 0.075">
+      <freejoint name="blue_fuel_12_jnt"/>
+      <geom name="blue_fuel_12_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_13" pos="0.375 5.745 0.075">
+      <freejoint name="blue_fuel_13_jnt"/>
+      <geom name="blue_fuel_13_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_14" pos="0.375 5.895 0.075">
+      <freejoint name="blue_fuel_14_jnt"/>
+      <geom name="blue_fuel_14_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_15" pos="0.375 6.045 0.075">
+      <freejoint name="blue_fuel_15_jnt"/>
+      <geom name="blue_fuel_15_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_16" pos="0.375 6.195 0.075">
+      <freejoint name="blue_fuel_16_jnt"/>
+      <geom name="blue_fuel_16_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_17" pos="0.375 6.345 0.075">
+      <freejoint name="blue_fuel_17_jnt"/>
+      <geom name="blue_fuel_17_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <body name="blue_fuel_18" pos="0.525 5.595 0.075">
+      <freejoint name="blue_fuel_18_jnt"/>
+      <geom name="blue_fuel_18_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_19" pos="0.525 5.745 0.075">
+      <freejoint name="blue_fuel_19_jnt"/>
+      <geom name="blue_fuel_19_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_20" pos="0.525 5.895 0.075">
+      <freejoint name="blue_fuel_20_jnt"/>
+      <geom name="blue_fuel_20_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_21" pos="0.525 6.045 0.075">
+      <freejoint name="blue_fuel_21_jnt"/>
+      <geom name="blue_fuel_21_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_22" pos="0.525 6.195 0.075">
+      <freejoint name="blue_fuel_22_jnt"/>
+      <geom name="blue_fuel_22_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="blue_fuel_23" pos="0.525 6.345 0.075">
+      <freejoint name="blue_fuel_23_jnt"/>
+      <geom name="blue_fuel_23_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+
+    <!-- Red depot fuel: 6x4 grid -->
+    <body name="red_fuel_0" pos="16.465 2.475 0.075">
+      <freejoint name="red_fuel_0_jnt"/>
+      <geom name="red_fuel_0_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_1" pos="16.465 2.325 0.075">
+      <freejoint name="red_fuel_1_jnt"/>
+      <geom name="red_fuel_1_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_2" pos="16.465 2.175 0.075">
+      <freejoint name="red_fuel_2_jnt"/>
+      <geom name="red_fuel_2_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_3" pos="16.465 2.025 0.075">
+      <freejoint name="red_fuel_3_jnt"/>
+      <geom name="red_fuel_3_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_4" pos="16.465 1.875 0.075">
+      <freejoint name="red_fuel_4_jnt"/>
+      <geom name="red_fuel_4_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_5" pos="16.465 1.725 0.075">
+      <freejoint name="red_fuel_5_jnt"/>
+      <geom name="red_fuel_5_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_6" pos="16.315 2.475 0.075">
+      <freejoint name="red_fuel_6_jnt"/>
+      <geom name="red_fuel_6_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_7" pos="16.315 2.325 0.075">
+      <freejoint name="red_fuel_7_jnt"/>
+      <geom name="red_fuel_7_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_8" pos="16.315 2.175 0.075">
+      <freejoint name="red_fuel_8_jnt"/>
+      <geom name="red_fuel_8_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_9" pos="16.315 2.025 0.075">
+      <freejoint name="red_fuel_9_jnt"/>
+      <geom name="red_fuel_9_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_10" pos="16.315 1.875 0.075">
+      <freejoint name="red_fuel_10_jnt"/>
+      <geom name="red_fuel_10_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_11" pos="16.315 1.725 0.075">
+      <freejoint name="red_fuel_11_jnt"/>
+      <geom name="red_fuel_11_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_12" pos="16.165 2.475 0.075">
+      <freejoint name="red_fuel_12_jnt"/>
+      <geom name="red_fuel_12_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_13" pos="16.165 2.325 0.075">
+      <freejoint name="red_fuel_13_jnt"/>
+      <geom name="red_fuel_13_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_14" pos="16.165 2.175 0.075">
+      <freejoint name="red_fuel_14_jnt"/>
+      <geom name="red_fuel_14_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_15" pos="16.165 2.025 0.075">
+      <freejoint name="red_fuel_15_jnt"/>
+      <geom name="red_fuel_15_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_16" pos="16.165 1.875 0.075">
+      <freejoint name="red_fuel_16_jnt"/>
+      <geom name="red_fuel_16_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_17" pos="16.165 1.725 0.075">
+      <freejoint name="red_fuel_17_jnt"/>
+      <geom name="red_fuel_17_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_18" pos="16.015 2.475 0.075">
+      <freejoint name="red_fuel_18_jnt"/>
+      <geom name="red_fuel_18_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_19" pos="16.015 2.325 0.075">
+      <freejoint name="red_fuel_19_jnt"/>
+      <geom name="red_fuel_19_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_20" pos="16.015 2.175 0.075">
+      <freejoint name="red_fuel_20_jnt"/>
+      <geom name="red_fuel_20_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_21" pos="16.015 2.025 0.075">
+      <freejoint name="red_fuel_21_jnt"/>
+      <geom name="red_fuel_21_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_22" pos="16.015 1.875 0.075">
+      <freejoint name="red_fuel_22_jnt"/>
+      <geom name="red_fuel_22_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="red_fuel_23" pos="16.015 1.725 0.075">
+      <freejoint name="red_fuel_23_jnt"/>
+      <geom name="red_fuel_23_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+
+
+    <!-- ========== NEUTRAL ZONE FUEL (15x24 grid, 360 balls) ========== -->
+    <body name="neutral_fuel_0" pos="7.220 2.310 0.075">
+      <freejoint name="neutral_fuel_0_jnt"/>
+      <geom name="neutral_fuel_0_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_1" pos="7.370 2.310 0.075">
+      <freejoint name="neutral_fuel_1_jnt"/>
+      <geom name="neutral_fuel_1_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_2" pos="7.520 2.310 0.075">
+      <freejoint name="neutral_fuel_2_jnt"/>
+      <geom name="neutral_fuel_2_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_3" pos="7.670 2.310 0.075">
+      <freejoint name="neutral_fuel_3_jnt"/>
+      <geom name="neutral_fuel_3_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_4" pos="7.820 2.310 0.075">
+      <freejoint name="neutral_fuel_4_jnt"/>
+      <geom name="neutral_fuel_4_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_5" pos="7.970 2.310 0.075">
+      <freejoint name="neutral_fuel_5_jnt"/>
+      <geom name="neutral_fuel_5_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_6" pos="8.120 2.310 0.075">
+      <freejoint name="neutral_fuel_6_jnt"/>
+      <geom name="neutral_fuel_6_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_7" pos="8.270 2.310 0.075">
+      <freejoint name="neutral_fuel_7_jnt"/>
+      <geom name="neutral_fuel_7_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_8" pos="8.420 2.310 0.075">
+      <freejoint name="neutral_fuel_8_jnt"/>
+      <geom name="neutral_fuel_8_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_9" pos="8.570 2.310 0.075">
+      <freejoint name="neutral_fuel_9_jnt"/>
+      <geom name="neutral_fuel_9_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_10" pos="8.720 2.310 0.075">
+      <freejoint name="neutral_fuel_10_jnt"/>
+      <geom name="neutral_fuel_10_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_11" pos="8.870 2.310 0.075">
+      <freejoint name="neutral_fuel_11_jnt"/>
+      <geom name="neutral_fuel_11_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_12" pos="9.020 2.310 0.075">
+      <freejoint name="neutral_fuel_12_jnt"/>
+      <geom name="neutral_fuel_12_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_13" pos="9.170 2.310 0.075">
+      <freejoint name="neutral_fuel_13_jnt"/>
+      <geom name="neutral_fuel_13_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_14" pos="9.320 2.310 0.075">
+      <freejoint name="neutral_fuel_14_jnt"/>
+      <geom name="neutral_fuel_14_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_15" pos="7.220 2.460 0.075">
+      <freejoint name="neutral_fuel_15_jnt"/>
+      <geom name="neutral_fuel_15_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_16" pos="7.370 2.460 0.075">
+      <freejoint name="neutral_fuel_16_jnt"/>
+      <geom name="neutral_fuel_16_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_17" pos="7.520 2.460 0.075">
+      <freejoint name="neutral_fuel_17_jnt"/>
+      <geom name="neutral_fuel_17_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_18" pos="7.670 2.460 0.075">
+      <freejoint name="neutral_fuel_18_jnt"/>
+      <geom name="neutral_fuel_18_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_19" pos="7.820 2.460 0.075">
+      <freejoint name="neutral_fuel_19_jnt"/>
+      <geom name="neutral_fuel_19_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_20" pos="7.970 2.460 0.075">
+      <freejoint name="neutral_fuel_20_jnt"/>
+      <geom name="neutral_fuel_20_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_21" pos="8.120 2.460 0.075">
+      <freejoint name="neutral_fuel_21_jnt"/>
+      <geom name="neutral_fuel_21_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_22" pos="8.270 2.460 0.075">
+      <freejoint name="neutral_fuel_22_jnt"/>
+      <geom name="neutral_fuel_22_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_23" pos="8.420 2.460 0.075">
+      <freejoint name="neutral_fuel_23_jnt"/>
+      <geom name="neutral_fuel_23_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_24" pos="8.570 2.460 0.075">
+      <freejoint name="neutral_fuel_24_jnt"/>
+      <geom name="neutral_fuel_24_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_25" pos="8.720 2.460 0.075">
+      <freejoint name="neutral_fuel_25_jnt"/>
+      <geom name="neutral_fuel_25_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_26" pos="8.870 2.460 0.075">
+      <freejoint name="neutral_fuel_26_jnt"/>
+      <geom name="neutral_fuel_26_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_27" pos="9.020 2.460 0.075">
+      <freejoint name="neutral_fuel_27_jnt"/>
+      <geom name="neutral_fuel_27_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_28" pos="9.170 2.460 0.075">
+      <freejoint name="neutral_fuel_28_jnt"/>
+      <geom name="neutral_fuel_28_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_29" pos="9.320 2.460 0.075">
+      <freejoint name="neutral_fuel_29_jnt"/>
+      <geom name="neutral_fuel_29_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_30" pos="7.220 2.610 0.075">
+      <freejoint name="neutral_fuel_30_jnt"/>
+      <geom name="neutral_fuel_30_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_31" pos="7.370 2.610 0.075">
+      <freejoint name="neutral_fuel_31_jnt"/>
+      <geom name="neutral_fuel_31_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_32" pos="7.520 2.610 0.075">
+      <freejoint name="neutral_fuel_32_jnt"/>
+      <geom name="neutral_fuel_32_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_33" pos="7.670 2.610 0.075">
+      <freejoint name="neutral_fuel_33_jnt"/>
+      <geom name="neutral_fuel_33_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_34" pos="7.820 2.610 0.075">
+      <freejoint name="neutral_fuel_34_jnt"/>
+      <geom name="neutral_fuel_34_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_35" pos="7.970 2.610 0.075">
+      <freejoint name="neutral_fuel_35_jnt"/>
+      <geom name="neutral_fuel_35_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_36" pos="8.120 2.610 0.075">
+      <freejoint name="neutral_fuel_36_jnt"/>
+      <geom name="neutral_fuel_36_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_37" pos="8.270 2.610 0.075">
+      <freejoint name="neutral_fuel_37_jnt"/>
+      <geom name="neutral_fuel_37_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_38" pos="8.420 2.610 0.075">
+      <freejoint name="neutral_fuel_38_jnt"/>
+      <geom name="neutral_fuel_38_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_39" pos="8.570 2.610 0.075">
+      <freejoint name="neutral_fuel_39_jnt"/>
+      <geom name="neutral_fuel_39_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_40" pos="8.720 2.610 0.075">
+      <freejoint name="neutral_fuel_40_jnt"/>
+      <geom name="neutral_fuel_40_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_41" pos="8.870 2.610 0.075">
+      <freejoint name="neutral_fuel_41_jnt"/>
+      <geom name="neutral_fuel_41_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_42" pos="9.020 2.610 0.075">
+      <freejoint name="neutral_fuel_42_jnt"/>
+      <geom name="neutral_fuel_42_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_43" pos="9.170 2.610 0.075">
+      <freejoint name="neutral_fuel_43_jnt"/>
+      <geom name="neutral_fuel_43_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_44" pos="9.320 2.610 0.075">
+      <freejoint name="neutral_fuel_44_jnt"/>
+      <geom name="neutral_fuel_44_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_45" pos="7.220 2.760 0.075">
+      <freejoint name="neutral_fuel_45_jnt"/>
+      <geom name="neutral_fuel_45_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_46" pos="7.370 2.760 0.075">
+      <freejoint name="neutral_fuel_46_jnt"/>
+      <geom name="neutral_fuel_46_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_47" pos="7.520 2.760 0.075">
+      <freejoint name="neutral_fuel_47_jnt"/>
+      <geom name="neutral_fuel_47_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_48" pos="7.670 2.760 0.075">
+      <freejoint name="neutral_fuel_48_jnt"/>
+      <geom name="neutral_fuel_48_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_49" pos="7.820 2.760 0.075">
+      <freejoint name="neutral_fuel_49_jnt"/>
+      <geom name="neutral_fuel_49_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_50" pos="7.970 2.760 0.075">
+      <freejoint name="neutral_fuel_50_jnt"/>
+      <geom name="neutral_fuel_50_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_51" pos="8.120 2.760 0.075">
+      <freejoint name="neutral_fuel_51_jnt"/>
+      <geom name="neutral_fuel_51_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_52" pos="8.270 2.760 0.075">
+      <freejoint name="neutral_fuel_52_jnt"/>
+      <geom name="neutral_fuel_52_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_53" pos="8.420 2.760 0.075">
+      <freejoint name="neutral_fuel_53_jnt"/>
+      <geom name="neutral_fuel_53_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_54" pos="8.570 2.760 0.075">
+      <freejoint name="neutral_fuel_54_jnt"/>
+      <geom name="neutral_fuel_54_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_55" pos="8.720 2.760 0.075">
+      <freejoint name="neutral_fuel_55_jnt"/>
+      <geom name="neutral_fuel_55_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_56" pos="8.870 2.760 0.075">
+      <freejoint name="neutral_fuel_56_jnt"/>
+      <geom name="neutral_fuel_56_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_57" pos="9.020 2.760 0.075">
+      <freejoint name="neutral_fuel_57_jnt"/>
+      <geom name="neutral_fuel_57_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_58" pos="9.170 2.760 0.075">
+      <freejoint name="neutral_fuel_58_jnt"/>
+      <geom name="neutral_fuel_58_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_59" pos="9.320 2.760 0.075">
+      <freejoint name="neutral_fuel_59_jnt"/>
+      <geom name="neutral_fuel_59_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_60" pos="7.220 2.910 0.075">
+      <freejoint name="neutral_fuel_60_jnt"/>
+      <geom name="neutral_fuel_60_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_61" pos="7.370 2.910 0.075">
+      <freejoint name="neutral_fuel_61_jnt"/>
+      <geom name="neutral_fuel_61_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_62" pos="7.520 2.910 0.075">
+      <freejoint name="neutral_fuel_62_jnt"/>
+      <geom name="neutral_fuel_62_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_63" pos="7.670 2.910 0.075">
+      <freejoint name="neutral_fuel_63_jnt"/>
+      <geom name="neutral_fuel_63_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_64" pos="7.820 2.910 0.075">
+      <freejoint name="neutral_fuel_64_jnt"/>
+      <geom name="neutral_fuel_64_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_65" pos="7.970 2.910 0.075">
+      <freejoint name="neutral_fuel_65_jnt"/>
+      <geom name="neutral_fuel_65_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_66" pos="8.120 2.910 0.075">
+      <freejoint name="neutral_fuel_66_jnt"/>
+      <geom name="neutral_fuel_66_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_67" pos="8.270 2.910 0.075">
+      <freejoint name="neutral_fuel_67_jnt"/>
+      <geom name="neutral_fuel_67_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_68" pos="8.420 2.910 0.075">
+      <freejoint name="neutral_fuel_68_jnt"/>
+      <geom name="neutral_fuel_68_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_69" pos="8.570 2.910 0.075">
+      <freejoint name="neutral_fuel_69_jnt"/>
+      <geom name="neutral_fuel_69_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_70" pos="8.720 2.910 0.075">
+      <freejoint name="neutral_fuel_70_jnt"/>
+      <geom name="neutral_fuel_70_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_71" pos="8.870 2.910 0.075">
+      <freejoint name="neutral_fuel_71_jnt"/>
+      <geom name="neutral_fuel_71_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_72" pos="9.020 2.910 0.075">
+      <freejoint name="neutral_fuel_72_jnt"/>
+      <geom name="neutral_fuel_72_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_73" pos="9.170 2.910 0.075">
+      <freejoint name="neutral_fuel_73_jnt"/>
+      <geom name="neutral_fuel_73_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_74" pos="9.320 2.910 0.075">
+      <freejoint name="neutral_fuel_74_jnt"/>
+      <geom name="neutral_fuel_74_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_75" pos="7.220 3.060 0.075">
+      <freejoint name="neutral_fuel_75_jnt"/>
+      <geom name="neutral_fuel_75_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_76" pos="7.370 3.060 0.075">
+      <freejoint name="neutral_fuel_76_jnt"/>
+      <geom name="neutral_fuel_76_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_77" pos="7.520 3.060 0.075">
+      <freejoint name="neutral_fuel_77_jnt"/>
+      <geom name="neutral_fuel_77_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_78" pos="7.670 3.060 0.075">
+      <freejoint name="neutral_fuel_78_jnt"/>
+      <geom name="neutral_fuel_78_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_79" pos="7.820 3.060 0.075">
+      <freejoint name="neutral_fuel_79_jnt"/>
+      <geom name="neutral_fuel_79_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_80" pos="7.970 3.060 0.075">
+      <freejoint name="neutral_fuel_80_jnt"/>
+      <geom name="neutral_fuel_80_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_81" pos="8.120 3.060 0.075">
+      <freejoint name="neutral_fuel_81_jnt"/>
+      <geom name="neutral_fuel_81_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_82" pos="8.270 3.060 0.075">
+      <freejoint name="neutral_fuel_82_jnt"/>
+      <geom name="neutral_fuel_82_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_83" pos="8.420 3.060 0.075">
+      <freejoint name="neutral_fuel_83_jnt"/>
+      <geom name="neutral_fuel_83_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_84" pos="8.570 3.060 0.075">
+      <freejoint name="neutral_fuel_84_jnt"/>
+      <geom name="neutral_fuel_84_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_85" pos="8.720 3.060 0.075">
+      <freejoint name="neutral_fuel_85_jnt"/>
+      <geom name="neutral_fuel_85_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_86" pos="8.870 3.060 0.075">
+      <freejoint name="neutral_fuel_86_jnt"/>
+      <geom name="neutral_fuel_86_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_87" pos="9.020 3.060 0.075">
+      <freejoint name="neutral_fuel_87_jnt"/>
+      <geom name="neutral_fuel_87_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_88" pos="9.170 3.060 0.075">
+      <freejoint name="neutral_fuel_88_jnt"/>
+      <geom name="neutral_fuel_88_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_89" pos="9.320 3.060 0.075">
+      <freejoint name="neutral_fuel_89_jnt"/>
+      <geom name="neutral_fuel_89_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_90" pos="7.220 3.210 0.075">
+      <freejoint name="neutral_fuel_90_jnt"/>
+      <geom name="neutral_fuel_90_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_91" pos="7.370 3.210 0.075">
+      <freejoint name="neutral_fuel_91_jnt"/>
+      <geom name="neutral_fuel_91_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_92" pos="7.520 3.210 0.075">
+      <freejoint name="neutral_fuel_92_jnt"/>
+      <geom name="neutral_fuel_92_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_93" pos="7.670 3.210 0.075">
+      <freejoint name="neutral_fuel_93_jnt"/>
+      <geom name="neutral_fuel_93_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_94" pos="7.820 3.210 0.075">
+      <freejoint name="neutral_fuel_94_jnt"/>
+      <geom name="neutral_fuel_94_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_95" pos="7.970 3.210 0.075">
+      <freejoint name="neutral_fuel_95_jnt"/>
+      <geom name="neutral_fuel_95_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_96" pos="8.120 3.210 0.075">
+      <freejoint name="neutral_fuel_96_jnt"/>
+      <geom name="neutral_fuel_96_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_97" pos="8.270 3.210 0.075">
+      <freejoint name="neutral_fuel_97_jnt"/>
+      <geom name="neutral_fuel_97_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_98" pos="8.420 3.210 0.075">
+      <freejoint name="neutral_fuel_98_jnt"/>
+      <geom name="neutral_fuel_98_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_99" pos="8.570 3.210 0.075">
+      <freejoint name="neutral_fuel_99_jnt"/>
+      <geom name="neutral_fuel_99_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_100" pos="8.720 3.210 0.075">
+      <freejoint name="neutral_fuel_100_jnt"/>
+      <geom name="neutral_fuel_100_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_101" pos="8.870 3.210 0.075">
+      <freejoint name="neutral_fuel_101_jnt"/>
+      <geom name="neutral_fuel_101_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_102" pos="9.020 3.210 0.075">
+      <freejoint name="neutral_fuel_102_jnt"/>
+      <geom name="neutral_fuel_102_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_103" pos="9.170 3.210 0.075">
+      <freejoint name="neutral_fuel_103_jnt"/>
+      <geom name="neutral_fuel_103_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_104" pos="9.320 3.210 0.075">
+      <freejoint name="neutral_fuel_104_jnt"/>
+      <geom name="neutral_fuel_104_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_105" pos="7.220 3.360 0.075">
+      <freejoint name="neutral_fuel_105_jnt"/>
+      <geom name="neutral_fuel_105_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_106" pos="7.370 3.360 0.075">
+      <freejoint name="neutral_fuel_106_jnt"/>
+      <geom name="neutral_fuel_106_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_107" pos="7.520 3.360 0.075">
+      <freejoint name="neutral_fuel_107_jnt"/>
+      <geom name="neutral_fuel_107_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_108" pos="7.670 3.360 0.075">
+      <freejoint name="neutral_fuel_108_jnt"/>
+      <geom name="neutral_fuel_108_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_109" pos="7.820 3.360 0.075">
+      <freejoint name="neutral_fuel_109_jnt"/>
+      <geom name="neutral_fuel_109_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_110" pos="7.970 3.360 0.075">
+      <freejoint name="neutral_fuel_110_jnt"/>
+      <geom name="neutral_fuel_110_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_111" pos="8.120 3.360 0.075">
+      <freejoint name="neutral_fuel_111_jnt"/>
+      <geom name="neutral_fuel_111_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_112" pos="8.270 3.360 0.075">
+      <freejoint name="neutral_fuel_112_jnt"/>
+      <geom name="neutral_fuel_112_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_113" pos="8.420 3.360 0.075">
+      <freejoint name="neutral_fuel_113_jnt"/>
+      <geom name="neutral_fuel_113_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_114" pos="8.570 3.360 0.075">
+      <freejoint name="neutral_fuel_114_jnt"/>
+      <geom name="neutral_fuel_114_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_115" pos="8.720 3.360 0.075">
+      <freejoint name="neutral_fuel_115_jnt"/>
+      <geom name="neutral_fuel_115_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_116" pos="8.870 3.360 0.075">
+      <freejoint name="neutral_fuel_116_jnt"/>
+      <geom name="neutral_fuel_116_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_117" pos="9.020 3.360 0.075">
+      <freejoint name="neutral_fuel_117_jnt"/>
+      <geom name="neutral_fuel_117_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_118" pos="9.170 3.360 0.075">
+      <freejoint name="neutral_fuel_118_jnt"/>
+      <geom name="neutral_fuel_118_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_119" pos="9.320 3.360 0.075">
+      <freejoint name="neutral_fuel_119_jnt"/>
+      <geom name="neutral_fuel_119_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_120" pos="7.220 3.510 0.075">
+      <freejoint name="neutral_fuel_120_jnt"/>
+      <geom name="neutral_fuel_120_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_121" pos="7.370 3.510 0.075">
+      <freejoint name="neutral_fuel_121_jnt"/>
+      <geom name="neutral_fuel_121_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_122" pos="7.520 3.510 0.075">
+      <freejoint name="neutral_fuel_122_jnt"/>
+      <geom name="neutral_fuel_122_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_123" pos="7.670 3.510 0.075">
+      <freejoint name="neutral_fuel_123_jnt"/>
+      <geom name="neutral_fuel_123_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_124" pos="7.820 3.510 0.075">
+      <freejoint name="neutral_fuel_124_jnt"/>
+      <geom name="neutral_fuel_124_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_125" pos="7.970 3.510 0.075">
+      <freejoint name="neutral_fuel_125_jnt"/>
+      <geom name="neutral_fuel_125_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_126" pos="8.120 3.510 0.075">
+      <freejoint name="neutral_fuel_126_jnt"/>
+      <geom name="neutral_fuel_126_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_127" pos="8.270 3.510 0.075">
+      <freejoint name="neutral_fuel_127_jnt"/>
+      <geom name="neutral_fuel_127_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_128" pos="8.420 3.510 0.075">
+      <freejoint name="neutral_fuel_128_jnt"/>
+      <geom name="neutral_fuel_128_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_129" pos="8.570 3.510 0.075">
+      <freejoint name="neutral_fuel_129_jnt"/>
+      <geom name="neutral_fuel_129_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_130" pos="8.720 3.510 0.075">
+      <freejoint name="neutral_fuel_130_jnt"/>
+      <geom name="neutral_fuel_130_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_131" pos="8.870 3.510 0.075">
+      <freejoint name="neutral_fuel_131_jnt"/>
+      <geom name="neutral_fuel_131_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_132" pos="9.020 3.510 0.075">
+      <freejoint name="neutral_fuel_132_jnt"/>
+      <geom name="neutral_fuel_132_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_133" pos="9.170 3.510 0.075">
+      <freejoint name="neutral_fuel_133_jnt"/>
+      <geom name="neutral_fuel_133_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_134" pos="9.320 3.510 0.075">
+      <freejoint name="neutral_fuel_134_jnt"/>
+      <geom name="neutral_fuel_134_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_135" pos="7.220 3.660 0.075">
+      <freejoint name="neutral_fuel_135_jnt"/>
+      <geom name="neutral_fuel_135_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_136" pos="7.370 3.660 0.075">
+      <freejoint name="neutral_fuel_136_jnt"/>
+      <geom name="neutral_fuel_136_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_137" pos="7.520 3.660 0.075">
+      <freejoint name="neutral_fuel_137_jnt"/>
+      <geom name="neutral_fuel_137_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_138" pos="7.670 3.660 0.075">
+      <freejoint name="neutral_fuel_138_jnt"/>
+      <geom name="neutral_fuel_138_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_139" pos="7.820 3.660 0.075">
+      <freejoint name="neutral_fuel_139_jnt"/>
+      <geom name="neutral_fuel_139_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_140" pos="7.970 3.660 0.075">
+      <freejoint name="neutral_fuel_140_jnt"/>
+      <geom name="neutral_fuel_140_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_141" pos="8.120 3.660 0.075">
+      <freejoint name="neutral_fuel_141_jnt"/>
+      <geom name="neutral_fuel_141_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_142" pos="8.270 3.660 0.075">
+      <freejoint name="neutral_fuel_142_jnt"/>
+      <geom name="neutral_fuel_142_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_143" pos="8.420 3.660 0.075">
+      <freejoint name="neutral_fuel_143_jnt"/>
+      <geom name="neutral_fuel_143_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_144" pos="8.570 3.660 0.075">
+      <freejoint name="neutral_fuel_144_jnt"/>
+      <geom name="neutral_fuel_144_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_145" pos="8.720 3.660 0.075">
+      <freejoint name="neutral_fuel_145_jnt"/>
+      <geom name="neutral_fuel_145_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_146" pos="8.870 3.660 0.075">
+      <freejoint name="neutral_fuel_146_jnt"/>
+      <geom name="neutral_fuel_146_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_147" pos="9.020 3.660 0.075">
+      <freejoint name="neutral_fuel_147_jnt"/>
+      <geom name="neutral_fuel_147_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_148" pos="9.170 3.660 0.075">
+      <freejoint name="neutral_fuel_148_jnt"/>
+      <geom name="neutral_fuel_148_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_149" pos="9.320 3.660 0.075">
+      <freejoint name="neutral_fuel_149_jnt"/>
+      <geom name="neutral_fuel_149_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_150" pos="7.220 3.810 0.075">
+      <freejoint name="neutral_fuel_150_jnt"/>
+      <geom name="neutral_fuel_150_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_151" pos="7.370 3.810 0.075">
+      <freejoint name="neutral_fuel_151_jnt"/>
+      <geom name="neutral_fuel_151_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_152" pos="7.520 3.810 0.075">
+      <freejoint name="neutral_fuel_152_jnt"/>
+      <geom name="neutral_fuel_152_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_153" pos="7.670 3.810 0.075">
+      <freejoint name="neutral_fuel_153_jnt"/>
+      <geom name="neutral_fuel_153_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_154" pos="7.820 3.810 0.075">
+      <freejoint name="neutral_fuel_154_jnt"/>
+      <geom name="neutral_fuel_154_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_155" pos="7.970 3.810 0.075">
+      <freejoint name="neutral_fuel_155_jnt"/>
+      <geom name="neutral_fuel_155_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_156" pos="8.120 3.810 0.075">
+      <freejoint name="neutral_fuel_156_jnt"/>
+      <geom name="neutral_fuel_156_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_157" pos="8.270 3.810 0.075">
+      <freejoint name="neutral_fuel_157_jnt"/>
+      <geom name="neutral_fuel_157_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_158" pos="8.420 3.810 0.075">
+      <freejoint name="neutral_fuel_158_jnt"/>
+      <geom name="neutral_fuel_158_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_159" pos="8.570 3.810 0.075">
+      <freejoint name="neutral_fuel_159_jnt"/>
+      <geom name="neutral_fuel_159_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_160" pos="8.720 3.810 0.075">
+      <freejoint name="neutral_fuel_160_jnt"/>
+      <geom name="neutral_fuel_160_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_161" pos="8.870 3.810 0.075">
+      <freejoint name="neutral_fuel_161_jnt"/>
+      <geom name="neutral_fuel_161_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_162" pos="9.020 3.810 0.075">
+      <freejoint name="neutral_fuel_162_jnt"/>
+      <geom name="neutral_fuel_162_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_163" pos="9.170 3.810 0.075">
+      <freejoint name="neutral_fuel_163_jnt"/>
+      <geom name="neutral_fuel_163_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_164" pos="9.320 3.810 0.075">
+      <freejoint name="neutral_fuel_164_jnt"/>
+      <geom name="neutral_fuel_164_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_165" pos="7.220 3.960 0.075">
+      <freejoint name="neutral_fuel_165_jnt"/>
+      <geom name="neutral_fuel_165_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_166" pos="7.370 3.960 0.075">
+      <freejoint name="neutral_fuel_166_jnt"/>
+      <geom name="neutral_fuel_166_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_167" pos="7.520 3.960 0.075">
+      <freejoint name="neutral_fuel_167_jnt"/>
+      <geom name="neutral_fuel_167_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_168" pos="7.670 3.960 0.075">
+      <freejoint name="neutral_fuel_168_jnt"/>
+      <geom name="neutral_fuel_168_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_169" pos="7.820 3.960 0.075">
+      <freejoint name="neutral_fuel_169_jnt"/>
+      <geom name="neutral_fuel_169_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_170" pos="7.970 3.960 0.075">
+      <freejoint name="neutral_fuel_170_jnt"/>
+      <geom name="neutral_fuel_170_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_171" pos="8.120 3.960 0.075">
+      <freejoint name="neutral_fuel_171_jnt"/>
+      <geom name="neutral_fuel_171_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_172" pos="8.270 3.960 0.075">
+      <freejoint name="neutral_fuel_172_jnt"/>
+      <geom name="neutral_fuel_172_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_173" pos="8.420 3.960 0.075">
+      <freejoint name="neutral_fuel_173_jnt"/>
+      <geom name="neutral_fuel_173_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_174" pos="8.570 3.960 0.075">
+      <freejoint name="neutral_fuel_174_jnt"/>
+      <geom name="neutral_fuel_174_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_175" pos="8.720 3.960 0.075">
+      <freejoint name="neutral_fuel_175_jnt"/>
+      <geom name="neutral_fuel_175_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_176" pos="8.870 3.960 0.075">
+      <freejoint name="neutral_fuel_176_jnt"/>
+      <geom name="neutral_fuel_176_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_177" pos="9.020 3.960 0.075">
+      <freejoint name="neutral_fuel_177_jnt"/>
+      <geom name="neutral_fuel_177_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_178" pos="9.170 3.960 0.075">
+      <freejoint name="neutral_fuel_178_jnt"/>
+      <geom name="neutral_fuel_178_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_179" pos="9.320 3.960 0.075">
+      <freejoint name="neutral_fuel_179_jnt"/>
+      <geom name="neutral_fuel_179_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_180" pos="7.220 4.110 0.075">
+      <freejoint name="neutral_fuel_180_jnt"/>
+      <geom name="neutral_fuel_180_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_181" pos="7.370 4.110 0.075">
+      <freejoint name="neutral_fuel_181_jnt"/>
+      <geom name="neutral_fuel_181_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_182" pos="7.520 4.110 0.075">
+      <freejoint name="neutral_fuel_182_jnt"/>
+      <geom name="neutral_fuel_182_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_183" pos="7.670 4.110 0.075">
+      <freejoint name="neutral_fuel_183_jnt"/>
+      <geom name="neutral_fuel_183_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_184" pos="7.820 4.110 0.075">
+      <freejoint name="neutral_fuel_184_jnt"/>
+      <geom name="neutral_fuel_184_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_185" pos="7.970 4.110 0.075">
+      <freejoint name="neutral_fuel_185_jnt"/>
+      <geom name="neutral_fuel_185_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_186" pos="8.120 4.110 0.075">
+      <freejoint name="neutral_fuel_186_jnt"/>
+      <geom name="neutral_fuel_186_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_187" pos="8.270 4.110 0.075">
+      <freejoint name="neutral_fuel_187_jnt"/>
+      <geom name="neutral_fuel_187_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_188" pos="8.420 4.110 0.075">
+      <freejoint name="neutral_fuel_188_jnt"/>
+      <geom name="neutral_fuel_188_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_189" pos="8.570 4.110 0.075">
+      <freejoint name="neutral_fuel_189_jnt"/>
+      <geom name="neutral_fuel_189_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_190" pos="8.720 4.110 0.075">
+      <freejoint name="neutral_fuel_190_jnt"/>
+      <geom name="neutral_fuel_190_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_191" pos="8.870 4.110 0.075">
+      <freejoint name="neutral_fuel_191_jnt"/>
+      <geom name="neutral_fuel_191_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_192" pos="9.020 4.110 0.075">
+      <freejoint name="neutral_fuel_192_jnt"/>
+      <geom name="neutral_fuel_192_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_193" pos="9.170 4.110 0.075">
+      <freejoint name="neutral_fuel_193_jnt"/>
+      <geom name="neutral_fuel_193_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_194" pos="9.320 4.110 0.075">
+      <freejoint name="neutral_fuel_194_jnt"/>
+      <geom name="neutral_fuel_194_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_195" pos="7.220 4.260 0.075">
+      <freejoint name="neutral_fuel_195_jnt"/>
+      <geom name="neutral_fuel_195_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_196" pos="7.370 4.260 0.075">
+      <freejoint name="neutral_fuel_196_jnt"/>
+      <geom name="neutral_fuel_196_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_197" pos="7.520 4.260 0.075">
+      <freejoint name="neutral_fuel_197_jnt"/>
+      <geom name="neutral_fuel_197_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_198" pos="7.670 4.260 0.075">
+      <freejoint name="neutral_fuel_198_jnt"/>
+      <geom name="neutral_fuel_198_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_199" pos="7.820 4.260 0.075">
+      <freejoint name="neutral_fuel_199_jnt"/>
+      <geom name="neutral_fuel_199_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_200" pos="7.970 4.260 0.075">
+      <freejoint name="neutral_fuel_200_jnt"/>
+      <geom name="neutral_fuel_200_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_201" pos="8.120 4.260 0.075">
+      <freejoint name="neutral_fuel_201_jnt"/>
+      <geom name="neutral_fuel_201_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_202" pos="8.270 4.260 0.075">
+      <freejoint name="neutral_fuel_202_jnt"/>
+      <geom name="neutral_fuel_202_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_203" pos="8.420 4.260 0.075">
+      <freejoint name="neutral_fuel_203_jnt"/>
+      <geom name="neutral_fuel_203_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_204" pos="8.570 4.260 0.075">
+      <freejoint name="neutral_fuel_204_jnt"/>
+      <geom name="neutral_fuel_204_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_205" pos="8.720 4.260 0.075">
+      <freejoint name="neutral_fuel_205_jnt"/>
+      <geom name="neutral_fuel_205_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_206" pos="8.870 4.260 0.075">
+      <freejoint name="neutral_fuel_206_jnt"/>
+      <geom name="neutral_fuel_206_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_207" pos="9.020 4.260 0.075">
+      <freejoint name="neutral_fuel_207_jnt"/>
+      <geom name="neutral_fuel_207_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_208" pos="9.170 4.260 0.075">
+      <freejoint name="neutral_fuel_208_jnt"/>
+      <geom name="neutral_fuel_208_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_209" pos="9.320 4.260 0.075">
+      <freejoint name="neutral_fuel_209_jnt"/>
+      <geom name="neutral_fuel_209_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_210" pos="7.220 4.410 0.075">
+      <freejoint name="neutral_fuel_210_jnt"/>
+      <geom name="neutral_fuel_210_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_211" pos="7.370 4.410 0.075">
+      <freejoint name="neutral_fuel_211_jnt"/>
+      <geom name="neutral_fuel_211_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_212" pos="7.520 4.410 0.075">
+      <freejoint name="neutral_fuel_212_jnt"/>
+      <geom name="neutral_fuel_212_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_213" pos="7.670 4.410 0.075">
+      <freejoint name="neutral_fuel_213_jnt"/>
+      <geom name="neutral_fuel_213_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_214" pos="7.820 4.410 0.075">
+      <freejoint name="neutral_fuel_214_jnt"/>
+      <geom name="neutral_fuel_214_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_215" pos="7.970 4.410 0.075">
+      <freejoint name="neutral_fuel_215_jnt"/>
+      <geom name="neutral_fuel_215_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_216" pos="8.120 4.410 0.075">
+      <freejoint name="neutral_fuel_216_jnt"/>
+      <geom name="neutral_fuel_216_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_217" pos="8.270 4.410 0.075">
+      <freejoint name="neutral_fuel_217_jnt"/>
+      <geom name="neutral_fuel_217_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_218" pos="8.420 4.410 0.075">
+      <freejoint name="neutral_fuel_218_jnt"/>
+      <geom name="neutral_fuel_218_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_219" pos="8.570 4.410 0.075">
+      <freejoint name="neutral_fuel_219_jnt"/>
+      <geom name="neutral_fuel_219_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_220" pos="8.720 4.410 0.075">
+      <freejoint name="neutral_fuel_220_jnt"/>
+      <geom name="neutral_fuel_220_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_221" pos="8.870 4.410 0.075">
+      <freejoint name="neutral_fuel_221_jnt"/>
+      <geom name="neutral_fuel_221_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_222" pos="9.020 4.410 0.075">
+      <freejoint name="neutral_fuel_222_jnt"/>
+      <geom name="neutral_fuel_222_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_223" pos="9.170 4.410 0.075">
+      <freejoint name="neutral_fuel_223_jnt"/>
+      <geom name="neutral_fuel_223_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_224" pos="9.320 4.410 0.075">
+      <freejoint name="neutral_fuel_224_jnt"/>
+      <geom name="neutral_fuel_224_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_225" pos="7.220 4.560 0.075">
+      <freejoint name="neutral_fuel_225_jnt"/>
+      <geom name="neutral_fuel_225_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_226" pos="7.370 4.560 0.075">
+      <freejoint name="neutral_fuel_226_jnt"/>
+      <geom name="neutral_fuel_226_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_227" pos="7.520 4.560 0.075">
+      <freejoint name="neutral_fuel_227_jnt"/>
+      <geom name="neutral_fuel_227_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_228" pos="7.670 4.560 0.075">
+      <freejoint name="neutral_fuel_228_jnt"/>
+      <geom name="neutral_fuel_228_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_229" pos="7.820 4.560 0.075">
+      <freejoint name="neutral_fuel_229_jnt"/>
+      <geom name="neutral_fuel_229_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_230" pos="7.970 4.560 0.075">
+      <freejoint name="neutral_fuel_230_jnt"/>
+      <geom name="neutral_fuel_230_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_231" pos="8.120 4.560 0.075">
+      <freejoint name="neutral_fuel_231_jnt"/>
+      <geom name="neutral_fuel_231_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_232" pos="8.270 4.560 0.075">
+      <freejoint name="neutral_fuel_232_jnt"/>
+      <geom name="neutral_fuel_232_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_233" pos="8.420 4.560 0.075">
+      <freejoint name="neutral_fuel_233_jnt"/>
+      <geom name="neutral_fuel_233_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_234" pos="8.570 4.560 0.075">
+      <freejoint name="neutral_fuel_234_jnt"/>
+      <geom name="neutral_fuel_234_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_235" pos="8.720 4.560 0.075">
+      <freejoint name="neutral_fuel_235_jnt"/>
+      <geom name="neutral_fuel_235_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_236" pos="8.870 4.560 0.075">
+      <freejoint name="neutral_fuel_236_jnt"/>
+      <geom name="neutral_fuel_236_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_237" pos="9.020 4.560 0.075">
+      <freejoint name="neutral_fuel_237_jnt"/>
+      <geom name="neutral_fuel_237_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_238" pos="9.170 4.560 0.075">
+      <freejoint name="neutral_fuel_238_jnt"/>
+      <geom name="neutral_fuel_238_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_239" pos="9.320 4.560 0.075">
+      <freejoint name="neutral_fuel_239_jnt"/>
+      <geom name="neutral_fuel_239_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_240" pos="7.220 4.710 0.075">
+      <freejoint name="neutral_fuel_240_jnt"/>
+      <geom name="neutral_fuel_240_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_241" pos="7.370 4.710 0.075">
+      <freejoint name="neutral_fuel_241_jnt"/>
+      <geom name="neutral_fuel_241_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_242" pos="7.520 4.710 0.075">
+      <freejoint name="neutral_fuel_242_jnt"/>
+      <geom name="neutral_fuel_242_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_243" pos="7.670 4.710 0.075">
+      <freejoint name="neutral_fuel_243_jnt"/>
+      <geom name="neutral_fuel_243_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_244" pos="7.820 4.710 0.075">
+      <freejoint name="neutral_fuel_244_jnt"/>
+      <geom name="neutral_fuel_244_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_245" pos="7.970 4.710 0.075">
+      <freejoint name="neutral_fuel_245_jnt"/>
+      <geom name="neutral_fuel_245_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_246" pos="8.120 4.710 0.075">
+      <freejoint name="neutral_fuel_246_jnt"/>
+      <geom name="neutral_fuel_246_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_247" pos="8.270 4.710 0.075">
+      <freejoint name="neutral_fuel_247_jnt"/>
+      <geom name="neutral_fuel_247_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_248" pos="8.420 4.710 0.075">
+      <freejoint name="neutral_fuel_248_jnt"/>
+      <geom name="neutral_fuel_248_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_249" pos="8.570 4.710 0.075">
+      <freejoint name="neutral_fuel_249_jnt"/>
+      <geom name="neutral_fuel_249_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_250" pos="8.720 4.710 0.075">
+      <freejoint name="neutral_fuel_250_jnt"/>
+      <geom name="neutral_fuel_250_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_251" pos="8.870 4.710 0.075">
+      <freejoint name="neutral_fuel_251_jnt"/>
+      <geom name="neutral_fuel_251_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_252" pos="9.020 4.710 0.075">
+      <freejoint name="neutral_fuel_252_jnt"/>
+      <geom name="neutral_fuel_252_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_253" pos="9.170 4.710 0.075">
+      <freejoint name="neutral_fuel_253_jnt"/>
+      <geom name="neutral_fuel_253_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_254" pos="9.320 4.710 0.075">
+      <freejoint name="neutral_fuel_254_jnt"/>
+      <geom name="neutral_fuel_254_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_255" pos="7.220 4.860 0.075">
+      <freejoint name="neutral_fuel_255_jnt"/>
+      <geom name="neutral_fuel_255_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_256" pos="7.370 4.860 0.075">
+      <freejoint name="neutral_fuel_256_jnt"/>
+      <geom name="neutral_fuel_256_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_257" pos="7.520 4.860 0.075">
+      <freejoint name="neutral_fuel_257_jnt"/>
+      <geom name="neutral_fuel_257_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_258" pos="7.670 4.860 0.075">
+      <freejoint name="neutral_fuel_258_jnt"/>
+      <geom name="neutral_fuel_258_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_259" pos="7.820 4.860 0.075">
+      <freejoint name="neutral_fuel_259_jnt"/>
+      <geom name="neutral_fuel_259_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_260" pos="7.970 4.860 0.075">
+      <freejoint name="neutral_fuel_260_jnt"/>
+      <geom name="neutral_fuel_260_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_261" pos="8.120 4.860 0.075">
+      <freejoint name="neutral_fuel_261_jnt"/>
+      <geom name="neutral_fuel_261_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_262" pos="8.270 4.860 0.075">
+      <freejoint name="neutral_fuel_262_jnt"/>
+      <geom name="neutral_fuel_262_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_263" pos="8.420 4.860 0.075">
+      <freejoint name="neutral_fuel_263_jnt"/>
+      <geom name="neutral_fuel_263_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_264" pos="8.570 4.860 0.075">
+      <freejoint name="neutral_fuel_264_jnt"/>
+      <geom name="neutral_fuel_264_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_265" pos="8.720 4.860 0.075">
+      <freejoint name="neutral_fuel_265_jnt"/>
+      <geom name="neutral_fuel_265_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_266" pos="8.870 4.860 0.075">
+      <freejoint name="neutral_fuel_266_jnt"/>
+      <geom name="neutral_fuel_266_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_267" pos="9.020 4.860 0.075">
+      <freejoint name="neutral_fuel_267_jnt"/>
+      <geom name="neutral_fuel_267_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_268" pos="9.170 4.860 0.075">
+      <freejoint name="neutral_fuel_268_jnt"/>
+      <geom name="neutral_fuel_268_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_269" pos="9.320 4.860 0.075">
+      <freejoint name="neutral_fuel_269_jnt"/>
+      <geom name="neutral_fuel_269_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_270" pos="7.220 5.010 0.075">
+      <freejoint name="neutral_fuel_270_jnt"/>
+      <geom name="neutral_fuel_270_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_271" pos="7.370 5.010 0.075">
+      <freejoint name="neutral_fuel_271_jnt"/>
+      <geom name="neutral_fuel_271_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_272" pos="7.520 5.010 0.075">
+      <freejoint name="neutral_fuel_272_jnt"/>
+      <geom name="neutral_fuel_272_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_273" pos="7.670 5.010 0.075">
+      <freejoint name="neutral_fuel_273_jnt"/>
+      <geom name="neutral_fuel_273_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_274" pos="7.820 5.010 0.075">
+      <freejoint name="neutral_fuel_274_jnt"/>
+      <geom name="neutral_fuel_274_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_275" pos="7.970 5.010 0.075">
+      <freejoint name="neutral_fuel_275_jnt"/>
+      <geom name="neutral_fuel_275_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_276" pos="8.120 5.010 0.075">
+      <freejoint name="neutral_fuel_276_jnt"/>
+      <geom name="neutral_fuel_276_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_277" pos="8.270 5.010 0.075">
+      <freejoint name="neutral_fuel_277_jnt"/>
+      <geom name="neutral_fuel_277_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_278" pos="8.420 5.010 0.075">
+      <freejoint name="neutral_fuel_278_jnt"/>
+      <geom name="neutral_fuel_278_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_279" pos="8.570 5.010 0.075">
+      <freejoint name="neutral_fuel_279_jnt"/>
+      <geom name="neutral_fuel_279_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_280" pos="8.720 5.010 0.075">
+      <freejoint name="neutral_fuel_280_jnt"/>
+      <geom name="neutral_fuel_280_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_281" pos="8.870 5.010 0.075">
+      <freejoint name="neutral_fuel_281_jnt"/>
+      <geom name="neutral_fuel_281_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_282" pos="9.020 5.010 0.075">
+      <freejoint name="neutral_fuel_282_jnt"/>
+      <geom name="neutral_fuel_282_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_283" pos="9.170 5.010 0.075">
+      <freejoint name="neutral_fuel_283_jnt"/>
+      <geom name="neutral_fuel_283_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_284" pos="9.320 5.010 0.075">
+      <freejoint name="neutral_fuel_284_jnt"/>
+      <geom name="neutral_fuel_284_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_285" pos="7.220 5.160 0.075">
+      <freejoint name="neutral_fuel_285_jnt"/>
+      <geom name="neutral_fuel_285_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_286" pos="7.370 5.160 0.075">
+      <freejoint name="neutral_fuel_286_jnt"/>
+      <geom name="neutral_fuel_286_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_287" pos="7.520 5.160 0.075">
+      <freejoint name="neutral_fuel_287_jnt"/>
+      <geom name="neutral_fuel_287_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_288" pos="7.670 5.160 0.075">
+      <freejoint name="neutral_fuel_288_jnt"/>
+      <geom name="neutral_fuel_288_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_289" pos="7.820 5.160 0.075">
+      <freejoint name="neutral_fuel_289_jnt"/>
+      <geom name="neutral_fuel_289_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_290" pos="7.970 5.160 0.075">
+      <freejoint name="neutral_fuel_290_jnt"/>
+      <geom name="neutral_fuel_290_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_291" pos="8.120 5.160 0.075">
+      <freejoint name="neutral_fuel_291_jnt"/>
+      <geom name="neutral_fuel_291_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_292" pos="8.270 5.160 0.075">
+      <freejoint name="neutral_fuel_292_jnt"/>
+      <geom name="neutral_fuel_292_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_293" pos="8.420 5.160 0.075">
+      <freejoint name="neutral_fuel_293_jnt"/>
+      <geom name="neutral_fuel_293_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_294" pos="8.570 5.160 0.075">
+      <freejoint name="neutral_fuel_294_jnt"/>
+      <geom name="neutral_fuel_294_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_295" pos="8.720 5.160 0.075">
+      <freejoint name="neutral_fuel_295_jnt"/>
+      <geom name="neutral_fuel_295_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_296" pos="8.870 5.160 0.075">
+      <freejoint name="neutral_fuel_296_jnt"/>
+      <geom name="neutral_fuel_296_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_297" pos="9.020 5.160 0.075">
+      <freejoint name="neutral_fuel_297_jnt"/>
+      <geom name="neutral_fuel_297_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_298" pos="9.170 5.160 0.075">
+      <freejoint name="neutral_fuel_298_jnt"/>
+      <geom name="neutral_fuel_298_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_299" pos="9.320 5.160 0.075">
+      <freejoint name="neutral_fuel_299_jnt"/>
+      <geom name="neutral_fuel_299_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_300" pos="7.220 5.310 0.075">
+      <freejoint name="neutral_fuel_300_jnt"/>
+      <geom name="neutral_fuel_300_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_301" pos="7.370 5.310 0.075">
+      <freejoint name="neutral_fuel_301_jnt"/>
+      <geom name="neutral_fuel_301_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_302" pos="7.520 5.310 0.075">
+      <freejoint name="neutral_fuel_302_jnt"/>
+      <geom name="neutral_fuel_302_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_303" pos="7.670 5.310 0.075">
+      <freejoint name="neutral_fuel_303_jnt"/>
+      <geom name="neutral_fuel_303_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_304" pos="7.820 5.310 0.075">
+      <freejoint name="neutral_fuel_304_jnt"/>
+      <geom name="neutral_fuel_304_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_305" pos="7.970 5.310 0.075">
+      <freejoint name="neutral_fuel_305_jnt"/>
+      <geom name="neutral_fuel_305_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_306" pos="8.120 5.310 0.075">
+      <freejoint name="neutral_fuel_306_jnt"/>
+      <geom name="neutral_fuel_306_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_307" pos="8.270 5.310 0.075">
+      <freejoint name="neutral_fuel_307_jnt"/>
+      <geom name="neutral_fuel_307_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_308" pos="8.420 5.310 0.075">
+      <freejoint name="neutral_fuel_308_jnt"/>
+      <geom name="neutral_fuel_308_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_309" pos="8.570 5.310 0.075">
+      <freejoint name="neutral_fuel_309_jnt"/>
+      <geom name="neutral_fuel_309_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_310" pos="8.720 5.310 0.075">
+      <freejoint name="neutral_fuel_310_jnt"/>
+      <geom name="neutral_fuel_310_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_311" pos="8.870 5.310 0.075">
+      <freejoint name="neutral_fuel_311_jnt"/>
+      <geom name="neutral_fuel_311_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_312" pos="9.020 5.310 0.075">
+      <freejoint name="neutral_fuel_312_jnt"/>
+      <geom name="neutral_fuel_312_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_313" pos="9.170 5.310 0.075">
+      <freejoint name="neutral_fuel_313_jnt"/>
+      <geom name="neutral_fuel_313_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_314" pos="9.320 5.310 0.075">
+      <freejoint name="neutral_fuel_314_jnt"/>
+      <geom name="neutral_fuel_314_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_315" pos="7.220 5.460 0.075">
+      <freejoint name="neutral_fuel_315_jnt"/>
+      <geom name="neutral_fuel_315_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_316" pos="7.370 5.460 0.075">
+      <freejoint name="neutral_fuel_316_jnt"/>
+      <geom name="neutral_fuel_316_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_317" pos="7.520 5.460 0.075">
+      <freejoint name="neutral_fuel_317_jnt"/>
+      <geom name="neutral_fuel_317_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_318" pos="7.670 5.460 0.075">
+      <freejoint name="neutral_fuel_318_jnt"/>
+      <geom name="neutral_fuel_318_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_319" pos="7.820 5.460 0.075">
+      <freejoint name="neutral_fuel_319_jnt"/>
+      <geom name="neutral_fuel_319_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_320" pos="7.970 5.460 0.075">
+      <freejoint name="neutral_fuel_320_jnt"/>
+      <geom name="neutral_fuel_320_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_321" pos="8.120 5.460 0.075">
+      <freejoint name="neutral_fuel_321_jnt"/>
+      <geom name="neutral_fuel_321_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_322" pos="8.270 5.460 0.075">
+      <freejoint name="neutral_fuel_322_jnt"/>
+      <geom name="neutral_fuel_322_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_323" pos="8.420 5.460 0.075">
+      <freejoint name="neutral_fuel_323_jnt"/>
+      <geom name="neutral_fuel_323_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_324" pos="8.570 5.460 0.075">
+      <freejoint name="neutral_fuel_324_jnt"/>
+      <geom name="neutral_fuel_324_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_325" pos="8.720 5.460 0.075">
+      <freejoint name="neutral_fuel_325_jnt"/>
+      <geom name="neutral_fuel_325_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_326" pos="8.870 5.460 0.075">
+      <freejoint name="neutral_fuel_326_jnt"/>
+      <geom name="neutral_fuel_326_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_327" pos="9.020 5.460 0.075">
+      <freejoint name="neutral_fuel_327_jnt"/>
+      <geom name="neutral_fuel_327_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_328" pos="9.170 5.460 0.075">
+      <freejoint name="neutral_fuel_328_jnt"/>
+      <geom name="neutral_fuel_328_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_329" pos="9.320 5.460 0.075">
+      <freejoint name="neutral_fuel_329_jnt"/>
+      <geom name="neutral_fuel_329_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_330" pos="7.220 5.610 0.075">
+      <freejoint name="neutral_fuel_330_jnt"/>
+      <geom name="neutral_fuel_330_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_331" pos="7.370 5.610 0.075">
+      <freejoint name="neutral_fuel_331_jnt"/>
+      <geom name="neutral_fuel_331_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_332" pos="7.520 5.610 0.075">
+      <freejoint name="neutral_fuel_332_jnt"/>
+      <geom name="neutral_fuel_332_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_333" pos="7.670 5.610 0.075">
+      <freejoint name="neutral_fuel_333_jnt"/>
+      <geom name="neutral_fuel_333_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_334" pos="7.820 5.610 0.075">
+      <freejoint name="neutral_fuel_334_jnt"/>
+      <geom name="neutral_fuel_334_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_335" pos="7.970 5.610 0.075">
+      <freejoint name="neutral_fuel_335_jnt"/>
+      <geom name="neutral_fuel_335_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_336" pos="8.120 5.610 0.075">
+      <freejoint name="neutral_fuel_336_jnt"/>
+      <geom name="neutral_fuel_336_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_337" pos="8.270 5.610 0.075">
+      <freejoint name="neutral_fuel_337_jnt"/>
+      <geom name="neutral_fuel_337_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_338" pos="8.420 5.610 0.075">
+      <freejoint name="neutral_fuel_338_jnt"/>
+      <geom name="neutral_fuel_338_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_339" pos="8.570 5.610 0.075">
+      <freejoint name="neutral_fuel_339_jnt"/>
+      <geom name="neutral_fuel_339_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_340" pos="8.720 5.610 0.075">
+      <freejoint name="neutral_fuel_340_jnt"/>
+      <geom name="neutral_fuel_340_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_341" pos="8.870 5.610 0.075">
+      <freejoint name="neutral_fuel_341_jnt"/>
+      <geom name="neutral_fuel_341_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_342" pos="9.020 5.610 0.075">
+      <freejoint name="neutral_fuel_342_jnt"/>
+      <geom name="neutral_fuel_342_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_343" pos="9.170 5.610 0.075">
+      <freejoint name="neutral_fuel_343_jnt"/>
+      <geom name="neutral_fuel_343_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_344" pos="9.320 5.610 0.075">
+      <freejoint name="neutral_fuel_344_jnt"/>
+      <geom name="neutral_fuel_344_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_345" pos="7.220 5.760 0.075">
+      <freejoint name="neutral_fuel_345_jnt"/>
+      <geom name="neutral_fuel_345_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_346" pos="7.370 5.760 0.075">
+      <freejoint name="neutral_fuel_346_jnt"/>
+      <geom name="neutral_fuel_346_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_347" pos="7.520 5.760 0.075">
+      <freejoint name="neutral_fuel_347_jnt"/>
+      <geom name="neutral_fuel_347_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_348" pos="7.670 5.760 0.075">
+      <freejoint name="neutral_fuel_348_jnt"/>
+      <geom name="neutral_fuel_348_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_349" pos="7.820 5.760 0.075">
+      <freejoint name="neutral_fuel_349_jnt"/>
+      <geom name="neutral_fuel_349_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_350" pos="7.970 5.760 0.075">
+      <freejoint name="neutral_fuel_350_jnt"/>
+      <geom name="neutral_fuel_350_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_351" pos="8.120 5.760 0.075">
+      <freejoint name="neutral_fuel_351_jnt"/>
+      <geom name="neutral_fuel_351_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_352" pos="8.270 5.760 0.075">
+      <freejoint name="neutral_fuel_352_jnt"/>
+      <geom name="neutral_fuel_352_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_353" pos="8.420 5.760 0.075">
+      <freejoint name="neutral_fuel_353_jnt"/>
+      <geom name="neutral_fuel_353_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_354" pos="8.570 5.760 0.075">
+      <freejoint name="neutral_fuel_354_jnt"/>
+      <geom name="neutral_fuel_354_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_355" pos="8.720 5.760 0.075">
+      <freejoint name="neutral_fuel_355_jnt"/>
+      <geom name="neutral_fuel_355_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_356" pos="8.870 5.760 0.075">
+      <freejoint name="neutral_fuel_356_jnt"/>
+      <geom name="neutral_fuel_356_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_357" pos="9.020 5.760 0.075">
+      <freejoint name="neutral_fuel_357_jnt"/>
+      <geom name="neutral_fuel_357_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_358" pos="9.170 5.760 0.075">
+      <freejoint name="neutral_fuel_358_jnt"/>
+      <geom name="neutral_fuel_358_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+    <body name="neutral_fuel_359" pos="9.320 5.760 0.075">
+      <freejoint name="neutral_fuel_359_jnt"/>
+      <geom name="neutral_fuel_359_geom" type="sphere" size="0.0750"
+            mass="0.2154" material="fuel_mat" class="fuel"
+            contype="1" conaffinity="3"/>
+    </body>
+
+
+  </worldbody>
+</mujoco>

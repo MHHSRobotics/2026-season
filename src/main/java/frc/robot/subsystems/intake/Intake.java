@@ -19,19 +19,21 @@ import frc.robot.io.MotorIO;
 
 public class Intake extends SubsystemBase {
     public static class Constants {
-        public static final int intakeMotorId = 22;
-        public static final int hingeMotorId = 23;
+        public static final int intakeMotorId = 14;
+        public static final int hingeMotorId = 15;
         // These are DIO IDs, separate from CAN IDs
         public static final int rightSwitchId = 1;
         public static final int leftSwitchId = 2;
 
-        public static final double defaultSpeed = 0.5;
+        public static final double defaultSpeed = 0.25;
 
-        public static final LoggedNetworkNumber hingeKP = new LoggedNetworkNumber("Intake/Hinge/kP", 10);
+        public static final LoggedNetworkNumber hingeKP =
+                new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 0);
         public static final LoggedNetworkNumber hingeKI = new LoggedNetworkNumber("Intake/Hinge/kI", 0);
-        public static final LoggedNetworkNumber hingeKD = new LoggedNetworkNumber("Intake/Hinge/kD", 5);
+        public static final LoggedNetworkNumber hingeKD =
+                new LoggedNetworkNumber("Intake/Hinge/kD", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 0);
         public static final LoggedNetworkNumber hingeKG =
-                new LoggedNetworkNumber("Intake/Hinge/kG", frc.robot.Constants.currentMode == Mode.SIM ? 0 : 5);
+                new LoggedNetworkNumber("Intake/Hinge/kG", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 0);
         public static final LoggedNetworkNumber hingeKS = new LoggedNetworkNumber("Intake/Hinge/kS", 0);
         public static final LoggedNetworkNumber hingeKV = new LoggedNetworkNumber("Intake/Hinge/kV", 0);
         public static final LoggedNetworkNumber hingeKA = new LoggedNetworkNumber("Intake/Hinge/kA", 0);
@@ -39,8 +41,8 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkNumber hingeMaxVel = new LoggedNetworkNumber("Intake/Hinge/maxVel", 5);
         public static final LoggedNetworkNumber hingeMaxAccel = new LoggedNetworkNumber("Intake/Hinge/maxAccel", 10);
 
-        public static final LoggedNetworkNumber hingeVerticalPos =
-                new LoggedNetworkNumber("Intake/Hinge/VerticalPos", 0);
+        public static final LoggedNetworkNumber hingeVerticalPos = new LoggedNetworkNumber(
+                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : Math.PI / 2);
 
         public static final LoggedNetworkBoolean intakeLocked =
                 new LoggedNetworkBoolean("Intake/Locked", true); // Toggle to enable braking of the hinge when stopped
@@ -49,7 +51,7 @@ public class Intake extends SubsystemBase {
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
         public static final double hingeUp = Units.degreesToRadians(90);
-        public static final double hingeDown = 0;
+        public static final double hingeDown = Units.degreesToRadians(-15);
 
         public static final double intakeRatio = 1;
         public static final double hingeRatio = 15;
@@ -67,6 +69,8 @@ public class Intake extends SubsystemBase {
     private BitIO rightLimitSwitch;
     private BitIO leftLimitSwitch;
 
+    private boolean intakeUp = true;
+
     public Intake(MotorIO intakeMotorIO, MotorIO hingeMotorIO, BitIO rightLimitSwitchIO, BitIO leftLimitSwitchIO) {
         hingeMotor = hingeMotorIO;
         rightLimitSwitch = rightLimitSwitchIO;
@@ -76,6 +80,7 @@ public class Intake extends SubsystemBase {
         hingeMotor.setInverted(Constants.hingeInverted);
         hingeMotor.connectInternalSensor(Constants.hingeRatio);
         hingeMotor.setPosition(Constants.hingeUp);
+        hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
         // hingeMotor.connectForwardLimitSwitch(rightLimitSwitch);
 
         intakeMotor.setInverted(Constants.intakeInverted);
@@ -103,11 +108,38 @@ public class Intake extends SubsystemBase {
         hingeMotor.setDutyCycle(speed);
     }
 
+    public void switchPos() {
+        if (intakeUp == false) {
+            setHingeGoal(Constants.hingeUp);
+        } else {
+            setHingeGoal(Constants.hingeDown);
+        }
+    }
+
+    public boolean getIntakePos() {
+        return intakeUp;
+    }
+
     public void setHingeGoal(double goal) {
-        hingeMotor.setGoalWithCurrentMagic(
-                goal,
-                () -> Constants.hingeKG.get()
-                        * Math.cos(hingeMotor.getInputs().position - Constants.hingeVerticalPos.get()));
+        intakeUp = false;
+        if (goal > 0) {
+            intakeUp = true;
+        }
+        hingeMotor.setGoalWithCurrentMagic(goal, () -> {
+            double position = hingeMotor.getInputs().position;
+            double gravityFF =
+                    Constants.hingeKG.get() * Math.cos(position + Math.PI / 2 - Constants.hingeVerticalPos.get());
+            // Scale down gravity compensation as the arm approaches the bottom.
+            // When down, gravity keeps the intake in place — applying upward kG
+            // would let fuel push it up. The scale factor smoothly tapers kG off
+            // so the arm doesn't free-fall.
+            double scale = Math.min(1.0, position / Constants.hingeUp);
+            return gravityFF * scale;
+        });
+    }
+
+    public double getHingeGoal() {
+        return hingeMotor.getInputs().setpoint;
     }
 
     public void intake() {
@@ -142,6 +174,8 @@ public class Intake extends SubsystemBase {
         hingeMotor.setMaxAccel(Constants.hingeMaxAccel.get());
 
         updateVis();
+
+        Logger.recordOutput("IntakeUp", intakeUp);
     }
 
     // On-screen drawing of the wrist for dashboards (length is visual only)
