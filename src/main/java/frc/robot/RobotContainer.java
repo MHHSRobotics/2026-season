@@ -352,7 +352,7 @@ public class RobotContainer {
                     hangEncoder = new EncoderIO("hang encoder", "Hang/Encoder");
                     break;
             }
-            hang = new Hang(hangMotor, hangEncoder);
+            hang = new Hang(hangMotor);
         }
 
         if (Constants.intakeEnabled) {

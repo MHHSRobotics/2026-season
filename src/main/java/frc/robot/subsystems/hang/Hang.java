@@ -68,7 +68,6 @@ public class Hang extends SubsystemBase {
     }
 
     private MotorIO motor;
-    private EncoderIO encoder;
 
     // On-screen drawing of the wrist for dashboards (length is visual only)
     private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
@@ -112,20 +111,13 @@ public class Hang extends SubsystemBase {
     private final LoggedMechanismLigament2d iAmount =
             iRoot.append(new LoggedMechanismLigament2d("IAmount", 1.0, 90, 6, new Color8Bit(Color.kRed)));
 
-    public Hang(MotorIO motorIO, EncoderIO encoderIO) {
+    public Hang(MotorIO motorIO) {
         motor = motorIO;
-        encoder = encoderIO;
-
-        encoder.setInverted(Constants.encoderInverted);
-        encoder.setGearRatio(Constants.encoderRatio);
 
         motor.setInverted(Constants.motorInverted);
-        motor.connectEncoder(encoder, Constants.motorRatio, true);
 
         motor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
-        motor.setOffset(Constants.offset);
-
-        motor.setLimits(Constants.minAngle, Constants.maxAngle);
+        motor.setPosition(0);
 
         motor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
     }
@@ -156,7 +148,6 @@ public class Hang extends SubsystemBase {
     @Override
     public void periodic() {
         motor.update();
-        encoder.update();
 
         motor.setBraking(Constants.hangLocked.get());
 
