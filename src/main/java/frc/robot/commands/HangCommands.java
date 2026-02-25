@@ -15,6 +15,7 @@ public class HangCommands {
     }
 
     public Command setSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> hang.setSpeed(speed.getAsDouble()), () -> hang.setSpeed(0), hang).withName("hang set speed");
+        return Commands.runEnd(() -> hang.setSpeed(speed.getAsDouble()), () -> hang.setSpeed(0), hang)
+                .withName("hang set speed");
     }
 }

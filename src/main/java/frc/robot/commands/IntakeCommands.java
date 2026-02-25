@@ -30,22 +30,27 @@ public class IntakeCommands {
     }
 
     public Command changeGoal(DoubleSupplier change) {
-        return Commands.run(() -> intake.setHingeGoal(intake.getHingeGoal() + change.getAsDouble()), intake).withName("change goal");
+        return Commands.run(() -> intake.setHingeGoal(intake.getHingeGoal() + change.getAsDouble()), intake)
+                .withName("change goal");
     }
 
     public Command setHingeSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> intake.setHingeSpeed(speed.getAsDouble()), () -> intake.hingeStop(), intake).withName("set hinge speed");
+        return Commands.runEnd(() -> intake.setHingeSpeed(speed.getAsDouble()), () -> intake.hingeStop(), intake)
+                .withName("set hinge speed");
     }
 
     public Command setIntakeSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> intake.setIntakeSpeed(speed.getAsDouble()), () -> intake.intakeStop(), intake).withName("set intake speed");
+        return Commands.runEnd(() -> intake.setIntakeSpeed(speed.getAsDouble()), () -> intake.intakeStop(), intake)
+                .withName("set intake speed");
     }
 
     public Command intake() {
-        return Commands.startEnd(() -> intake.intake(), () -> intake.intakeStop(), intake).withName("intake");
+        return Commands.startEnd(() -> intake.intake(), () -> intake.intakeStop(), intake)
+                .withName("intake");
     }
 
     public Command outtake() {
-        return Commands.startEnd(() -> intake.outtake(), () -> intake.intakeStop(), intake).withName("outtake");
+        return Commands.startEnd(() -> intake.outtake(), () -> intake.intakeStop(), intake)
+                .withName("outtake");
     }
 }
