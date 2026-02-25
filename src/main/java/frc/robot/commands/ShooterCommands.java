@@ -15,15 +15,15 @@ public class ShooterCommands {
     }
 
     public Command setFlySpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> shooter.setFlyTargetSpeed(speed.getAsDouble()), () -> shooter.flyStop());
+        return Commands.runEnd(() -> shooter.setFlyTargetSpeed(speed.getAsDouble()), () -> shooter.flyStop()).withName("set fly speed");
     }
 
     public Command flyShoot() {
-        return Commands.startEnd(() -> shooter.flyShoot(), () -> shooter.flyStop());
+        return Commands.startEnd(() -> shooter.flyShoot(), () -> shooter.flyStop()).withName("fly shoot");
     }
 
     public Command setFeedSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> shooter.setFeedSpeed(speed.getAsDouble()), () -> shooter.feedStop());
+        return Commands.runEnd(() -> shooter.setFeedSpeed(speed.getAsDouble()), () -> shooter.feedStop()).withName("set feed speed");
     }
 
     public Command feedShootWhenAtTarget() {
@@ -35,14 +35,14 @@ public class ShooterCommands {
                         shooter.feedStop();
                     }
                 },
-                () -> shooter.feedStop());
+                () -> shooter.feedStop()).withName("feed shoot when at target");
     }
 
     public Command feedShoot() {
-        return Commands.startEnd(() -> shooter.feedShoot(), () -> shooter.feedStop());
+        return Commands.startEnd(() -> shooter.feedShoot(), () -> shooter.feedStop()).withName("feed shoot");
     }
 
     public Command feedReverse() {
-        return Commands.startEnd(() -> shooter.feedReverse(), () -> shooter.feedStop());
+        return Commands.startEnd(() -> shooter.feedReverse(), () -> shooter.feedStop()).withName("feed reverse");
     }
 }

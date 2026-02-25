@@ -17,10 +17,10 @@ public class LEDCommands {
     }
 
     public Command setColor(Supplier<RGBWColor> color) {
-        return Commands.runEnd(() -> led.setColor(color.get()), () -> led.setColor(new RGBWColor()));
+        return Commands.runEnd(() -> led.setColor(color.get()), () -> led.setColor(new RGBWColor())).withName("led set color");
     }
 
     public Command startEndColor(RGBWColor startColor, RGBWColor endColor) {
-        return Commands.startEnd(() -> led.setColor(startColor), () -> led.setColor(endColor), led);
+        return Commands.startEnd(() -> led.setColor(startColor), () -> led.setColor(endColor), led).withName("led start end color");
     }
 }

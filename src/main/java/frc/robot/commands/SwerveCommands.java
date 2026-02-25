@@ -25,7 +25,7 @@ public class SwerveCommands {
 
     // Reset swerve gyro to 0
     public Command resetGyro() {
-        return new InstantCommand(() -> swerve.resetGyro());
+        return new InstantCommand(() -> swerve.resetGyro()).withName("reset gyro");
     }
 
     // Drives using the given dx, dy, omega, and field relative inputs. Applies a deadband and scales the values.
