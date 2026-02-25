@@ -297,6 +297,10 @@ public class Swerve extends SubsystemBase {
         return getPose().getRotation();
     }
 
+    public FieldPose2d getFieldPose(){
+        return new FieldPose2d(RobotUtils.invertToAlliance(getPose()));
+    }
+
     // Tell the pose estimator to reset to a known field position (meters, radians)
     public void setPose(Pose2d newPose) {
         estimator.resetPosition(gyroAngle, getModulePositions(), newPose);
