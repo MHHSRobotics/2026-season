@@ -540,8 +540,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
-                    .onTrue(swerveCommands.setPoseTarget(new FieldPose2d(1, 1, new Rotation2d())))
-                    .onFalse(swerveCommands.stop());
+                    .onTrue(swerveCommands.setPoseTarget(new FieldPose2d(1, 1, new Rotation2d())));
 
             // Manual duty cycle backward test, fast
             driveController
@@ -549,8 +548,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
-                    .onTrue(swerveCommands.setPoseTarget(new FieldPose2d()))
-                    .onFalse(swerveCommands.stop());
+                    .onTrue(swerveCommands.setPoseTarget(new FieldPose2d()));
         }
 
         if (Constants.hangEnabled) {
