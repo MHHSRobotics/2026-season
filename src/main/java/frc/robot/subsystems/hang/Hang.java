@@ -16,7 +16,6 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
 public class Hang extends SubsystemBase {

@@ -716,6 +716,58 @@
                 }
               }
             ]
+          },
+          {
+            "title": "Test",
+            "x": 1280.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Enabled",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "ComboBox Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Enabled",
+                  "period": 0.06,
+                  "sort_options": false
+                }
+              },
+              {
+                "title": "Subsystem",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "ComboBox Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Subsystem",
+                  "period": 0.06,
+                  "sort_options": false
+                }
+              },
+              {
+                "title": "Type",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "ComboBox Chooser",
+                "properties": {
+                  "topic": "/SmartDashboard/Test/Type",
+                  "period": 0.06,
+                  "sort_options": false
+                }
+              }
+            ]
           }
         ],
         "containers": [
@@ -832,79 +884,6 @@
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
-            }
-          },
-          {
-            "title": "Enabled",
-            "x": 1280.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Test/Enabled",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Type",
-            "x": 1280.0,
-            "y": 256.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Test/Type",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
-            "title": "Subsystem",
-            "x": 1280.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/Test/Subsystem",
-              "period": 0.06,
-              "sort_options": false
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "Camera Feeds",
-      "grid_layout": {
-        "layouts": [],
-        "containers": [
-          {
-            "title": "BackLeft_AT",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 640.0,
-            "height": 512.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/BackLeft_AT-processed",
-              "period": 0.06,
-              "rotation_turns": 0
-            }
-          },
-          {
-            "title": "BackRight_AT",
-            "x": 640.0,
-            "y": 0.0,
-            "width": 640.0,
-            "height": 512.0,
-            "type": "Camera Stream",
-            "properties": {
-              "topic": "/CameraPublisher/BackRight_AT-processed",
-              "period": 0.06,
-              "rotation_turns": 0
             }
           }
         ]
