@@ -297,7 +297,7 @@ public class Swerve extends SubsystemBase {
         return getPose().getRotation();
     }
 
-    public FieldPose2d getFieldPose(){
+    public FieldPose2d getFieldPose() {
         return new FieldPose2d(RobotUtils.invertToAlliance(getPose()));
     }
 
