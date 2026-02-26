@@ -42,7 +42,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkNumber hingeMaxAccel = new LoggedNetworkNumber("Intake/Hinge/maxAccel", 10);
 
         public static final LoggedNetworkNumber hingeVerticalPos = new LoggedNetworkNumber(
-                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : Math.PI / 2);
+                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : 1.155);
 
         public static final LoggedNetworkBoolean intakeLocked =
                 new LoggedNetworkBoolean("Intake/Locked", true); // Toggle to enable braking of the hinge when stopped
@@ -80,7 +80,7 @@ public class Intake extends SubsystemBase {
         hingeMotor.setInverted(Constants.hingeInverted);
         hingeMotor.connectInternalSensor(Constants.hingeRatio);
         hingeMotor.setPosition(Constants.hingeUp);
-        hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
+        // hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
         // hingeMotor.connectForwardLimitSwitch(rightLimitSwitch);
 
         intakeMotor.setInverted(Constants.intakeInverted);
@@ -121,6 +121,7 @@ public class Intake extends SubsystemBase {
     }
 
     public void setHingeGoal(double goal) {
+        System.out.println(goal);
         intakeUp = false;
         if (goal > 0) {
             intakeUp = true;
