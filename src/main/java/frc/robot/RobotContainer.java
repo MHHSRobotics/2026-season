@@ -559,7 +559,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.setSpeed(() -> 0.1));
+                    .whileTrue(hangCommands.setSpeed(() -> 0.2));
 
             // Hang move down test
             driveController
@@ -567,7 +567,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.setSpeed(() -> -0.1));
+                    .whileTrue(hangCommands.setSpeed(() -> -0.2));
 
             // Hang move up test
             driveController

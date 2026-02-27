@@ -121,7 +121,6 @@ public class Intake extends SubsystemBase {
     }
 
     public void setHingeGoal(double goal) {
-        System.out.println(goal);
         intakeUp = false;
         if (goal > 0) {
             intakeUp = true;
