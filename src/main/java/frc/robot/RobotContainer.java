@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -8,8 +9,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -54,6 +55,8 @@ import frc.robot.subsystems.swerve.SwerveModule;
 import frc.robot.subsystems.swerve.SwerveModulePhysicsSim;
 import frc.robot.subsystems.swerve.SwerveModuleSim;
 import frc.robot.subsystems.swerve.SwervePhysicsSim;
+import frc.robot.subsystems.swerve.SwerveRotation;
+import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
@@ -62,6 +65,8 @@ import frc.robot.util.FieldPose2d;
 public class RobotContainer {
     // Subsystems
     private Swerve swerve;
+    private SwerveTranslation swerveTranslation;
+    private SwerveRotation swerveRotation;
     private Hang hang;
     private Hopper hopper;
     private Intake intake;
@@ -223,6 +228,8 @@ public class RobotContainer {
             SwerveModule br = new SwerveModule(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight);
 
             swerve = new Swerve(gyro, fl, fr, bl, br); // Initialize swerve subsystem
+            swerveTranslation = new SwerveTranslation();
+            swerveRotation = new SwerveRotation();
 
             if (Constants.visionEnabled) {
                 // Create camera variables
@@ -415,7 +422,7 @@ public class RobotContainer {
 
     private void initCommands() {
         if (Constants.swerveEnabled) {
-            swerveCommands = new SwerveCommands(swerve);
+            swerveCommands = new SwerveCommands(swerve, swerveTranslation, swerveRotation);
         }
         if (Constants.hopperEnabled) {
             hopperCommands = new HopperCommands(hopper);
@@ -448,21 +455,23 @@ public class RobotContainer {
         testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
 
         if (Constants.swerveEnabled) {
-            driveController.options().and(() -> !testEnabled.get()).onTrue(swerveCommands.resetGyro());
-            driveController.create().and(() -> !testEnabled.get()).onTrue(swerveCommands.lock());
-            /*
-             * How this works:
-             * When the driver controller is outside of its deadband, it runs swerveCommands.drive(), which overrides auto align commands. swerveCommands.drive() will continue to run until an auto align command is executed, so the swerve drive will stop when both sticks are at 0.
-             */
-            driveController
-                    .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
-                    .or(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
+            driveController.options().onTrue(swerveCommands.resetGyro());
+            driveController.create().onTrue(swerveCommands.lock());
+            // Translation: left stick controls dx/dy
+            new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
                     .onTrue(swerveCommands.drive(
                             () -> -driveController.getLeftY(),
                             () -> -driveController.getLeftX(),
-                            () -> -driveController.getRightX(),
                             () -> Swerve.Constants.swerveFieldCentric.get()));
+
+            // Rotation: right stick X controls omega
+            driveController
+                    .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
+                    .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
+
+            // Aim at hub: povUp
+            driveController.povUp().onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
             driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
                     .cancelAll()));
@@ -471,10 +480,6 @@ public class RobotContainer {
             driveController.L1().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
             driveController.L2().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
             driveController.R1().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
-        }
-        if (Constants.hopperEnabled) {
-            driveController.povUp().and(() -> !testEnabled.get()).whileTrue(hopperCommands.forward());
-            driveController.povDown().and(() -> !testEnabled.get()).whileTrue(hopperCommands.reverse());
         }
         if (multiCommands != null) {
             driveController.R2().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
@@ -518,6 +523,14 @@ public class RobotContainer {
                     .and(() -> testSubsystem.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(-testSpeed.get(), 0, 0))
                     .onFalse(swerveCommands.stop());
+
+            // Manual pose reset
+            driveController
+                    .triangle()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("Swerve"))
+                    .onTrue(swerveCommands.resetPose(new Pose2d()));
 
             // PID to (1,1)
             driveController
@@ -685,10 +698,7 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         if (autoChooser.get().equals("Leave")) {
-            return swerveCommands
-                    .setPositionOutput(-2, 0)
-                    .andThen(new WaitCommand(3))
-                    .andThen(swerveCommands.setPositionOutput(0, 0));
+            return swerveCommands.setPositionOutput(-2, 0).withTimeout(3);
         } else {
             Alerts.create("Unknown auto specified", AlertType.kWarning);
             return new InstantCommand();
