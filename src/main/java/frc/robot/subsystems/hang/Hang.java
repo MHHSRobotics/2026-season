@@ -6,15 +6,15 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
@@ -26,16 +26,16 @@ public class Hang extends SubsystemBase {
         public static final int encoderId = 26;
 
         public static final boolean motorInverted = false;
-        public static final boolean encoderInverted=false;
+        public static final boolean encoderInverted = false;
 
-        public static final double encoderRatio=1;
+        public static final double encoderRatio = 1;
 
-        public static final double motorRatio=32;
-        public static final double offset=0;
+        public static final double motorRatio = 32;
+        public static final double offset = 0;
 
-        public static final double minAngle=Units.degreesToRadians(-100);
-        public static final double maxAngle=Units.degreesToRadians(100);
-        public static final double startAngle=Units.degreesToRadians(-100); // start angle in sim
+        public static final double minAngle = Units.degreesToRadians(-100);
+        public static final double maxAngle = Units.degreesToRadians(100);
+        public static final double startAngle = Units.degreesToRadians(-100); // start angle in sim
 
         public static final LoggedNetworkBoolean hangLocked =
                 new LoggedNetworkBoolean("Hang/Locked", true); // Toggle to enable braking when stopped
@@ -50,8 +50,8 @@ public class Hang extends SubsystemBase {
         public static final LoggedNetworkNumber kI =
                 new LoggedNetworkNumber("Hang/kI", 0); // (volts per rad) removes steady state error
 
-        public static final LoggedNetworkNumber kS = new LoggedNetworkNumber(
-                "Hang/kS", 0); // (volts) voltage to get wrist moving (overcome static friction)
+        public static final LoggedNetworkNumber kS =
+                new LoggedNetworkNumber("Hang/kS", 0); // (volts) voltage to get wrist moving (overcome static friction)
         public static final LoggedNetworkNumber kG = new LoggedNetworkNumber(
                 "Hang/kG", 0); // (volts) voltage to hold the wrist level (compensate gravity at 0 rad)
         public static final LoggedNetworkNumber kV = new LoggedNetworkNumber(
@@ -64,7 +64,7 @@ public class Hang extends SubsystemBase {
         public static final LoggedNetworkNumber maxAccel = new LoggedNetworkNumber(
                 "Hang/maxAccel", 6.3); // (rad/s^2) Motion Magic max acceleration for moving to a target
 
-        public static final LoggedNetworkNumber verticalPos=new LoggedNetworkNumber("Hang/VerticalPos",1.57);
+        public static final LoggedNetworkNumber verticalPos = new LoggedNetworkNumber("Hang/VerticalPos", 1.57);
     }
 
     private MotorIO motor;
@@ -112,15 +112,15 @@ public class Hang extends SubsystemBase {
     private final LoggedMechanismLigament2d iAmount =
             iRoot.append(new LoggedMechanismLigament2d("IAmount", 1.0, 90, 6, new Color8Bit(Color.kRed)));
 
-    public Hang(MotorIO motorIO,EncoderIO encoderIO) {
+    public Hang(MotorIO motorIO, EncoderIO encoderIO) {
         motor = motorIO;
-        encoder=encoderIO;
+        encoder = encoderIO;
 
         encoder.setInverted(Constants.encoderInverted);
         encoder.setGearRatio(Constants.encoderRatio);
 
         motor.setInverted(Constants.motorInverted);
-        motor.connectEncoder(encoder, Constants.motorRatio,true);
+        motor.connectEncoder(encoder, Constants.motorRatio, true);
 
         motor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
         motor.setOffset(Constants.offset);
@@ -128,18 +128,17 @@ public class Hang extends SubsystemBase {
         motor.setLimits(Constants.minAngle, Constants.maxAngle);
 
         motor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
-        
     }
 
     public void setSpeed(double speed) {
         motor.setDutyCycle(speed);
     }
 
-    public double getPosition(){
+    public double getPosition() {
         return motor.getInputs().position;
     }
 
-    public double getVelocity(){
+    public double getVelocity() {
         return motor.getInputs().velocity;
     }
 
@@ -150,7 +149,7 @@ public class Hang extends SubsystemBase {
         });
     }
 
-    public double getGoal(){
+    public double getGoal() {
         return motor.getInputs().setpoint;
     }
 
@@ -188,7 +187,7 @@ public class Hang extends SubsystemBase {
             iAmount.setLineWeight(0);
         }
 
-        Logger.recordOutput("Hang/Visualization",mech);
+        Logger.recordOutput("Hang/Visualization", mech);
 
         motor.setkP(Constants.kP.get());
         motor.setkD(Constants.kD.get());
