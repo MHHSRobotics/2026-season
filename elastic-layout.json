@@ -194,6 +194,19 @@
               "trajectory_color": 4294967295,
               "show_robot_outside_widget": true
             }
+          },
+          {
+            "title": "Bad Controls",
+            "x": 384.0,
+            "y": 640.0,
+            "width": 1152.0,
+            "height": 256.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "AltControlsEnabled",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
           }
         ]
       }
