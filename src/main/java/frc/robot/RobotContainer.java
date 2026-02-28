@@ -24,8 +24,6 @@ import frc.robot.commands.LEDCommands;
 import frc.robot.commands.MultiCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
-import frc.robot.io.BitIO;
-import frc.robot.io.BitIODigitalSignal;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
@@ -469,19 +467,33 @@ public class RobotContainer {
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
             // Aim at hub: circle, L1 in alt controls
-            driveController.circle().and(()->!altControls()).onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
-            driveController.L1().and(()->altControls()).onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            driveController
+                    .circle()
+                    .and(() -> !altControls())
+                    .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            driveController.L1().and(() -> altControls()).onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
-            if(Constants.autoAlignEnabled){
+            if (Constants.autoAlignEnabled) {
                 // Go to outpost: cross, L2 in alt controls
-                driveController.cross().and(()->!altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
-                driveController.L2().and(()->altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
+                driveController
+                        .cross()
+                        .and(() -> !altControls())
+                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
+                driveController
+                        .L2()
+                        .and(() -> altControls())
+                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
 
                 // Go to hang: cross, L2 in alt controls
-                driveController.square().and(()->!altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
-                driveController.R2().and(()->altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
+                driveController
+                        .square()
+                        .and(() -> !altControls())
+                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
+                driveController
+                        .R2()
+                        .and(() -> altControls())
+                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
-            
 
             driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
                     .cancelAll()));
@@ -511,19 +523,37 @@ public class RobotContainer {
                     .whileTrue(intakeCommands.outtake());
             operator.R1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.outtake());
         }
-        if(Constants.hopperEnabled){
+        if (Constants.hopperEnabled) {
             // Hopper in is driver povUp on main controls, operator povUp on alt
-            driveController.povUp().and(()->!testEnabled.get()).and(()->!altControls()).whileTrue(hopperCommands.forward());
-            operator.povUp().and(()->!testEnabled.get()).and(()->altControls()).whileTrue(hopperCommands.forward());
+            driveController
+                    .povUp()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> !altControls())
+                    .whileTrue(hopperCommands.forward());
+            operator.povUp()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> altControls())
+                    .whileTrue(hopperCommands.forward());
 
             // Hopper out is driver povUp on main controls, operator povUp on alt
-            driveController.povDown().and(()->!testEnabled.get()).and(()->!altControls()).whileTrue(hopperCommands.reverse());
-            operator.povDown().and(()->!testEnabled.get()).and(()->altControls()).whileTrue(hopperCommands.reverse());
+            driveController
+                    .povDown()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> !altControls())
+                    .whileTrue(hopperCommands.reverse());
+            operator.povDown()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> altControls())
+                    .whileTrue(hopperCommands.reverse());
         }
         if (multiCommands != null) {
             // Shoot is driver R2 on main controls, operator R2 on alt
-            driveController.R2().and(() -> !testEnabled.get()).and(()->!altControls()).whileTrue(multiCommands.shoot());
-            operator.R2().and(() -> !testEnabled.get()).and(()->altControls()).whileTrue(multiCommands.shoot());
+            driveController
+                    .R2()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> !altControls())
+                    .whileTrue(multiCommands.shoot());
+            operator.R2().and(() -> !testEnabled.get()).and(() -> altControls()).whileTrue(multiCommands.shoot());
         }
     }
 
@@ -725,8 +755,8 @@ public class RobotContainer {
 
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {
-        controllerDisconnected.set(!driveController.isConnected());
-        operatorDisconnected.set(!operator.isConnected());
+        controllerDisconnected.set(!driveController.isConnected() && Constants.currentMode != Mode.SIM);
+        operatorDisconnected.set(!operator.isConnected() && Constants.currentMode != Mode.SIM);
     }
 
     // Initialize dashboard auto chooser

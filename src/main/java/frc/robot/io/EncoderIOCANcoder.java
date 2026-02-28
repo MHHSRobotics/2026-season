@@ -55,7 +55,7 @@ public class EncoderIOCANcoder extends EncoderIO {
         sim = encoder.getSimState();
         this.id = id;
         this.canBus = canBus;
-        proLicenseAlert=new Alert("The "+name+" isn't pro licensed",AlertType.kWarning);
+        proLicenseAlert = new Alert("The " + name + " isn't pro licensed", AlertType.kWarning);
     }
 
     public EncoderIOCANcoder(int id, String canBus, String name, String logPath) {
@@ -86,7 +86,10 @@ public class EncoderIOCANcoder extends EncoderIO {
         }
 
         // Update pro licensed warning
-        proLicenseAlert.set(frc.robot.Constants.ctreProLicensedWarning?!encoder.getIsProLicensed().getValue():false);
+        proLicenseAlert.set(
+                frc.robot.Constants.ctreProLicensedWarning
+                        ? !encoder.getIsProLicensed().getValue()
+                        : false);
 
         inputs.connected = disconnected ? false : encoder.isConnected();
 

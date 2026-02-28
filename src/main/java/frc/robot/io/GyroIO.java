@@ -44,7 +44,7 @@ public class GyroIO {
         return name;
     }
 
-    public String getLogPath(){
+    public String getLogPath() {
         return logPath;
     }
 

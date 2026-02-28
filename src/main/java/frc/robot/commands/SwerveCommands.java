@@ -146,14 +146,12 @@ public class SwerveCommands {
 
     // Puts the swerve drive into an X position so it can't be pushed
     public Command lock() {
-        return new InstantCommand(() -> swerve.lock(), swerveTranslation, swerveRotation)
-                .withName("swerve lock");
+        return new InstantCommand(() -> swerve.lock(), swerveTranslation, swerveRotation).withName("swerve lock");
     }
 
     // Stops all swerve output
     public Command stop() {
-        return new InstantCommand(() -> swerve.stop(), swerveTranslation, swerveRotation)
-                .withName("swerve stop");
+        return new InstantCommand(() -> swerve.stop(), swerveTranslation, swerveRotation).withName("swerve stop");
     }
 
     // Reset swerve gyro to 0

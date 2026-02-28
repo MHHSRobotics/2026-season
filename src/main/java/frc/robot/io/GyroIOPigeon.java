@@ -27,7 +27,7 @@ public class GyroIOPigeon extends GyroIO {
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         gyro.getConfigurator().setYaw(0);
         sim = gyro.getSimState();
-        proLicenseAlert=new Alert("The "+name+" isn't pro licensed",AlertType.kWarning);
+        proLicenseAlert = new Alert("The " + name + " isn't pro licensed", AlertType.kWarning);
     }
 
     public GyroIOPigeon(int id, String canBus, String name, String logPath) {
@@ -41,7 +41,10 @@ public class GyroIOPigeon extends GyroIO {
     @Override
     public void update() {
         // Update pro licensed warning
-        proLicenseAlert.set(frc.robot.Constants.ctreProLicensedWarning?!gyro.getIsProLicensed().getValue():false);
+        proLicenseAlert.set(
+                frc.robot.Constants.ctreProLicensedWarning
+                        ? !gyro.getIsProLicensed().getValue()
+                        : false);
 
         inputs.connected = disconnected ? false : gyro.isConnected();
         inputs.yawPositionRad = Units.degreesToRadians(gyro.getYaw().getValueAsDouble());

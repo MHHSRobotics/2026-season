@@ -14,7 +14,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import frc.robot.Constants.Mode;
-import frc.robot.io.BitIO;
 import frc.robot.io.MotorIO;
 
 public class Intake extends SubsystemBase {

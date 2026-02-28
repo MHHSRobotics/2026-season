@@ -90,7 +90,7 @@ public class MotorIO {
         return name;
     }
 
-    public String getLogPath(){
+    public String getLogPath() {
         return logPath;
     }
 
