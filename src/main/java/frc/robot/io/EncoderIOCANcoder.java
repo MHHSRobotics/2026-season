@@ -1,6 +1,7 @@
 package frc.robot.io;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
 import com.ctre.phoenix6.CANBus;
@@ -46,12 +47,15 @@ public class EncoderIOCANcoder extends EncoderIO {
 
     private boolean disconnected = false;
 
+    private Alert proLicenseAlert;
+
     public EncoderIOCANcoder(int id, CANBus canBus, String name, String logPath) {
         super(name, logPath);
         encoder = new CANcoder(id, canBus);
         sim = encoder.getSimState();
         this.id = id;
         this.canBus = canBus;
+        proLicenseAlert=new Alert("The "+name+" isn't pro licensed",AlertType.kWarning);
     }
 
     public EncoderIOCANcoder(int id, String canBus, String name, String logPath) {
@@ -80,6 +84,9 @@ public class EncoderIOCANcoder extends EncoderIO {
             configChanged = false;
             encoder.getConfigurator().apply(config);
         }
+
+        // Update pro licensed warning
+        proLicenseAlert.set(frc.robot.Constants.ctreProLicensedWarning?!encoder.getIsProLicensed().getValue():false);
 
         inputs.connected = disconnected ? false : encoder.isConnected();
 

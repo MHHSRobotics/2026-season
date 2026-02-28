@@ -49,6 +49,8 @@ public final class Constants {
 
     public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error
 
+    public static final boolean ctreProLicensedWarning = true; // Whether to warn if a CTRE device isn't pro licensed
+
     // Toggles for susbsytems
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = true;

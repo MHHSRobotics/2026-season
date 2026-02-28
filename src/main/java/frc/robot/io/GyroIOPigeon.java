@@ -1,6 +1,7 @@
 package frc.robot.io;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
 import com.ctre.phoenix6.CANBus;
@@ -18,13 +19,15 @@ public class GyroIOPigeon extends GyroIO {
 
     private boolean disconnected = false;
 
+    private Alert proLicenseAlert;
+
     public GyroIOPigeon(int id, CANBus canBus, String name, String logPath) {
         super(name, logPath);
         gyro = new Pigeon2(id, canBus);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         gyro.getConfigurator().setYaw(0);
-
         sim = gyro.getSimState();
+        proLicenseAlert=new Alert("The "+name+" isn't pro licensed",AlertType.kWarning);
     }
 
     public GyroIOPigeon(int id, String canBus, String name, String logPath) {
@@ -37,6 +40,9 @@ public class GyroIOPigeon extends GyroIO {
 
     @Override
     public void update() {
+        // Update pro licensed warning
+        proLicenseAlert.set(frc.robot.Constants.ctreProLicensedWarning?!gyro.getIsProLicensed().getValue():false);
+
         inputs.connected = disconnected ? false : gyro.isConnected();
         inputs.yawPositionRad = Units.degreesToRadians(gyro.getYaw().getValueAsDouble());
         inputs.yawVelocityRadPerSec =

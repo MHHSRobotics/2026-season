@@ -116,7 +116,7 @@ public class Swerve extends SubsystemBase {
         public static final LoggedNetworkNumber translationKI = new LoggedNetworkNumber("Swerve/TransKI", 0);
 
         // Auto align rotation PID
-        public static final LoggedNetworkNumber rotationKP = new LoggedNetworkNumber("Swerve/RotKP", 0.4);
+        public static final LoggedNetworkNumber rotationKP = new LoggedNetworkNumber("Swerve/RotKP", 5);
         public static final LoggedNetworkNumber rotationKD = new LoggedNetworkNumber("Swerve/RotKD", 0);
         public static final LoggedNetworkNumber rotationKI = new LoggedNetworkNumber("Swerve/RotKI", 0);
 

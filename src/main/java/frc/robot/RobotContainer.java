@@ -6,8 +6,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -88,6 +86,7 @@ public class RobotContainer {
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
 
     private LoggedNetworkBoolean testEnabled;
+    private LoggedNetworkBoolean altControls;
     private LoggedNetworkNumber testSpeed;
     private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
@@ -444,6 +443,10 @@ public class RobotContainer {
         }
     }
 
+    private boolean altControls() {
+        return altControls.get() ? true : DriverStation.isFMSAttached();
+    }
+
     private void configureBindings() {
         /* ---- Main controller bindings ---- */
         /*
@@ -453,10 +456,11 @@ public class RobotContainer {
          * Touchpad: cancel all commands
          */
         testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
+        altControls = new LoggedNetworkBoolean("AltControlsEnabled", false);
 
         if (Constants.swerveEnabled) {
-            driveController.options().onTrue(swerveCommands.resetGyro());
-            driveController.create().onTrue(swerveCommands.lock());
+            // driveController.options().onTrue(swerveCommands.resetGyro());
+            // driveController.create().onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
             new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
@@ -473,13 +477,29 @@ public class RobotContainer {
             // Aim at hub: povUp
             driveController.povUp().onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
-            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                    .cancelAll()));
+            // driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+            //         .cancelAll()));
         }
         if (Constants.intakeEnabled) {
-            driveController.L1().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
-            driveController.L2().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
-            driveController.R1().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
+            driveController
+                    .L2()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> !altControls())
+                    .onTrue(intakeCommands.switchHinge());
+            driveController
+                    .L1()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> !altControls())
+                    .whileTrue(intakeCommands.intake());
+            driveController
+                    .R1()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> !altControls())
+                    .whileTrue(intakeCommands.outtake());
+
+            operator.L2().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.switchHinge());
+            operator.L1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.intake());
+            operator.R1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.outtake());
         }
         if (multiCommands != null) {
             driveController.R2().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
@@ -489,8 +509,8 @@ public class RobotContainer {
     private void configureTestBindings() {
         /* ---- Test controller bindings ---- */
         /*
-         * Forward manual/PID: cross
-         * Backward manual/PID: circle
+         * Forward manual/PID: a
+         * Backward manual/PID: b
          */
 
         testType = new LoggedDashboardChooser<>("Test/Type");
