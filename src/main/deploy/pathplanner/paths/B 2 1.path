@@ -1,0 +1,86 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.4124676724137935,
+        "y": 7.49489224137931
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.360517241379311,
+        "y": 7.631724137931036
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.722672413793104,
+        "y": 7.1234913793103445
+      },
+      "prevControl": {
+        "x": 7.798473328112341,
+        "y": 7.361722824313659
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "End Point B M 1"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.341356673960613,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -22.072706279326415
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 4.65,
+        "y": 4.0
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 1,
+      "maxWaypointRelativePos": 1,
+      "name": "Point Towards Zone"
+    }
+  ],
+  "eventMarkers": [
+    {
+      "name": "",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "HangDown"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 1.0809241870551602
+  },
+  "useDefaultConstraints": true
+}

@@ -123,7 +123,12 @@ public class Intake extends SubsystemBase {
             double position = hingeMotor.getInputs().position;
             double gravityFF =
                     Constants.hingeKG.get() * Math.cos(position + Math.PI / 2 - Constants.hingeVerticalPos.get());
-            return gravityFF;
+            // Scale down gravity compensation as the arm approaches the bottom.
+            // When down, gravity keeps the intake in place — applying upward kG
+            // would let fuel push it up. The scale factor smoothly tapers kG off
+            // so the arm doesn't free-fall.
+            double scale = Math.min(1.0, position / Constants.hingeUp);
+            return gravityFF * scale;
         });
     }
 
