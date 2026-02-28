@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
 import com.ctre.phoenix6.CANBus;
@@ -103,11 +104,14 @@ public class MotorIOTalonFX extends MotorIO {
     private double minLimit = -Double.MAX_VALUE;
     private double maxLimit = Double.MAX_VALUE;
 
+    private Alert proLicenseAlert;
+
     // Make a TalonFX on the given CAN bus
     public MotorIOTalonFX(int id, CANBus canBus, String name, String logPath) {
         super(name, logPath);
         motor = new TalonFX(id, canBus);
         sim = motor.getSimState();
+        proLicenseAlert = new Alert("The " + name + " isn't pro licensed", AlertType.kWarning);
     }
 
     // Make a TalonFX on a named CAN bus (e.g., "rio", "canivore")
@@ -130,6 +134,12 @@ public class MotorIOTalonFX extends MotorIO {
         if (disabled) {
             currentControl = ControlType.NEUTRAL;
         }
+
+        // Update pro licensed warning
+        proLicenseAlert.set(
+                frc.robot.Constants.ctreProLicensedWarning
+                        ? !motor.getIsProLicensed().getValue()
+                        : false);
 
         // Update all input values from the motor signals
         inputs.connected = disconnected ? false : motor.isConnected();
@@ -537,7 +547,7 @@ public class MotorIOTalonFX extends MotorIO {
     @Override
     public void connectEncoder(EncoderIO encoder, double motorToSensorRatio, boolean fuse) {
         if (encoder instanceof EncoderIOCANcoder cancoder) {
-            if (fuse && !motor.getIsProLicensed().getValue()) {
+            if (fuse && !motor.getIsProLicensed().getValue() && Constants.currentMode != Mode.SIM) {
                 Alerts.create("Attempted to use encoder fusion on unlicensed TalonFX " + getName(), AlertType.kWarning);
             }
             config.Feedback.FeedbackRemoteSensorID = cancoder.getId();
