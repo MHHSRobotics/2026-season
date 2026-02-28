@@ -41,6 +41,10 @@ public class CameraIO {
         return name;
     }
 
+    public String getLogPath(){
+        return logPath;
+    }
+
     protected CameraIOInputsAutoLogged inputs = new CameraIOInputsAutoLogged();
 
     public void update() {

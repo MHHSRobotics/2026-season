@@ -13,6 +13,8 @@ import frc.robot.Constants.Mode;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.util.Alerts;
 import frc.robot.util.Field;
+
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -96,6 +98,11 @@ public class CameraIOPhotonCamera extends CameraIO {
         inputs.tagCounts = tagCountsList.stream().mapToInt(Integer::intValue).toArray();
 
         super.update();
+
+        Logger.recordOutput(getLogPath()+"/Transform", robotToCamera);
+        Logger.recordOutput(getLogPath()+"/FOV", fov);
+        Logger.recordOutput(getLogPath()+"/ResWidth", resWidth);
+        Logger.recordOutput(getLogPath()+"/ResHeight", resHeight);
     }
 
     @Override

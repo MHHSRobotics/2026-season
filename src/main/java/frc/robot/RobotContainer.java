@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -367,39 +369,31 @@ public class RobotContainer {
         }
 
         if (Constants.intakeEnabled) {
-            MotorIO intakeMotor;
+            MotorIO rollerMotor;
             MotorIO hingeMotor;
-            BitIO leftSwitch;
-            BitIO rightSwitch;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
-                    intakeMotor = new MotorIOTalonFX(
-                            Intake.Constants.intakeMotorId,
+                    rollerMotor = new MotorIOTalonFX(
+                            Intake.Constants.rollerMotorId,
                             Constants.defaultBus,
-                            "intake flywheel motor",
-                            "Intake/Flywheel");
+                            "intake roller motor",
+                            "Intake/Roller");
                     hingeMotor = new MotorIOTalonFX(
                             Intake.Constants.hingeMotorId, Constants.defaultBus, "intake hinge motor", "Intake/Hinge");
-                    leftSwitch = new BitIODigitalSignal(
-                            "intake left limit switch", "Intake/LeftSwitch", Intake.Constants.leftSwitchId);
-                    rightSwitch = new BitIODigitalSignal(
-                            "intake right limit switch", "Intake/RightSwitch", Intake.Constants.rightSwitchId);
                     break;
                 default:
-                    intakeMotor = new MotorIO("intake flywheel motor", "Intake/Flywheel");
+                    rollerMotor = new MotorIO("intake roller motor", "Intake/Roller");
                     hingeMotor = new MotorIO("intake hinge motor", "Intake/Hinge");
-                    leftSwitch = new BitIO("intake left limit switch", "Intake/LeftSwitch");
-                    rightSwitch = new BitIO("intake right limit switch", "Intake/RightSwitch");
                     break;
             }
-            intake = new Intake(intakeMotor, hingeMotor, leftSwitch, rightSwitch);
+            intake = new Intake(rollerMotor, hingeMotor);
 
             if (Constants.currentMode == Mode.SIM) {
                 if (!Constants.physicsSimEnabled) {
-                    new IntakeSim(intakeMotor, hingeMotor);
+                    new IntakeSim(rollerMotor, hingeMotor);
                 } else {
-                    new IntakePhysicsSim(intakeMotor, hingeMotor, "/MuJoCo/Intake");
+                    new IntakePhysicsSim(rollerMotor, hingeMotor, "/MuJoCo/Intake");
                 }
             }
         }
@@ -459,8 +453,8 @@ public class RobotContainer {
         altControls = new LoggedNetworkBoolean("AltControlsEnabled", false);
 
         if (Constants.swerveEnabled) {
-            // driveController.options().onTrue(swerveCommands.resetGyro());
-            // driveController.create().onTrue(swerveCommands.lock());
+            driveController.options().onTrue(swerveCommands.resetGyro());
+            driveController.create().onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
             new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
@@ -474,35 +468,62 @@ public class RobotContainer {
                     .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
-            // Aim at hub: povUp
-            driveController.povUp().onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            // Aim at hub: circle, L1 in alt controls
+            driveController.circle().and(()->!altControls()).onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            driveController.L1().and(()->altControls()).onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
-            // driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-            //         .cancelAll()));
+            if(Constants.autoAlignEnabled){
+                // Go to outpost: cross, L2 in alt controls
+                driveController.cross().and(()->!altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
+                driveController.L2().and(()->altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
+
+                // Go to hang: cross, L2 in alt controls
+                driveController.square().and(()->!altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
+                driveController.R2().and(()->altControls()).onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
+            }
+            
+
+            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                    .cancelAll()));
         }
         if (Constants.intakeEnabled) {
-            driveController
-                    .L2()
-                    .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
-                    .onTrue(intakeCommands.switchHinge());
+            // Toggle hinge is driver L1 on main controls, operator L1 on alt
             driveController
                     .L1()
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
+                    .onTrue(intakeCommands.switchHinge());
+            operator.L1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.switchHinge());
+
+            // Intake is driver L2 on main controls, operator L2 on alt
+            driveController
+                    .L2()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> !altControls())
                     .whileTrue(intakeCommands.intake());
+            operator.L2().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.intake());
+
+            // Outtake is driver R1 on main controls, operator R1 on alt
             driveController
                     .R1()
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .whileTrue(intakeCommands.outtake());
-
-            operator.L2().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.switchHinge());
-            operator.L1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.intake());
             operator.R1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.outtake());
         }
+        if(Constants.hopperEnabled){
+            // Hopper in is driver povUp on main controls, operator povUp on alt
+            driveController.povUp().and(()->!testEnabled.get()).and(()->!altControls()).whileTrue(hopperCommands.forward());
+            operator.povUp().and(()->!testEnabled.get()).and(()->altControls()).whileTrue(hopperCommands.forward());
+
+            // Hopper out is driver povUp on main controls, operator povUp on alt
+            driveController.povDown().and(()->!testEnabled.get()).and(()->!altControls()).whileTrue(hopperCommands.reverse());
+            operator.povDown().and(()->!testEnabled.get()).and(()->altControls()).whileTrue(hopperCommands.reverse());
+        }
         if (multiCommands != null) {
-            driveController.R2().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
+            // Shoot is driver R2 on main controls, operator R2 on alt
+            driveController.R2().and(() -> !testEnabled.get()).and(()->!altControls()).whileTrue(multiCommands.shoot());
+            operator.R2().and(() -> !testEnabled.get()).and(()->altControls()).whileTrue(multiCommands.shoot());
         }
     }
 
