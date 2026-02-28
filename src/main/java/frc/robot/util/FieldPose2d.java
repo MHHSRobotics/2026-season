@@ -52,4 +52,9 @@ public class FieldPose2d {
     public Pose2d getOnRed() {
         return RobotUtils.invert(getOnBlue());
     }
+
+    // Get the translation component as a FieldTranslation2d
+    public FieldTranslation2d getTranslation() {
+        return new FieldTranslation2d(x, y);
+    }
 }
