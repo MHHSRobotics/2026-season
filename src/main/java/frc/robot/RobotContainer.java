@@ -823,17 +823,17 @@ public class RobotContainer {
         NamedCommands.registerCommand("IntakeDown", new IntakeCommands(intake).hingeDown());
         NamedCommands.registerCommand("IntakeUp", new IntakeCommands(intake).hingeUp());
         NamedCommands.registerCommand("IntakeStart", new IntakeCommands(intake).intake());
-        NamedCommands.registerCommand("IntakeStop", new IntakeCommands(intake).intakeStop());
+        NamedCommands.registerCommand("IntakeStop", new IntakeCommands(intake).setIntakeSpeed(() -> 0));
 
         NamedCommands.registerCommand("Feed", new ShooterCommands(shooter).feedShoot());
         NamedCommands.registerCommand("Shoot", new ShooterCommands(shooter).flyShoot());
-        NamedCommands.registerCommand("StopShoot", new ShooterCommands(shooter).flyStop());
-        NamedCommands.registerCommand("StopFeed", new ShooterCommands(shooter).feedStop());
+        NamedCommands.registerCommand("StopShoot", new ShooterCommands(shooter).setFlySpeed(() -> 0));
+        NamedCommands.registerCommand("StopFeed", new ShooterCommands(shooter).setFeedSpeed(() -> 0));
 
         NamedCommands.registerCommand("HopperStart", new HopperCommands(hopper).forward());
-        NamedCommands.registerCommand("HopperStop", new HopperCommands(hopper).stop());
-        NamedCommands.registerCommand("HangUp", new HangCommands(hang).moveUp());
-        NamedCommands.registerCommand("HangDown", new HangCommands(hang).moveDown());
+        NamedCommands.registerCommand("HopperStop", new HopperCommands(hopper).setSpeed(() -> 0));
+        NamedCommands.registerCommand("HangUp", new HangCommands(hang).setSpeed(() -> 0.2));
+        NamedCommands.registerCommand("HangDown", new HangCommands(hang).setSpeed(() -> -0.2));
     }
 
     public Command getAutonomousCommand() {
