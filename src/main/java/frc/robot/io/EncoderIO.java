@@ -45,6 +45,10 @@ public class EncoderIO {
         return name;
     }
 
+    public String getLogPath() {
+        return logPath;
+    }
+
     protected EncoderIOInputsAutoLogged inputs = new EncoderIOInputsAutoLogged();
 
     // Find out the latest values from the encoder and store them in inputs
