@@ -124,10 +124,10 @@ public class Swerve extends SubsystemBase {
         public static final FieldPose2d hubPosition = new FieldPose2d(4.622, 4.035, 0);
 
         // Outpost bot position in blue alliance coordinates (meters)
-        public static final FieldPose2d outpostPosition = new FieldPose2d(1, 1, 0);
+        public static final FieldPose2d outpostPosition = new FieldPose2d(0.44, 0.58, Units.degreesToRadians(0));
 
         // Hang bot position in blue alliance coordinates (meters)
-        public static final FieldPose2d hangPosition = new FieldPose2d(3, 3, 0);
+        public static final FieldPose2d hangPosition = new FieldPose2d(1.555, 3.29, Units.degreesToRadians(90));
 
         public static final double simSwerveError =
                 0; // Simulated error in swerve odometry, set to 0 for no error, 0.1 for some error
