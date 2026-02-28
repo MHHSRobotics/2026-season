@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -60,6 +62,7 @@ import frc.robot.subsystems.swerve.SwervePhysicsSim;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
+import frc.robot.util.FieldPose2d;
 import frc.robot.util.RobotUtils;
 
 public class RobotContainer {
@@ -85,7 +88,7 @@ public class RobotContainer {
     private final CommandPS5Controller operator =
             new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
 
-    private LoggedDashboardChooser<Boolean> testEnabled;
+    private LoggedNetworkBoolean testEnabled;
     private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
 
@@ -348,14 +351,18 @@ public class RobotContainer {
 
         if (Constants.hangEnabled) {
             MotorIO hangMotor;
+            EncoderIO hangEncoder;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
                     hangMotor = new MotorIOTalonFX(
                             Hang.Constants.motorId, Constants.defaultBus, "hang motor", "Hang/Motor");
+                    hangEncoder = new EncoderIOCANcoder(
+                            Hang.Constants.encoderId, Constants.defaultBus, "hang encoder", "Hang/Encoder");
                     break;
                 default:
                     hangMotor = new MotorIO("hang motor", "Hang/Motor");
+                    hangEncoder = new EncoderIO("hang encoder", "Hang/Encoder");
                     break;
             }
             hang = new Hang(hangMotor);
@@ -446,9 +453,7 @@ public class RobotContainer {
          * Right stick X: turn
          * Touchpad: cancel all commands
          */
-        testEnabled = new LoggedDashboardChooser<>("Test/Enabled");
-        testEnabled.addDefaultOption("false", false);
-        testEnabled.addOption("true", true);
+        testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
 
         if (Constants.swerveEnabled) {
             driveController.options().and(() -> !testEnabled.get()).onTrue(swerveCommands.resetGyro());
@@ -538,6 +543,22 @@ public class RobotContainer {
                     .and(() -> testSubsystem.get().equals("Swerve"))
                     .onTrue(swerveCommands.setSpeed(-1, 0, 0))
                     .onFalse(swerveCommands.stop());
+
+            // Manual duty cycle forward test, fast
+            driveController
+                    .cross()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PID"))
+                    .and(() -> testSubsystem.get().equals("Swerve"))
+                    .onTrue(swerveCommands.setPoseTarget(new FieldPose2d(1, 1, new Rotation2d())));
+
+            // Manual duty cycle backward test, fast
+            driveController
+                    .circle()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PID"))
+                    .and(() -> testSubsystem.get().equals("Swerve"))
+                    .onTrue(swerveCommands.setPoseTarget(new FieldPose2d()));
         }
 
         if (Constants.hangEnabled) {
@@ -564,7 +585,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Fast"))
                     .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.moveUp());
+                    .whileTrue(hangCommands.setSpeed(() -> 0.5));
 
             // Hang move down test
             driveController
@@ -572,7 +593,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Fast"))
                     .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.moveDown());
+                    .whileTrue(hangCommands.setSpeed(() -> -0.5));
         }
 
         if (Constants.hopperEnabled) {
