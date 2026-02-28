@@ -10,27 +10,27 @@ import frc.robot.io.MotorIO;
 
 public class IntakePhysicsSim extends SubsystemBase {
     private MotorIO hinge;
-    private MotorIO flywheel;
+    private MotorIO roller;
 
     private DoubleSubscriber hingePos;
     private DoubleSubscriber hingeVel;
-    private DoubleSubscriber flywheelPos;
-    private DoubleSubscriber flywheelVel;
+    private DoubleSubscriber rollerPos;
+    private DoubleSubscriber rollerVel;
 
-    public IntakePhysicsSim(MotorIO flywheelIO, MotorIO hingeIO, String path) {
+    public IntakePhysicsSim(MotorIO rollerIO, MotorIO hingeIO, String path) {
         hinge = hingeIO;
-        flywheel = flywheelIO;
+        roller = rollerIO;
         hingePos = NetworkTableInstance.getDefault()
                 .getDoubleTopic(path + "/Hinge/Position")
                 .subscribe(0, PubSubOption.periodic(Constants.loopTime));
         hingeVel = NetworkTableInstance.getDefault()
                 .getDoubleTopic(path + "/Hinge/Velocity")
                 .subscribe(0, PubSubOption.periodic(Constants.loopTime));
-        flywheelPos = NetworkTableInstance.getDefault()
-                .getDoubleTopic(path + "/Flywheel/Position")
+        rollerPos = NetworkTableInstance.getDefault()
+                .getDoubleTopic(path + "/Roller/Position")
                 .subscribe(0, PubSubOption.periodic(Constants.loopTime));
-        flywheelVel = NetworkTableInstance.getDefault()
-                .getDoubleTopic(path + "/Flywheel/Velocity")
+        rollerVel = NetworkTableInstance.getDefault()
+                .getDoubleTopic(path + "/Roller/Velocity")
                 .subscribe(0, PubSubOption.periodic(Constants.loopTime));
     }
 
@@ -38,7 +38,7 @@ public class IntakePhysicsSim extends SubsystemBase {
     public void periodic() {
         hinge.setMechPosition(hingePos.get());
         hinge.setMechVelocity(hingeVel.get());
-        flywheel.setMechPosition(flywheelPos.get());
-        flywheel.setMechVelocity(flywheelVel.get());
+        roller.setMechPosition(rollerPos.get());
+        roller.setMechVelocity(rollerVel.get());
     }
 }

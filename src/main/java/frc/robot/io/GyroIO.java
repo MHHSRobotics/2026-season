@@ -44,6 +44,10 @@ public class GyroIO {
         return name;
     }
 
+    public String getLogPath() {
+        return logPath;
+    }
+
     protected GyroIOInputsAutoLogged inputs = new GyroIOInputsAutoLogged();
 
     // Find out the latest values from the gyro and store them in inputs
