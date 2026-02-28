@@ -128,8 +128,7 @@ public class EncoderIOCANcoder extends EncoderIO {
     public void setOffset(double mechOffset) {
         // Convert mechanism offset to encoder rotations
         double rotOffset = Units.radiansToRotations(mechOffset * encoderRatio);
-
-        encoder.setPosition(encoder.getAbsolutePosition().getValueAsDouble() - rotOffset);
+        config.MagnetSensor.MagnetOffset = -rotOffset;
 
         // Track offset for simulation - see simOffset field documentation
         simOffset = rotOffset;

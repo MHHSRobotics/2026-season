@@ -41,7 +41,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkNumber hingeMaxAccel = new LoggedNetworkNumber("Intake/Hinge/maxAccel", 10);
 
         public static final LoggedNetworkNumber hingeVerticalPos = new LoggedNetworkNumber(
-                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : Math.PI / 2);
+                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : 1.155);
 
         public static final LoggedNetworkBoolean intakeLocked =
                 new LoggedNetworkBoolean("Intake/Locked", true); // Toggle to enable braking of the hinge when stopped

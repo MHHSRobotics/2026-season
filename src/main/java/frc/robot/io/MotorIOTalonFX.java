@@ -156,10 +156,14 @@ public class MotorIOTalonFX extends MotorIO {
 
         inputs.controlMode = currentControl.name();
 
+        // if (getName().equals("intake hinge motor")) {
+        //     System.out.println(motor.getClosedLoopReference().getValueAsDouble());
+        // }
         double setpoint =
                 Units.rotationsToRadians(motor.getClosedLoopReference().getValueAsDouble());
         switch (currentControl) {
             case COAST, BRAKE, NEUTRAL, FOLLOW, VOLTAGE, DUTY_CYCLE, TORQUE_CURRENT:
+                // System.out.println("x");
                 inputs.setpoint = 0;
                 break;
             default:
