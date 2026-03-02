@@ -763,18 +763,18 @@ public class RobotContainer {
         // Register named commands for PathPlanner
         NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
         NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-        NamedCommands.registerCommand("IntakeStart", intakeCommands.intake());
-        NamedCommands.registerCommand("IntakeStop", intakeCommands.setIntakeSpeed(() -> 0));
+        NamedCommands.registerCommand("IntakeStart", Commands.runOnce(() -> intake.intake()));
+        NamedCommands.registerCommand("IntakeStop", Commands.runOnce(() -> intake.intakeStop()));
 
-        NamedCommands.registerCommand("Feed", shooterCommands.feedShoot());
-        NamedCommands.registerCommand("Shoot", shooterCommands.flyShoot());
-        NamedCommands.registerCommand("StopShoot", shooterCommands.setFlySpeed(() -> 0));
-        NamedCommands.registerCommand("StopFeed", shooterCommands.setFeedSpeed(() -> 0));
+        NamedCommands.registerCommand("Feed", Commands.runOnce(() -> shooter.feedShoot()));
+        NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> shooter.flyShoot()));
+        NamedCommands.registerCommand("StopShoot", Commands.runOnce(() -> shooter.flyStop()));
+        NamedCommands.registerCommand("StopFeed", Commands.runOnce(() -> shooter.feedStop()));
 
-        NamedCommands.registerCommand("HopperStart", hopperCommands.forward());
-        NamedCommands.registerCommand("HopperStop", hopperCommands.setSpeed(() -> 0));
-        NamedCommands.registerCommand("HangUp", hangCommands.setSpeed(() -> 0.2));
-        NamedCommands.registerCommand("HangDown", hangCommands.setSpeed(() -> -0.2));
+        NamedCommands.registerCommand("HopperStart", Commands.runOnce(() -> hopper.forward()));
+        NamedCommands.registerCommand("HopperStop", Commands.runOnce(() -> hopper.stop()));
+        NamedCommands.registerCommand("HangUp", Commands.runOnce(() -> hang.setSpeed(0.2)));
+        NamedCommands.registerCommand("HangDown", Commands.runOnce(() -> hang.setSpeed(-0.2)));
 
         RobotConfig config;
 
