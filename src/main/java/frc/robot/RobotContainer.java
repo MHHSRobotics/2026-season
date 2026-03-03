@@ -428,6 +428,8 @@ public class RobotContainer {
         }
         if (Constants.intakeEnabled) {
             intakeCommands = new IntakeCommands(intake);
+
+
             NamedCommands.registerCommand("hinge up", intakeCommands.hingeUp());
             NamedCommands.registerCommand("hinge down", intakeCommands.hingeDown());
             NamedCommands.registerCommand("intake", intakeCommands.intake());
