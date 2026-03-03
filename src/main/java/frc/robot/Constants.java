@@ -25,7 +25,7 @@ public final class Constants {
             RobotBase.isReal() ? Mode.REAL : simMode; // Current mode the robot program is in
 
     public static final boolean enablePhysicsSim =
-            true; // Whether to enable the physics sim connector (for SIM mode only)
+            false; // Whether to enable the physics sim connector (for SIM mode only)
 
     public static final boolean physicsSimEnabled = currentMode == Mode.SIM
             && enablePhysicsSim; // Whether to enable the physics sim connector (for SIM mode only)
