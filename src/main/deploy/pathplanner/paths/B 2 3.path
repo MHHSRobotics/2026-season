@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.758157327586207,
-        "y": 7.377607758620689
+        "x": 6.140169642857143,
+        "y": 0.7309285714285716
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.116174568965518,
-        "y": 7.465571120689656
+        "x": 4.893044642857143,
+        "y": 0.5527678571428565
       },
       "isLocked": false,
       "linkedName": "End Point B M 2"
     },
     {
       "anchor": {
-        "x": 2.6403448275862074,
-        "y": 7.240775862068965
+        "x": 2.7389196428571427,
+        "y": 0.7309285714285716
       },
       "prevControl": {
-        "x": 2.9531034482758627,
-        "y": 7.426476293103449
+        "x": 3.435366071428571,
+        "y": 0.6013571428571425
       },
       "nextControl": {
-        "x": 2.385464469469837,
-        "y": 7.0894406494373685
+        "x": 2.4474977010904815,
+        "y": 0.7851466071060902
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.731390086206897,
-        "y": 4.807122844827586
+        "x": 2.123455357142857,
+        "y": 3.273767857142857
       },
       "prevControl": {
-        "x": 1.507783288456921,
-        "y": 4.918926243702582
+        "x": 1.8998485593928809,
+        "y": 3.3855712560178524
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": 89.50178838738638
+      "rotationDegrees": -91.60591422783654
     }
   ],
   "constraintZones": [],
@@ -63,13 +63,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -14.446795370936156
+    "rotation": 17.75825848264268
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -90.7252242990593
   },
   "useDefaultConstraints": true
 }

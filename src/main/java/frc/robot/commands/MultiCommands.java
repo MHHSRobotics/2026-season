@@ -48,4 +48,10 @@ public class MultiCommands {
                     .withName("shoot");
         }
     }
+
+    public Command shootStop() {
+        return hopperCommands
+                .setSpeed(() -> 0)
+                .alongWith(shooterCommands.setFeedSpeed(() -> 0), shooterCommands.setFlySpeed(() -> 0));
+    }
 }
