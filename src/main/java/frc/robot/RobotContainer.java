@@ -763,18 +763,13 @@ public class RobotContainer {
         // Register named commands for PathPlanner
         NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
         NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-        NamedCommands.registerCommand("IntakeStart", Commands.runOnce(() -> intake.intake()));
-        NamedCommands.registerCommand("IntakeStop", Commands.runOnce(() -> intake.intakeStop()));
+        NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
+        NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
 
-        NamedCommands.registerCommand("Feed", Commands.runOnce(() -> shooter.feedShoot()));
-        NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> shooter.flyShoot()));
-        NamedCommands.registerCommand("StopShoot", Commands.runOnce(() -> shooter.flyStop()));
-        NamedCommands.registerCommand("StopFeed", Commands.runOnce(() -> shooter.feedStop()));
-
-        NamedCommands.registerCommand("HopperStart", Commands.runOnce(() -> hopper.forward()));
-        NamedCommands.registerCommand("HopperStop", Commands.runOnce(() -> hopper.stop()));
-        NamedCommands.registerCommand("HangUp", Commands.runOnce(() -> hang.setSpeed(0.2)));
-        NamedCommands.registerCommand("HangDown", Commands.runOnce(() -> hang.setSpeed(-0.2)));
+        NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
+        NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
+        NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
+        NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
 
         RobotConfig config;
 
