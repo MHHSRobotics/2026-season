@@ -11,13 +11,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "hopper reverse"
+                  "name": "HopperStart"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "intake"
+                  "name": "IntakeStart"
                 }
               }
             ]
@@ -32,13 +32,7 @@
         {
           "type": "named",
           "data": {
-            "name": "hinge down"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stop hinge"
+            "name": "IntakeDown"
           }
         },
         {
@@ -54,28 +48,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "stop hopper"
+                  "name": "IntakeUp"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "hinge up"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "stop intake"
+                  "name": "IntakeStop"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stop hinge"
           }
         },
         {
@@ -91,19 +73,19 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "hopper forward"
+                  "name": "HopperStop"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "feed shoot"
+                  "name": "Feed"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "fly shoot"
+                  "name": "Shoot"
                 }
               }
             ]
@@ -112,7 +94,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 1.0
           }
         },
         {
@@ -122,19 +104,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "stop feed shoot"
+                  "name": "StopFeed"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "stop fly shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "stop hopper"
+                  "name": "StopShoot"
                 }
               }
             ]
@@ -149,7 +125,7 @@
         {
           "type": "named",
           "data": {
-            "name": "hang up"
+            "name": "HangUp"
           }
         }
       ]

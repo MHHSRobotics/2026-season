@@ -17,19 +17,19 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "feed shoot"
+                  "name": "Feed"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "fly shoot"
+                  "name": "Shoot"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "hopper forward"
+                  "name": "HopperStart"
                 }
               }
             ]
@@ -38,7 +38,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 1.0
           }
         },
         {
@@ -48,19 +48,19 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "stop feed shoot"
+                  "name": "StopFeed"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "stop fly shoot"
+                  "name": "StopShoot"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "stop hopper"
+                  "name": "HopperStop"
                 }
               }
             ]
@@ -75,7 +75,7 @@
         {
           "type": "named",
           "data": {
-            "name": "hang up"
+            "name": "HangUp"
           }
         }
       ]
