@@ -36,14 +36,16 @@ public class MultiCommands {
                                     () -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0),
                             shooterCommands.flyShoot(),
                             ledCommands.setColor(() ->
-                                    shooter.atTargetSpeed() ? new RGBWColor(0, 255, 0) : new RGBWColor(255, 0, 0)));
+                                    shooter.atTargetSpeed() ? new RGBWColor(0, 255, 0) : new RGBWColor(255, 0, 0)))
+                    .withName("shoot");
         } else {
             return hopperCommands
                     .setSpeed(() -> shooter.atTargetSpeed() ? Hopper.Constants.rollerSpeed : 0)
                     .alongWith(
                             shooterCommands.setFeedSpeed(
                                     () -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0),
-                            shooterCommands.flyShoot());
+                            shooterCommands.flyShoot())
+                    .withName("shoot");
         }
     }
 }

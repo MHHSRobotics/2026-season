@@ -90,6 +90,10 @@ public class MotorIO {
         return name;
     }
 
+    public String getLogPath() {
+        return logPath;
+    }
+
     protected MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
 
     // Find out the latest values from the motor and store them in inputs

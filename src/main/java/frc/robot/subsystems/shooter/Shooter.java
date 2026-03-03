@@ -1,6 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import org.littletonrobotics.junction.Logger;
@@ -42,8 +41,6 @@ public class Shooter extends SubsystemBase {
     private MotorIO feed;
     private MotorIO fly;
 
-    private BangBangController controller;
-
     private double targetSpeed;
 
     public Shooter(MotorIO feedIO, MotorIO flyIO) {
@@ -54,8 +51,6 @@ public class Shooter extends SubsystemBase {
         fly.connectInternalSensor(Constants.flyRatio);
         feed.setInverted(Constants.feedInverted);
         feed.connectInternalSensor(Constants.feedRatio);
-
-        controller = new BangBangController();
     }
 
     public double getFlyVelocity() {
@@ -119,7 +114,6 @@ public class Shooter extends SubsystemBase {
             }
         }
 
-        // fly.setDutyCycle(controller.calculate(getFlyVelocity(), targetSpeed));
         fly.update();
         feed.update();
 

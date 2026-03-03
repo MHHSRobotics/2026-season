@@ -10,21 +10,21 @@ import frc.robot.Constants;
 import frc.robot.io.MotorIO;
 
 public class IntakeSim extends SubsystemBase {
-    private static final DCMotor intakeGearbox = DCMotor.getKrakenX60Foc(1);
+    private static final DCMotor rollerGearbox = DCMotor.getKrakenX60Foc(1);
     private static final DCMotor hingeGearbox = DCMotor.getKrakenX60Foc(1);
 
-    private MotorIO intake, hinge;
+    private MotorIO roller, hinge;
 
-    private DCMotorSim intakeMech;
+    private DCMotorSim rollerMech;
     private SingleJointedArmSim hingeMech;
 
-    public IntakeSim(MotorIO intakeIO, MotorIO hingeIO) {
-        intake = intakeIO;
+    public IntakeSim(MotorIO rollerIO, MotorIO hingeIO) {
+        roller = rollerIO;
         hinge = hingeIO;
-        intakeMech = new DCMotorSim(
+        rollerMech = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
-                        intakeGearbox, Intake.Constants.intakeInertia, Intake.Constants.intakeRatio),
-                intakeGearbox);
+                        rollerGearbox, Intake.Constants.rollerInertia, Intake.Constants.rollerRatio),
+                rollerGearbox);
         hingeMech = new SingleJointedArmSim(
                 hingeGearbox,
                 Intake.Constants.hingeRatio,
@@ -38,14 +38,14 @@ public class IntakeSim extends SubsystemBase {
 
     @Override
     public void periodic() {
-        intakeMech.setInputVoltage(intake.getInputs().appliedVoltage);
+        rollerMech.setInputVoltage(roller.getInputs().appliedVoltage);
         hingeMech.setInputVoltage(hinge.getInputs().appliedVoltage);
 
-        intakeMech.update(Constants.loopTime);
+        rollerMech.update(Constants.loopTime);
         hingeMech.update(Constants.loopTime);
 
-        intake.setMechPosition(intakeMech.getAngularPositionRad());
-        intake.setMechVelocity(intakeMech.getAngularVelocityRadPerSec());
+        roller.setMechPosition(rollerMech.getAngularPositionRad());
+        roller.setMechVelocity(rollerMech.getAngularVelocityRadPerSec());
 
         hinge.setMechPosition(hingeMech.getAngleRads());
         hinge.setMechVelocity(hingeMech.getVelocityRadPerSec());
