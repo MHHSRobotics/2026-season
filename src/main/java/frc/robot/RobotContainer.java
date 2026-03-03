@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -420,26 +419,15 @@ public class RobotContainer {
         }
         if (Constants.hopperEnabled) {
             hopperCommands = new HopperCommands(hopper);
-            NamedCommands.registerCommand("hopper reverse", hopperCommands.reverse());
-            NamedCommands.registerCommand("hopper forward", hopperCommands.forward());
         }
         if (Constants.hangEnabled) {
             hangCommands = new HangCommands(hang);
-            NamedCommands.registerCommand("hang up", hangCommands.moveUp());
-            NamedCommands.registerCommand("hang down", hangCommands.moveDown());
         }
         if (Constants.intakeEnabled) {
             intakeCommands = new IntakeCommands(intake);
-
-
-            NamedCommands.registerCommand("hinge up", intakeCommands.hingeUp());
-            NamedCommands.registerCommand("hinge down", intakeCommands.hingeDown());
-            NamedCommands.registerCommand("intake", intakeCommands.intake());
         }
         if (Constants.shooterEnabled) {
             shooterCommands = new ShooterCommands(shooter);
-            NamedCommands.registerCommand("feed shoot", shooterCommands.feedShoot());
-            NamedCommands.registerCommand("fly shoot", shooterCommands.flyShoot());
         }
         if (Constants.ledsEnabled) {
             ledCommands = new LEDCommands(led);

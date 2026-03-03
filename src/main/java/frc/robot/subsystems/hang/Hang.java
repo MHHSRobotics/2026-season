@@ -1,5 +1,9 @@
 package frc.robot.subsystems.hang;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -18,6 +22,8 @@ public class Hang extends SubsystemBase {
     public static class Constants {
         // CAN device ID for the hang motor controller, and Digital input sensors initialized.
         public static final int motorId = 25;
+
+        public static final int encoderId = 26;
 
         // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
