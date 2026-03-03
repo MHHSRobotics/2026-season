@@ -24,7 +24,7 @@ public class Intake extends SubsystemBase {
         public static final int rightSwitchId = 1;
         public static final int leftSwitchId = 2;
 
-        public static final double defaultSpeed = frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.25;
+        public static final double defaultSpeed = frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.4;
 
         public static final LoggedNetworkNumber hingeKP =
                 new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 0);
@@ -49,7 +49,8 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean(
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
-        public static final double hingeUp = Units.degreesToRadians(90);
+        public static final double hingeUp =
+                frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
         public static final double hingeDown = Units.degreesToRadians(-15);
 
         public static final double rollerRatio = 1;

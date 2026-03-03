@@ -162,19 +162,6 @@
             }
           },
           {
-            "title": "AutoSelection",
-            "x": 768.0,
-            "y": 512.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "ComboBox Chooser",
-            "properties": {
-              "topic": "/SmartDashboard/AutoSelection",
-              "period": 0.06,
-              "sort_options": false
-            }
-          },
-          {
             "title": "Field",
             "x": 384.0,
             "y": 0.0,
@@ -206,6 +193,19 @@
               "topic": "AltControlsEnabled",
               "period": 0.06,
               "data_type": "boolean"
+            }
+          },
+          {
+            "title": "AutoChooser",
+            "x": 768.0,
+            "y": 512.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/AutoChooser",
+              "period": 0.06,
+              "sort_options": false
             }
           }
         ]

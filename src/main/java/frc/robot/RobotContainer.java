@@ -5,11 +5,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -63,7 +61,6 @@ import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
-import frc.robot.util.Alerts;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.RobotUtils;
 
@@ -98,8 +95,7 @@ public class RobotContainer {
     private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
 
-    private LoggedDashboardChooser<String> autoChooser; // Choice of auto
-    private SendableChooser<Command> selectedAuto;
+    private LoggedDashboardChooser<Command> autoChooser; // Choice of auto
 
     private RobotPublisher publisher; // Publishes 3D robot data to AdvantageScope for visualization
 
@@ -116,13 +112,9 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        configureAutoPaths(); // Set up the auto path commands
-
-        configureAutoChooser(); // Set up the auto chooser
+        configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
-
-        configureManualBindings(); // Configure bindings for manual controller
 
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
     }
@@ -760,9 +752,6 @@ public class RobotContainer {
         }
     }
 
-    // Bindings for manual control of each of the subsystems (nothing here for swerve, add other subsystems)
-    public void configureManualBindings() {}
-
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {
         controllerDisconnected.set(!driveController.isConnected() && Constants.currentMode != Mode.SIM);
@@ -770,7 +759,23 @@ public class RobotContainer {
     }
 
     // Initialize dashboard auto chooser
-    public void configureAutoChooser() {
+    public void configureAuto() {
+        // Register named commands for PathPlanner
+        NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
+        NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
+        NamedCommands.registerCommand("IntakeStart", Commands.runOnce(() -> intake.intake()));
+        NamedCommands.registerCommand("IntakeStop", Commands.runOnce(() -> intake.intakeStop()));
+
+        NamedCommands.registerCommand("Feed", Commands.runOnce(() -> shooter.feedShoot()));
+        NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> shooter.flyShoot()));
+        NamedCommands.registerCommand("StopShoot", Commands.runOnce(() -> shooter.flyStop()));
+        NamedCommands.registerCommand("StopFeed", Commands.runOnce(() -> shooter.feedStop()));
+
+        NamedCommands.registerCommand("HopperStart", Commands.runOnce(() -> hopper.forward()));
+        NamedCommands.registerCommand("HopperStop", Commands.runOnce(() -> hopper.stop()));
+        NamedCommands.registerCommand("HangUp", Commands.runOnce(() -> hang.setSpeed(0.2)));
+        NamedCommands.registerCommand("HangDown", Commands.runOnce(() -> hang.setSpeed(-0.2)));
+
         RobotConfig config;
 
         try {
@@ -794,42 +799,14 @@ public class RobotContainer {
                                 Swerve.Constants.rotationKI.get(),
                                 Swerve.Constants.rotationKD.get())),
                 config,
-                (() -> RobotUtils.onRedAlliance()),
+                RobotUtils::onRedAlliance,
                 swerve);
 
-        selectedAuto = AutoBuilder.buildAutoChooser("Auto");
-        autoChooser = new LoggedDashboardChooser<>("AutoSelection");
-        autoChooser.addOption("B M", "B M");
-        autoChooser.addDefaultOption("Leave", "Leave");
-    }
-
-    public void configureAutoPaths() {
-
-        NamedCommands.registerCommand("IntakeDown", new IntakeCommands(intake).hingeDown());
-        NamedCommands.registerCommand("IntakeUp", new IntakeCommands(intake).hingeUp());
-        NamedCommands.registerCommand("IntakeStart", new IntakeCommands(intake).intake());
-        NamedCommands.registerCommand("IntakeStop", new IntakeCommands(intake).setIntakeSpeed(() -> 0));
-
-        NamedCommands.registerCommand("Feed", new ShooterCommands(shooter).feedShoot());
-        NamedCommands.registerCommand("Shoot", new ShooterCommands(shooter).flyShoot());
-        NamedCommands.registerCommand("StopShoot", new ShooterCommands(shooter).setFlySpeed(() -> 0));
-        NamedCommands.registerCommand("StopFeed", new ShooterCommands(shooter).setFeedSpeed(() -> 0));
-
-        NamedCommands.registerCommand("HopperStart", new HopperCommands(hopper).forward());
-        NamedCommands.registerCommand("HopperStop", new HopperCommands(hopper).setSpeed(() -> 0));
-        NamedCommands.registerCommand("HangUp", new HangCommands(hang).setSpeed(() -> 0.2));
-        NamedCommands.registerCommand("HangDown", new HangCommands(hang).setSpeed(() -> -0.2));
+        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
     }
 
     public Command getAutonomousCommand() {
-        if (autoChooser.get().equals("Leave")) {
-            return swerveCommands.setPositionOutput(-2, 0).withTimeout(3);
-        } else if (autoChooser.get().equals("B M")) {
-            return selectedAuto.getSelected();
-        } else {
-            Alerts.create("Unknown auto specified", AlertType.kWarning);
-            return new InstantCommand();
-        }
+        return autoChooser.get();
     }
 
     public void periodic() {
