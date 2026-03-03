@@ -791,9 +791,9 @@ public class RobotContainer {
                 swerve::setChassisSpeeds,
                 new PPHolonomicDriveController(
                         new PIDConstants(
-                                Swerve.Constants.driveKP.get(),
-                                Swerve.Constants.driveKI.get(),
-                                Swerve.Constants.driveKD.get()),
+                                Swerve.Constants.translationKP.get(),
+                                Swerve.Constants.translationKI.get(),
+                                Swerve.Constants.translationKD.get()),
                         new PIDConstants(
                                 Swerve.Constants.rotationKP.get(),
                                 Swerve.Constants.rotationKI.get(),
