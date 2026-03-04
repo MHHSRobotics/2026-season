@@ -112,7 +112,7 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        configureAuto(); // Set up the auto names commands and chooser
+        // configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
 
@@ -371,6 +371,7 @@ public class RobotContainer {
         if (Constants.intakeEnabled) {
             MotorIO rollerMotor;
             MotorIO hingeMotor;
+            EncoderIO hingeEncoder;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
@@ -381,13 +382,16 @@ public class RobotContainer {
                             "Intake/Roller");
                     hingeMotor = new MotorIOTalonFX(
                             Intake.Constants.hingeMotorId, Constants.defaultBus, "intake hinge motor", "Intake/Hinge");
+                    hingeEncoder = new EncoderIOCANcoder(
+                            Intake.Constants.hingeEncoderId, "intake hinge encoder", "Intake/HingeEncoder");
                     break;
                 default:
                     rollerMotor = new MotorIO("intake roller motor", "Intake/Roller");
                     hingeMotor = new MotorIO("intake hinge motor", "Intake/Hinge");
+                    hingeEncoder = new EncoderIO("intake hinge encoder", "Intake/HingeEncoder");
                     break;
             }
-            intake = new Intake(rollerMotor, hingeMotor);
+            intake = new Intake(rollerMotor, hingeMotor, hingeEncoder);
 
             if (Constants.currentMode == Mode.SIM) {
                 if (!Constants.physicsSimEnabled) {
@@ -797,7 +801,7 @@ public class RobotContainer {
                 RobotUtils::onRedAlliance,
                 swerve);
 
-        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("Cat"));
+        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
     }
 
     public Command getAutonomousCommand() {
