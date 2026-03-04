@@ -112,7 +112,7 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        // configureAuto(); // Set up the auto names commands and chooser
+        configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
 
@@ -765,15 +765,22 @@ public class RobotContainer {
     // Initialize dashboard auto chooser
     public void configureAuto() {
         // Register named commands for PathPlanner
-        NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
-        NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-        NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
-        NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
+        if (Constants.intakeEnabled) {
+            NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
+            NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
+            NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
+            NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
+        }
 
-        NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
-        NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
-        NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
-        NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
+        if (multiCommands != null) {
+            NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
+            NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
+        }
+
+        if (Constants.hangEnabled) {
+            NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
+            NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
+        }
 
         RobotConfig config;
 
@@ -783,29 +790,35 @@ public class RobotContainer {
             e.printStackTrace();
             return;
         }
-        AutoBuilder.configure(
-                swerve::getPose,
-                swerve::resetPose,
-                swerve::getChassisSpeeds,
-                swerve::setChassisSpeeds,
-                new PPHolonomicDriveController(
-                        new PIDConstants(
-                                Swerve.Constants.translationKP.get(),
-                                Swerve.Constants.translationKI.get(),
-                                Swerve.Constants.translationKD.get()),
-                        new PIDConstants(
-                                Swerve.Constants.rotationKP.get(),
-                                Swerve.Constants.rotationKI.get(),
-                                Swerve.Constants.rotationKD.get())),
-                config,
-                RobotUtils::onRedAlliance,
-                swerve);
+        if (Constants.swerveEnabled) {
+            AutoBuilder.configure(
+                    swerve::getPose,
+                    swerve::resetPose,
+                    swerve::getChassisSpeeds,
+                    swerve::setChassisSpeeds,
+                    new PPHolonomicDriveController(
+                            new PIDConstants(
+                                    Swerve.Constants.translationKP.get(),
+                                    Swerve.Constants.translationKI.get(),
+                                    Swerve.Constants.translationKD.get()),
+                            new PIDConstants(
+                                    Swerve.Constants.rotationKP.get(),
+                                    Swerve.Constants.rotationKI.get(),
+                                    Swerve.Constants.rotationKD.get())),
+                    config,
+                    RobotUtils::onRedAlliance,
+                    swerve);
 
-        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
+            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
+        }
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        if (autoChooser != null) {
+            return autoChooser.get();
+        } else {
+            return Commands.none();
+        }
     }
 
     public void periodic() {
