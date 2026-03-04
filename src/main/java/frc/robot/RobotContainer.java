@@ -112,7 +112,7 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        configureAuto(); // Set up the auto names commands and chooser
+        // configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
 
@@ -371,6 +371,7 @@ public class RobotContainer {
         if (Constants.intakeEnabled) {
             MotorIO rollerMotor;
             MotorIO hingeMotor;
+            EncoderIO hingeEncoder;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
@@ -381,13 +382,16 @@ public class RobotContainer {
                             "Intake/Roller");
                     hingeMotor = new MotorIOTalonFX(
                             Intake.Constants.hingeMotorId, Constants.defaultBus, "intake hinge motor", "Intake/Hinge");
+                    hingeEncoder = new EncoderIOCANcoder(
+                            Intake.Constants.hingeEncoderId, "intake hinge encoder", "Intake/HingeEncoder");
                     break;
                 default:
                     rollerMotor = new MotorIO("intake roller motor", "Intake/Roller");
                     hingeMotor = new MotorIO("intake hinge motor", "Intake/Hinge");
+                    hingeEncoder = new EncoderIO("intake hinge encoder", "Intake/HingeEncoder");
                     break;
             }
-            intake = new Intake(rollerMotor, hingeMotor);
+            intake = new Intake(rollerMotor, hingeMotor, hingeEncoder);
 
             if (Constants.currentMode == Mode.SIM) {
                 if (!Constants.physicsSimEnabled) {
@@ -763,18 +767,13 @@ public class RobotContainer {
         // Register named commands for PathPlanner
         NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
         NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-        NamedCommands.registerCommand("IntakeStart", Commands.runOnce(() -> intake.intake()));
-        NamedCommands.registerCommand("IntakeStop", Commands.runOnce(() -> intake.intakeStop()));
+        NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
+        NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
 
-        NamedCommands.registerCommand("Feed", Commands.runOnce(() -> shooter.feedShoot()));
-        NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> shooter.flyShoot()));
-        NamedCommands.registerCommand("StopShoot", Commands.runOnce(() -> shooter.flyStop()));
-        NamedCommands.registerCommand("StopFeed", Commands.runOnce(() -> shooter.feedStop()));
-
-        NamedCommands.registerCommand("HopperStart", Commands.runOnce(() -> hopper.forward()));
-        NamedCommands.registerCommand("HopperStop", Commands.runOnce(() -> hopper.stop()));
-        NamedCommands.registerCommand("HangUp", Commands.runOnce(() -> hang.setSpeed(0.2)));
-        NamedCommands.registerCommand("HangDown", Commands.runOnce(() -> hang.setSpeed(-0.2)));
+        NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
+        NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
+        NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
+        NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
 
         RobotConfig config;
 

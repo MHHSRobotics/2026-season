@@ -7,9 +7,15 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 // Utility functions used it multiple places
 public class RobotUtils {
+    public static Command schedule(Command cmd) {
+        return Commands.runOnce(() -> CommandScheduler.getInstance().schedule(cmd));
+    }
     /**
      * Checks if the robot is on the red alliance.
      *

@@ -61,7 +61,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.2
+            "waitTime": 0.87
           }
         },
         {
@@ -74,18 +74,6 @@
           "type": "parallel",
           "data": {
             "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Feed"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "HopperStart"
-                }
-              },
               {
                 "type": "named",
                 "data": {
@@ -109,18 +97,6 @@
                 "type": "named",
                 "data": {
                   "name": "StopShoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "HopperStop"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StopFeed"
                 }
               }
             ]
