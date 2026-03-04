@@ -382,12 +382,13 @@ public class RobotContainer {
                             "Intake/Roller");
                     hingeMotor = new MotorIOTalonFX(
                             Intake.Constants.hingeMotorId, Constants.defaultBus, "intake hinge motor", "Intake/Hinge");
-                    hingeEncoder=new EncoderIOCANcoder(Intake.Constants.hingeEncoderId, "intake hinge encoder", "Intake/HingeEncoder");
+                    hingeEncoder = new EncoderIOCANcoder(
+                            Intake.Constants.hingeEncoderId, "intake hinge encoder", "Intake/HingeEncoder");
                     break;
                 default:
                     rollerMotor = new MotorIO("intake roller motor", "Intake/Roller");
                     hingeMotor = new MotorIO("intake hinge motor", "Intake/Hinge");
-                    hingeEncoder=new EncoderIO("intake hinge encoder", "Intake/HingeEncoder");
+                    hingeEncoder = new EncoderIO("intake hinge encoder", "Intake/HingeEncoder");
                     break;
             }
             intake = new Intake(rollerMotor, hingeMotor, hingeEncoder);

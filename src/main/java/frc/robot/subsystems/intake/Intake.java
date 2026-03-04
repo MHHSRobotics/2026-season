@@ -6,15 +6,15 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import frc.robot.Constants.Mode;
 import frc.robot.io.EncoderIO;
@@ -32,13 +32,13 @@ public class Intake extends SubsystemBase {
         public static final double defaultSpeed = frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.4;
 
         public static final LoggedNetworkNumber hingeKP =
-                new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 0);
+                new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 4);
         public static final LoggedNetworkNumber hingeKI = new LoggedNetworkNumber("Intake/Hinge/kI", 0);
         public static final LoggedNetworkNumber hingeKD =
-                new LoggedNetworkNumber("Intake/Hinge/kD", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 0);
+                new LoggedNetworkNumber("Intake/Hinge/kD", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 10);
         public static final LoggedNetworkNumber hingeKG =
-                new LoggedNetworkNumber("Intake/Hinge/kG", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 0);
-        public static final LoggedNetworkNumber hingeKS = new LoggedNetworkNumber("Intake/Hinge/kS", 0);
+                new LoggedNetworkNumber("Intake/Hinge/kG", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 22.5);
+        public static final LoggedNetworkNumber hingeKS = new LoggedNetworkNumber("Intake/Hinge/kS", 7.5);
         public static final LoggedNetworkNumber hingeKV = new LoggedNetworkNumber("Intake/Hinge/kV", 0);
         public static final LoggedNetworkNumber hingeKA = new LoggedNetworkNumber("Intake/Hinge/kA", 0);
 
@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkNumber hingeMaxAccel = new LoggedNetworkNumber("Intake/Hinge/maxAccel", 10);
 
         public static final LoggedNetworkNumber hingeVerticalPos = new LoggedNetworkNumber(
-                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : 1.155);
+                "Intake/Hinge/VerticalPos", frc.robot.Constants.currentMode == Mode.SIM ? 1.34 : 1.25);
 
         public static final LoggedNetworkBoolean intakeLocked =
                 new LoggedNetworkBoolean("Intake/Locked", true); // Toggle to enable braking of the hinge when stopped
@@ -62,11 +62,11 @@ public class Intake extends SubsystemBase {
         public static final double hingeRatio = 15;
         public static final double encoderRatio = 1;
 
-        public static final boolean hingeInverted = false;
+        public static final boolean hingeInverted = true;
         public static final boolean rollerInverted = false;
-        public static final boolean encoderInverted = false;
+        public static final boolean encoderInverted = true;
 
-        public static final double hingeOffset=0;
+        public static final double hingeOffset = -2.63;
 
         // Simulation only
         public static final double rollerInertia = 0.000132; // kg m^2
@@ -82,17 +82,17 @@ public class Intake extends SubsystemBase {
     public Intake(MotorIO rollerMotorIO, MotorIO hingeMotorIO, EncoderIO hingeEncoderIO) {
         hingeMotor = hingeMotorIO;
         rollerMotor = rollerMotorIO;
-        hingeEncoder=hingeEncoderIO;
+        hingeEncoder = hingeEncoderIO;
 
         hingeEncoder.setInverted(Constants.encoderInverted);
         hingeEncoder.setGearRatio(Constants.encoderRatio);
 
         hingeMotor.setInverted(Constants.hingeInverted);
-        hingeMotor.connectEncoder(hingeEncoder,Constants.hingeRatio);
+        hingeMotor.connectEncoder(hingeEncoder, Constants.hingeRatio);
         hingeMotor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
         hingeMotor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
         hingeMotor.setOffset(Constants.hingeOffset);
-        hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
+        // hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
 
         rollerMotor.setInverted(Constants.rollerInverted);
         rollerMotor.connectInternalSensor(Constants.rollerRatio);
@@ -144,8 +144,8 @@ public class Intake extends SubsystemBase {
             // When down, gravity keeps the intake in place — applying upward kG
             // would let fuel push it up. The scale factor smoothly tapers kG off
             // so the arm doesn't free-fall.
-            double scale = Math.min(1.0, position / Constants.hingeUp);
-            return gravityFF * scale;
+            // double scale = Math.min(1.0, position / Constants.hingeUp);
+            return gravityFF;
         });
     }
 
@@ -172,6 +172,7 @@ public class Intake extends SubsystemBase {
 
         rollerMotor.update();
         hingeMotor.update();
+        hingeEncoder.update();
 
         hingeMotor.setkP(Constants.hingeKP.get());
         hingeMotor.setkI(Constants.hingeKI.get());
