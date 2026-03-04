@@ -30,7 +30,7 @@ public final class Constants {
     public static final boolean physicsSimEnabled = currentMode == Mode.SIM
             && enablePhysicsSim; // Whether to enable the physics sim connector (for SIM mode only)
 
-    public static final double loopTime = physicsSimEnabled ? 0.005 : 0.02; // Period of main robot loop, 20ms default
+    public static final double loopTime = physicsSimEnabled ? 0.006 : 0.02; // Period of main robot loop, 20ms default
 
     public static final CANBus defaultBus = new CANBus("rio"); // CAN bus used for non-swerve motors
 
@@ -52,12 +52,12 @@ public final class Constants {
     public static final boolean ctreProLicensedWarning = true; // Whether to warn if a CTRE device isn't pro licensed
 
     // Toggles for susbsytems
-    public static final boolean swerveEnabled = true;
-    public static final boolean visionEnabled = true;
-    public static final boolean autoAlignEnabled = true;
+    public static final boolean swerveEnabled = false;
+    public static final boolean visionEnabled = false;
+    public static final boolean autoAlignEnabled = false;
     public static final boolean shooterEnabled = true;
     public static final boolean hopperEnabled = true;
-    public static final boolean hangEnabled = true;
+    public static final boolean hangEnabled = false;
     public static final boolean intakeEnabled = true;
     public static final boolean ledsEnabled = false;
 }
