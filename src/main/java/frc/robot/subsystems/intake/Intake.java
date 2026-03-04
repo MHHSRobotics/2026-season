@@ -13,13 +13,18 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
+
 import frc.robot.Constants.Mode;
+import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
 public class Intake extends SubsystemBase {
     public static class Constants {
         public static final int rollerMotorId = 14;
         public static final int hingeMotorId = 15;
+        public static final int hingeEncoderId = 19;
         // These are DIO IDs, separate from CAN IDs
         public static final int rightSwitchId = 1;
         public static final int leftSwitchId = 2;
@@ -55,9 +60,13 @@ public class Intake extends SubsystemBase {
 
         public static final double rollerRatio = 1;
         public static final double hingeRatio = 15;
+        public static final double encoderRatio = 1;
 
         public static final boolean hingeInverted = false;
         public static final boolean rollerInverted = false;
+        public static final boolean encoderInverted = false;
+
+        public static final double hingeOffset=0;
 
         // Simulation only
         public static final double rollerInertia = 0.000132; // kg m^2
@@ -66,16 +75,23 @@ public class Intake extends SubsystemBase {
 
     private MotorIO hingeMotor;
     private MotorIO rollerMotor;
+    private EncoderIO hingeEncoder;
 
     private boolean intakeUp = true;
 
-    public Intake(MotorIO rollerMotorIO, MotorIO hingeMotorIO) {
+    public Intake(MotorIO rollerMotorIO, MotorIO hingeMotorIO, EncoderIO hingeEncoderIO) {
         hingeMotor = hingeMotorIO;
         rollerMotor = rollerMotorIO;
+        hingeEncoder=hingeEncoderIO;
+
+        hingeEncoder.setInverted(Constants.encoderInverted);
+        hingeEncoder.setGearRatio(Constants.encoderRatio);
 
         hingeMotor.setInverted(Constants.hingeInverted);
-        hingeMotor.connectInternalSensor(Constants.hingeRatio);
-        hingeMotor.setPosition(Constants.hingeUp);
+        hingeMotor.connectEncoder(hingeEncoder,Constants.hingeRatio);
+        hingeMotor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
+        hingeMotor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
+        hingeMotor.setOffset(Constants.hingeOffset);
         hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
 
         rollerMotor.setInverted(Constants.rollerInverted);
