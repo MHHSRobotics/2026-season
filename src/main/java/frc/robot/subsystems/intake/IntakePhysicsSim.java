@@ -6,20 +6,23 @@ import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
+import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
 public class IntakePhysicsSim extends SubsystemBase {
     private MotorIO hinge;
     private MotorIO roller;
+    private EncoderIO hingeEncoder;
 
     private DoubleSubscriber hingePos;
     private DoubleSubscriber hingeVel;
     private DoubleSubscriber rollerPos;
     private DoubleSubscriber rollerVel;
 
-    public IntakePhysicsSim(MotorIO rollerIO, MotorIO hingeIO, String path) {
+    public IntakePhysicsSim(MotorIO rollerIO, MotorIO hingeIO, EncoderIO hingeEncoderIO, String path) {
         hinge = hingeIO;
         roller = rollerIO;
+        hingeEncoder = hingeEncoderIO;
         hingePos = NetworkTableInstance.getDefault()
                 .getDoubleTopic(path + "/Hinge/Position")
                 .subscribe(0, PubSubOption.periodic(Constants.loopTime));
@@ -38,6 +41,8 @@ public class IntakePhysicsSim extends SubsystemBase {
     public void periodic() {
         hinge.setMechPosition(hingePos.get());
         hinge.setMechVelocity(hingeVel.get());
+        hingeEncoder.setMechPosition(hingePos.get());
+        hingeEncoder.setMechVelocity(hingeVel.get());
         roller.setMechPosition(rollerPos.get());
         roller.setMechVelocity(rollerVel.get());
     }

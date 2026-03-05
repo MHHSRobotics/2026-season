@@ -395,9 +395,9 @@ public class RobotContainer {
 
             if (Constants.currentMode == Mode.SIM) {
                 if (!Constants.physicsSimEnabled) {
-                    new IntakeSim(rollerMotor, hingeMotor);
+                    new IntakeSim(rollerMotor, hingeMotor, hingeEncoder);
                 } else {
-                    new IntakePhysicsSim(rollerMotor, hingeMotor, "/MuJoCo/Intake");
+                    new IntakePhysicsSim(rollerMotor, hingeMotor, hingeEncoder, "/MuJoCo/Intake");
                 }
             }
         }

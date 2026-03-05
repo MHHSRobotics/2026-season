@@ -52,8 +52,8 @@ public final class Constants {
     public static final boolean ctreProLicensedWarning = true; // Whether to warn if a CTRE device isn't pro licensed
 
     // Toggles for susbsytems
-    public static final boolean swerveEnabled = false;
-    public static final boolean visionEnabled = false;
+    public static final boolean swerveEnabled = true;
+    public static final boolean visionEnabled = true;
     public static final boolean autoAlignEnabled = false;
     public static final boolean shooterEnabled = true;
     public static final boolean hopperEnabled = true;
