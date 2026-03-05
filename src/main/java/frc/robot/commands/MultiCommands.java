@@ -14,10 +14,7 @@ public class MultiCommands {
     private Shooter shooter;
 
     public MultiCommands(
-            HopperCommands hopperCommands,
-            ShooterCommands shooterCommands,
-            LEDCommands ledCommands,
-            Shooter shooter) {
+            HopperCommands hopperCommands, ShooterCommands shooterCommands, LEDCommands ledCommands, Shooter shooter) {
         this.hopperCommands = hopperCommands;
         this.shooterCommands = shooterCommands;
         this.ledCommands = ledCommands;
