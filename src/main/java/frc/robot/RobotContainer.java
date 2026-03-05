@@ -112,8 +112,9 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        // configureAuto(); // Set up the auto names commands and chooser
-
+        if (Constants.hangEnabled){
+            configureAuto(); // Set up the auto names commands and chooser
+        }
         configureBindings(); // Add drive controller bindings
 
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
@@ -801,7 +802,7 @@ public class RobotContainer {
                 RobotUtils::onRedAlliance,
                 swerve);
 
-        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("Cat"));
+        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
     }
 
     public Command getAutonomousCommand() {
