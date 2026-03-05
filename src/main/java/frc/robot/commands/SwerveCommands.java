@@ -97,9 +97,13 @@ public class SwerveCommands {
                             double yOutput = swerve.getYController()
                                     .calculate(swerve.getPose().getY(), t.getY());
                             swerve.setTranslation(xOutput, yOutput, true);
+                            swerve.setPIDPosition(true);
                         },
                         swerveTranslation)
-                .finallyDo(() -> swerve.setTranslation(0, 0, false))
+                .finallyDo(() -> {
+                    swerve.setTranslation(0, 0, false);
+                    swerve.setPIDPosition(false);
+                })
                 .withName("swerve set position target");
     }
 
@@ -113,9 +117,13 @@ public class SwerveCommands {
                                             swerve.getPose().getRotation().getRadians(),
                                             alliancePose.getRotation().getRadians());
                             swerve.setRotation(output);
+                            swerve.setPIDPosition(true);
                         },
                         swerveRotation)
-                .finallyDo(() -> swerve.setRotation(0))
+                .finallyDo(() -> {
+                    swerve.setRotation(0);
+                    swerve.setPIDRotation(false);
+                })
                 .withName("swerve set rotation target");
     }
 
@@ -130,9 +138,13 @@ public class SwerveCommands {
                             double output = swerve.getThetaController()
                                     .calculate(currentPose.getRotation().getRadians(), angleToTarget);
                             swerve.setRotation(output);
+                            swerve.setPIDRotation(true);
                         },
                         swerveRotation)
-                .finallyDo(() -> swerve.setRotation(0))
+                .finallyDo(() -> {
+                    swerve.setRotation(0);
+                    swerve.setPIDRotation(false);
+                })
                 .withName("swerve aim at");
     }
 
