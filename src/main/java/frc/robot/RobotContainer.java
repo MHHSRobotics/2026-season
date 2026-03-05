@@ -112,9 +112,8 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        if (Constants.hangEnabled){
-            configureAuto(); // Set up the auto names commands and chooser
-        }
+        configureAuto(); // Set up the auto names commands and chooser
+
         configureBindings(); // Add drive controller bindings
 
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
@@ -235,33 +234,34 @@ public class RobotContainer {
 
             if (Constants.visionEnabled) {
                 // Create camera variables
-                CameraIO hubCam, hubLeftCam, hubRightCam, hangCam;
+                CameraIO frontCam, rightCam;
                 switch (Constants.currentMode) {
                     case REAL:
                     case SIM:
                         // If in real bot or sim, use CameraIOPhotonCamera
-                        hubCam = new CameraIOPhotonCamera(
-                                "hub camera", "Vision/HubCam", Swerve.VisionConstants.hubCamPose, 60);
-                        hubLeftCam = new CameraIOPhotonCamera(
-                                "left hub camera", "Vision/LeftHubCam", Swerve.VisionConstants.hubLeftCamPose, 60);
-                        hubRightCam = new CameraIOPhotonCamera(
-                                "right hub camera", "Vision/RightHubCam", Swerve.VisionConstants.hubRightCamPose, 60);
-                        hangCam = new CameraIOPhotonCamera(
-                                "hang camera", "Vision/HangCam", Swerve.VisionConstants.hangCamPose, 60);
+                        frontCam = new CameraIOPhotonCamera(
+                                "FrontCam", "Vision/FrontCam", Swerve.VisionConstants.frontCamPose, 60);
+                        rightCam = new CameraIOPhotonCamera(
+                                "RightCam", "Vision/RightCam", Swerve.VisionConstants.rightCamPose, 60);
+                        // hubRightCam = new CameraIOPhotonCamera(
+                        //         "right hub camera", "Vision/RightHubCam", Swerve.VisionConstants.hubRightCamPose,
+                        // 60);
+                        // hangCam = new CameraIOPhotonCamera(
+                        //         "hang camera", "Vision/HangCam", Swerve.VisionConstants.hangCamPose, 60);
                         break;
                     default:
                         // If in replay use an empty CameraIO
-                        hubCam = new CameraIO("hub camera", "Vision/HubCam");
-                        hubLeftCam = new CameraIO("left hub camera", "Vision/LeftHubCam");
-                        hubRightCam = new CameraIO("right hub camera", "Vision/RightHubCam");
-                        hangCam = new CameraIO("hang camera", "Vision/HangCam");
+                        frontCam = new CameraIO("FrontCam", "Vision/FrontCam");
+                        rightCam = new CameraIO("RightCam", "Vision/RightCam");
+                        // hubRightCam = new CameraIO("right hub camera", "Vision/RightHubCam");
+                        // hangCam = new CameraIO("hang camera", "Vision/HangCam");
                         break;
                 }
                 // Add cameras to swerve ododmetry
-                swerve.addCameraSource(hubCam);
-                swerve.addCameraSource(hubLeftCam);
-                swerve.addCameraSource(hubRightCam);
-                swerve.addCameraSource(hangCam);
+                swerve.addCameraSource(frontCam);
+                swerve.addCameraSource(rightCam);
+                // swerve.addCameraSource(hubRightCam);
+                // swerve.addCameraSource(hangCam);
             }
 
             // If mode is SIM, start the simulations for swerve modules and gyro
@@ -396,9 +396,9 @@ public class RobotContainer {
 
             if (Constants.currentMode == Mode.SIM) {
                 if (!Constants.physicsSimEnabled) {
-                    new IntakeSim(rollerMotor, hingeMotor);
+                    new IntakeSim(rollerMotor, hingeMotor, hingeEncoder);
                 } else {
-                    new IntakePhysicsSim(rollerMotor, hingeMotor, "/MuJoCo/Intake");
+                    new IntakePhysicsSim(rollerMotor, hingeMotor, hingeEncoder, "/MuJoCo/Intake");
                 }
             }
         }
@@ -437,8 +437,8 @@ public class RobotContainer {
         if (Constants.ledsEnabled) {
             ledCommands = new LEDCommands(led);
         }
-        if (Constants.intakeEnabled && Constants.shooterEnabled && Constants.hopperEnabled) {
-            multiCommands = new MultiCommands(hopperCommands, intakeCommands, shooterCommands, ledCommands, shooter);
+        if (Constants.shooterEnabled && Constants.hopperEnabled) {
+            multiCommands = new MultiCommands(hopperCommands, shooterCommands, ledCommands, shooter);
         }
     }
 
@@ -766,15 +766,22 @@ public class RobotContainer {
     // Initialize dashboard auto chooser
     public void configureAuto() {
         // Register named commands for PathPlanner
-        NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
-        NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-        NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
-        NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
+        if (Constants.intakeEnabled) {
+            NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
+            NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
+            NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
+            NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
+        }
 
-        NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
-        NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
-        NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
-        NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
+        if (multiCommands != null) {
+            NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
+            NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
+        }
+
+        if (Constants.hangEnabled) {
+            NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
+            NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
+        }
 
         RobotConfig config;
 
@@ -784,29 +791,35 @@ public class RobotContainer {
             e.printStackTrace();
             return;
         }
-        AutoBuilder.configure(
-                swerve::getPose,
-                swerve::resetPose,
-                swerve::getChassisSpeeds,
-                swerve::setChassisSpeeds,
-                new PPHolonomicDriveController(
-                        new PIDConstants(
-                                Swerve.Constants.translationKP.get(),
-                                Swerve.Constants.translationKI.get(),
-                                Swerve.Constants.translationKD.get()),
-                        new PIDConstants(
-                                Swerve.Constants.rotationKP.get(),
-                                Swerve.Constants.rotationKI.get(),
-                                Swerve.Constants.rotationKD.get())),
-                config,
-                RobotUtils::onRedAlliance,
-                swerve);
+        if (Constants.swerveEnabled) {
+            AutoBuilder.configure(
+                    swerve::getPose,
+                    swerve::resetPose,
+                    swerve::getChassisSpeeds,
+                    swerve::setChassisSpeeds,
+                    new PPHolonomicDriveController(
+                            new PIDConstants(
+                                    Swerve.Constants.translationKP.get(),
+                                    Swerve.Constants.translationKI.get(),
+                                    Swerve.Constants.translationKD.get()),
+                            new PIDConstants(
+                                    Swerve.Constants.rotationKP.get(),
+                                    Swerve.Constants.rotationKI.get(),
+                                    Swerve.Constants.rotationKD.get())),
+                    config,
+                    RobotUtils::onRedAlliance,
+                    swerve);
 
-        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
+            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
+        }
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.get();
+        if (autoChooser != null) {
+            return autoChooser.get();
+        } else {
+            return Commands.none();
+        }
     }
 
     public void periodic() {

@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
+import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
 public class IntakeSim extends SubsystemBase {
@@ -14,13 +15,15 @@ public class IntakeSim extends SubsystemBase {
     private static final DCMotor hingeGearbox = DCMotor.getKrakenX60Foc(1);
 
     private MotorIO roller, hinge;
+    private EncoderIO hingeEncoder;
 
     private DCMotorSim rollerMech;
     private SingleJointedArmSim hingeMech;
 
-    public IntakeSim(MotorIO rollerIO, MotorIO hingeIO) {
+    public IntakeSim(MotorIO rollerIO, MotorIO hingeIO, EncoderIO hingeEncoderIO) {
         roller = rollerIO;
         hinge = hingeIO;
+        hingeEncoder = hingeEncoderIO;
         rollerMech = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
                         rollerGearbox, Intake.Constants.rollerInertia, Intake.Constants.rollerRatio),
@@ -49,5 +52,8 @@ public class IntakeSim extends SubsystemBase {
 
         hinge.setMechPosition(hingeMech.getAngleRads());
         hinge.setMechVelocity(hingeMech.getVelocityRadPerSec());
+
+        hingeEncoder.setMechPosition(hingeMech.getAngleRads());
+        hingeEncoder.setMechVelocity(hingeMech.getVelocityRadPerSec());
     }
 }

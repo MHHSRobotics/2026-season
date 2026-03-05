@@ -9,19 +9,13 @@ import frc.robot.subsystems.shooter.Shooter;
 
 public class MultiCommands {
     private HopperCommands hopperCommands;
-    private IntakeCommands intakeCommands;
     private ShooterCommands shooterCommands;
     private LEDCommands ledCommands;
     private Shooter shooter;
 
     public MultiCommands(
-            HopperCommands hopperCommands,
-            IntakeCommands intakeCommands,
-            ShooterCommands shooterCommands,
-            LEDCommands ledCommands,
-            Shooter shooter) {
+            HopperCommands hopperCommands, ShooterCommands shooterCommands, LEDCommands ledCommands, Shooter shooter) {
         this.hopperCommands = hopperCommands;
-        this.intakeCommands = intakeCommands;
         this.shooterCommands = shooterCommands;
         this.ledCommands = ledCommands;
         this.shooter = shooter;

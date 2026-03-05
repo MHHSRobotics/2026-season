@@ -896,21 +896,35 @@
               "topic": "Shooter/TargetSpeed",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": false
+              "show_submit_button": true
             }
           },
           {
-            "title": "LowDutyCycle",
-            "x": 768.0,
-            "y": 640.0,
+            "title": "FlykD",
+            "x": 1024.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "Shooter/LowDutyCycle",
+              "topic": "Shooter/FlykD",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": false
+              "show_submit_button": true
+            }
+          },
+          {
+            "title": "FlykP",
+            "x": 1024.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "Shooter/FlykP",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": true
             }
           }
         ]
