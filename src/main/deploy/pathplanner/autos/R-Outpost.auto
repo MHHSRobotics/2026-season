@@ -5,21 +5,53 @@
     "data": {
       "commands": [
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeStart"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeDown"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "R-Outpost-1"
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "intake"
+            "waitTime": 1.0
           }
         },
         {
-          "type": "wait",
+          "type": "parallel",
           "data": {
-            "waitTime": 3.0
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeUp"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeStop"
+                }
+              }
+            ]
           }
         },
         {
@@ -29,9 +61,21 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        },
+        {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopShoot"
           }
         },
         {
@@ -43,7 +87,7 @@
         {
           "type": "named",
           "data": {
-            "name": "hang"
+            "name": "HangUp"
           }
         }
       ]

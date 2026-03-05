@@ -5,34 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "HopperStart"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeStart"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "B-NeutralCross-1"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "IntakeDown"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeStart"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeDown"
+                }
+              }
+            ]
           }
         },
         {
@@ -67,28 +61,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "HopperStop"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Feed"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              }
-            ]
+            "name": "Shoot"
           }
         },
         {
@@ -98,22 +73,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "StopFeed"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StopShoot"
-                }
-              }
-            ]
+            "name": "StopShoot"
           }
         },
         {

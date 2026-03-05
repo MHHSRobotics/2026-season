@@ -11,28 +11,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "Feed"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "HopperStart"
-                }
-              }
-            ]
+            "name": "Shoot"
           }
         },
         {
@@ -42,28 +23,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "StopFeed"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "StopShoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "HopperStop"
-                }
-              }
-            ]
+            "name": "StopShoot"
           }
         },
         {

@@ -5,40 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "hopper reverse"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "R-NeutralCross-1"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "hinge down"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stop hinge"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeStart"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeDown"
+                }
+              }
+            ]
           }
         },
         {
@@ -54,28 +42,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "hinge up"
+                  "name": "IntakeUp"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "stop hopper"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "stop intake"
+                  "name": "IntakeStop"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stop hinge"
           }
         },
         {
@@ -85,59 +61,21 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "hopper forward"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "feed shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "fly shoot"
-                }
-              }
-            ]
+            "name": "Shoot"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 1.0
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "stop hopper"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "stop feed shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "stop fly shoot"
-                }
-              }
-            ]
+            "name": "StopShoot"
           }
         },
         {
