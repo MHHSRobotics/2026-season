@@ -25,7 +25,7 @@ public final class Constants {
             RobotBase.isReal() ? Mode.REAL : simMode; // Current mode the robot program is in
 
     public static final boolean enablePhysicsSim =
-            true; // Whether to enable the physics sim connector (for SIM mode only)
+            false; // Whether to enable the physics sim connector (for SIM mode only)
 
     public static final boolean physicsSimEnabled = currentMode == Mode.SIM
             && enablePhysicsSim; // Whether to enable the physics sim connector (for SIM mode only)
@@ -52,9 +52,9 @@ public final class Constants {
     public static final boolean ctreProLicensedWarning = true; // Whether to warn if a CTRE device isn't pro licensed
 
     // Toggles for susbsytems
-    public static final boolean swerveEnabled = false;
-    public static final boolean visionEnabled = false;
-    public static final boolean autoAlignEnabled = false;
+    public static final boolean swerveEnabled = true;
+    public static final boolean visionEnabled = true;
+    public static final boolean autoAlignEnabled = true;
     public static final boolean shooterEnabled = true;
     public static final boolean hopperEnabled = true;
     public static final boolean hangEnabled = false;
