@@ -146,19 +146,19 @@ public class Swerve extends SubsystemBase {
         public static final double visionXYStdDevDistanceMultiplier = 0.1; // multiplied by distance²
         public static final double visionThetaStdDevDistanceMultiplier = 0.2; // multiplied by distance
 
-        public static final Transform3d hubCamPose =
-                new Transform3d(new Translation3d(-0.3, 0, 0.38), new Rotation3d(0, Units.degreesToRadians(-25), 0));
+        public static final Transform3d frontCamPose = new Transform3d(
+                new Translation3d(0.165, -0.318, 0.498), new Rotation3d(0, Units.degreesToRadians(-25), 0));
 
-        public static final Transform3d hubLeftCamPose = new Transform3d(
-                new Translation3d(0, 0.3, 0.5),
-                new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(90)));
+        public static final Transform3d rightCamPose = new Transform3d(
+                new Translation3d(-0.19, -0.286, 0.486),
+                new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-90)));
 
-        public static final Transform3d hubRightCamPose = new Transform3d(
-                new Translation3d(0, -0.3, 0.5),
-                new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-90)));
+        // public static final Transform3d hubRightCamPose = new Transform3d(
+        //         new Translation3d(0, -0.3, 0.5),
+        //         new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-90)));
 
-        public static final Transform3d hangCamPose =
-                new Transform3d(new Translation3d(0, -0.33, 0.3), new Rotation3d(0, 0, Units.degreesToRadians(-90)));
+        // public static final Transform3d hangCamPose =
+        //         new Transform3d(new Translation3d(0, -0.33, 0.3), new Rotation3d(0, 0, Units.degreesToRadians(-90)));
 
         // How many robot pose measurements to store per camera
         public static final int maxMeasurements = 8;

@@ -16,6 +16,10 @@ public class Shooter extends SubsystemBase {
 
         public static final LoggedNetworkNumber flySpeed =
                 new LoggedNetworkNumber("Shooter/TargetSpeed", 500); // Target velocity in rad/s
+
+        public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 1); // kP
+        public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
+
         public static final double feedSpeed = 0.5;
 
         public static final LoggedNetworkNumber lowDutyCycle = new LoggedNetworkNumber("Shooter/LowDutyCycle", 0.75);
@@ -103,16 +107,13 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
-
         if (targetSpeed == 0) {
-            fly.setDutyCycle(0);
+            fly.coast();
         } else {
-            if (getFlyVelocity() < targetSpeed) {
-                fly.setDutyCycle(Constants.highDutyCycle);
-            } else {
-                fly.setDutyCycle(Constants.lowDutyCycle.get());
-            }
+            fly.setVelocityWithCurrent(targetSpeed);
         }
+        fly.setkP(Constants.flykP.get());
+        fly.setkD(Constants.flykD.get());
 
         fly.update();
         feed.update();
