@@ -112,7 +112,7 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        // configureAuto(); // Set up the auto names commands and chooser
+        configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
 
@@ -801,8 +801,7 @@ public class RobotContainer {
                 RobotUtils::onRedAlliance,
                 swerve);
 
-        autoChooser =
-                new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B-NeutralCross"));
+        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B-Depot"));
     }
 
     public Command getAutonomousCommand() {
