@@ -11,6 +11,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -470,6 +471,10 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/dtheta", dtheta);
         Logger.recordOutput("Swerve/PoseTranslationError", getTranslationError());
         Logger.recordOutput("Swerve/PoseRotationError", getRotationError());
+        Pose2d targetPose=new Pose2d(xController.getSetpoint(),yController.getSetpoint(),Rotation2d.fromRadians(thetaController.getSetpoint().position));
+        Logger.recordOutput("Swerve/TargetPose", targetPose);
+        Transform2d hubTrans=targetPose.minus(Constants.hubPosition.get());
+        Logger.recordOutput("Swerve/DistanceFromHub", Math.hypot(hubTrans.getX(),hubTrans.getY()));
 
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < modules.length; i++) {
