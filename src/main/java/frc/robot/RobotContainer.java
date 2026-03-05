@@ -112,8 +112,9 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        // configureAuto(); // Set up the auto names commands and chooser
-
+        if (Constants.hangEnabled){
+            configureAuto(); // Set up the auto names commands and chooser
+        }
         configureBindings(); // Add drive controller bindings
 
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
