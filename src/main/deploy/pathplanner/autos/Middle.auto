@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B 2 1"
+            "pathName": "M 1"
           }
         },
         {
@@ -31,13 +31,13 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.5
+            "waitTime": 0.05
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "B 2 2"
+            "pathName": "M 2"
           }
         },
         {
@@ -67,7 +67,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B 2 3"
+            "pathName": "M 3"
           }
         },
         {
@@ -111,7 +111,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "B 2 4"
+            "pathName": "M 4"
           }
         },
         {

@@ -11,6 +11,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -146,19 +147,19 @@ public class Swerve extends SubsystemBase {
         public static final double visionXYStdDevDistanceMultiplier = 0.1; // multiplied by distance²
         public static final double visionThetaStdDevDistanceMultiplier = 0.2; // multiplied by distance
 
-        public static final Transform3d hubCamPose =
-                new Transform3d(new Translation3d(-0.3, 0, 0.38), new Rotation3d(0, Units.degreesToRadians(-25), 0));
+        public static final Transform3d frontCamPose = new Transform3d(
+                new Translation3d(0.165, -0.318, 0.498), new Rotation3d(0, Units.degreesToRadians(-25), 0));
 
-        public static final Transform3d hubLeftCamPose = new Transform3d(
-                new Translation3d(0, 0.3, 0.5),
-                new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(90)));
+        public static final Transform3d rightCamPose = new Transform3d(
+                new Translation3d(-0.19, -0.286, 0.486),
+                new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-90)));
 
-        public static final Transform3d hubRightCamPose = new Transform3d(
-                new Translation3d(0, -0.3, 0.5),
-                new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-90)));
+        // public static final Transform3d hubRightCamPose = new Transform3d(
+        //         new Translation3d(0, -0.3, 0.5),
+        //         new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-90)));
 
-        public static final Transform3d hangCamPose =
-                new Transform3d(new Translation3d(0, -0.33, 0.3), new Rotation3d(0, 0, Units.degreesToRadians(-90)));
+        // public static final Transform3d hangCamPose =
+        //         new Transform3d(new Translation3d(0, -0.33, 0.3), new Rotation3d(0, 0, Units.degreesToRadians(-90)));
 
         // How many robot pose measurements to store per camera
         public static final int maxMeasurements = 8;
@@ -189,6 +190,8 @@ public class Swerve extends SubsystemBase {
     // Target dx, dy, dtheta for manual control (set by commands via setTranslation/setRotation)
     private double dx, dy, dtheta;
     private boolean fieldCentric;
+
+    private boolean pidPosition, pidRotation; // Whether PID position/rotation are currently enabled
 
     // Whether the bot is currently in the X position
     private boolean locked;
@@ -420,14 +423,22 @@ public class Swerve extends SubsystemBase {
         return cameras;
     }
 
+    public void setPIDPosition(boolean pidPosition) {
+        this.pidPosition = pidPosition;
+    }
+
+    public void setPIDRotation(boolean pidRotation) {
+        this.pidRotation = pidRotation;
+    }
+
     // Gets translation error to the goal in meters
     public double getTranslationError() {
-        return Math.hypot(xController.getError(), yController.getError());
+        return pidPosition ? Math.hypot(xController.getError(), yController.getError()) : 0;
     }
 
     // Gets rotation error to the goal in radians
     public double getRotationError() {
-        return Math.abs(thetaController.getPositionError());
+        return pidRotation ? Math.abs(thetaController.getPositionError()) : 0;
     }
 
     @Override
@@ -470,6 +481,20 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/dtheta", dtheta);
         Logger.recordOutput("Swerve/PoseTranslationError", getTranslationError());
         Logger.recordOutput("Swerve/PoseRotationError", getRotationError());
+        Logger.recordOutput("Swerve/PIDPosition", pidPosition);
+        Logger.recordOutput("Swerve/PIDRotation", pidRotation);
+        Pose2d currentPose = getPose();
+        Logger.recordOutput("Swerve/EstimatedPose", getPose());
+        Logger.recordOutput("Swerve/Rotation", getRotation());
+        double targetX = pidPosition ? xController.getSetpoint() : currentPose.getX();
+        double targetY = pidPosition ? yController.getSetpoint() : currentPose.getY();
+        double targetTheta = pidRotation
+                ? thetaController.getSetpoint().position
+                : currentPose.getRotation().getRadians();
+        Pose2d targetPose = new Pose2d(targetX, targetY, Rotation2d.fromRadians(targetTheta));
+        Logger.recordOutput("Swerve/TargetPose", targetPose);
+        Transform2d hubTrans = currentPose.minus(Constants.hubPosition.get());
+        Logger.recordOutput("Swerve/DistanceFromHub", Math.hypot(hubTrans.getX(), hubTrans.getY()));
 
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < modules.length; i++) {
@@ -483,8 +508,6 @@ public class Swerve extends SubsystemBase {
         }
         Logger.recordOutput("Swerve/TargetStates", targetStates);
         Logger.recordOutput("Swerve/TargetChassisSpeeds", kinematics.toChassisSpeeds(targetStates));
-        Logger.recordOutput("Swerve/EstimatedPose", getPose());
-        Logger.recordOutput("Swerve/Rotation", getRotation());
 
         // Get measurements from all connected cameras and add them to the pose estimator
         for (CameraIO cam : cameras) {
