@@ -68,21 +68,21 @@ public class SwerveCommands {
     }
 
     // Sets raw translation output (m/s), for auto/test use
-    public Command setPositionOutput(double dx, double dy) {
-        return Commands.run(() -> swerve.setTranslation(dx, dy, false), swerveTranslation)
+    public Command setPositionOutput(DoubleSupplier dx, DoubleSupplier dy) {
+        return Commands.run(() -> swerve.setTranslation(dx.getAsDouble(), dy.getAsDouble(), false), swerveTranslation)
                 .finallyDo(() -> swerve.setTranslation(0, 0, false))
                 .withName("swerve set position output");
     }
 
     // Sets raw rotation output (rad/s), for auto/test use
-    public Command setRotationOutput(double omega) {
-        return Commands.run(() -> swerve.setRotation(omega), swerveRotation)
+    public Command setRotationOutput(DoubleSupplier omega) {
+        return Commands.run(() -> swerve.setRotation(omega.getAsDouble()), swerveRotation)
                 .finallyDo(() -> swerve.setRotation(0))
                 .withName("swerve set rotation output");
     }
 
     // Sets translational and rotational speed
-    public Command setSpeed(double dx, double dy, double omega) {
+    public Command setSpeed(DoubleSupplier dx, DoubleSupplier dy, DoubleSupplier omega) {
         return Commands.parallel(setPositionOutput(dx, dy), setRotationOutput(omega))
                 .withName("swerve set speed");
     }

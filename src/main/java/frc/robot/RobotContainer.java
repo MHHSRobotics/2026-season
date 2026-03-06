@@ -476,28 +476,37 @@ public class RobotContainer {
             // Aim at hub: circle, L1 in alt controls
             driveController
                     .circle()
+                    .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
-            driveController.L1().and(() -> altControls()).onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            driveController
+                    .L1()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> altControls())
+                    .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
             if (Constants.autoAlignEnabled) {
                 // Go to outpost: cross, L2 in alt controls
                 driveController
                         .cross()
+                        .and(() -> !testEnabled.get())
                         .and(() -> !altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
                 driveController
                         .L2()
+                        .and(() -> !testEnabled.get())
                         .and(() -> altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
 
                 // Go to hang: cross, L2 in alt controls
                 driveController
                         .square()
+                        .and(() -> !testEnabled.get())
                         .and(() -> !altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
                 driveController
                         .R2()
+                        .and(() -> !testEnabled.get())
                         .and(() -> altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
@@ -590,7 +599,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
-                    .onTrue(swerveCommands.setSpeed(testSpeed.get(), 0, 0))
+                    .onTrue(swerveCommands.setSpeed(() -> testSpeed.get(), () -> 0, () -> 0))
                     .onFalse(swerveCommands.stop());
 
             // Manual duty cycle backward test
@@ -599,7 +608,7 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
-                    .onTrue(swerveCommands.setSpeed(-testSpeed.get(), 0, 0))
+                    .onTrue(swerveCommands.setSpeed(() -> -testSpeed.get(), () -> 0, () -> 0))
                     .onFalse(swerveCommands.stop());
 
             // Manual pose reset
@@ -760,7 +769,7 @@ public class RobotContainer {
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {
         controllerDisconnected.set(!driveController.isConnected() && Constants.currentMode != Mode.SIM);
-        operatorDisconnected.set(!operator.isConnected() && Constants.currentMode != Mode.SIM);
+        operatorDisconnected.set(!operator.isConnected() && Constants.currentMode != Mode.SIM && altControls());
     }
 
     // Initialize dashboard auto chooser
