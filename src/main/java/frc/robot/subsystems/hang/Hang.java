@@ -20,10 +20,12 @@ import frc.robot.io.MotorIO;
 
 public class Hang extends SubsystemBase {
     public static class Constants {
+        // CAN device ID for the hang motor controller, and Digital input sensors initialized.
         public static final int motorId = 25;
 
         public static final int encoderId = 26;
 
+        // Whether to flip motor direction (true means reverse forward/backward)
         public static final boolean motorInverted = false;
         public static final boolean encoderInverted = false;
 
@@ -148,8 +150,10 @@ public class Hang extends SubsystemBase {
     public void periodic() {
         motor.update();
 
+        // Set braking based on user input
         motor.setBraking(Constants.hangLocked.get());
 
+        // Disable the motor based on user input
         motor.setDisabled(Constants.hangDisabled.get());
 
         hang.setAngle(Rotation2d.fromRadians(motor.getInputs().position));

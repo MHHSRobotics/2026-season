@@ -39,6 +39,10 @@ public class IntakeCommands {
                 .withName("set hinge speed");
     }
 
+    public Command hingeStop() {
+        return Commands.runOnce(() -> intake.hingeStop(), intake);
+    }
+
     public Command setIntakeSpeed(DoubleSupplier speed) {
         return Commands.runEnd(() -> intake.setIntakeSpeed(speed.getAsDouble()), () -> intake.intakeStop(), intake)
                 .withName("set intake speed");
@@ -52,5 +56,9 @@ public class IntakeCommands {
     public Command outtake() {
         return Commands.startEnd(() -> intake.outtake(), () -> intake.intakeStop(), intake)
                 .withName("outtake");
+    }
+
+    public Command intakeStop() {
+        return Commands.runOnce(() -> intake.intakeStop(), intake);
     }
 }

@@ -30,4 +30,9 @@ public class HopperCommands {
         return Commands.startEnd(() -> hopper.reverse(), () -> hopper.stop(), hopper)
                 .withName("hopper reverse");
     }
+
+    // Stops hopper motor from spinning
+    public Command stop() {
+        return Commands.runOnce(() -> hopper.stop(), hopper);
+    }
 }
