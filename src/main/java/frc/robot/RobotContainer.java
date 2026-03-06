@@ -61,6 +61,7 @@ import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
+import frc.robot.util.Alerts;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.RobotUtils;
 
@@ -797,6 +798,7 @@ public class RobotContainer {
         try {
             config = RobotConfig.fromGUISettings();
         } catch (Exception e) {
+            Alerts.create("Failed to load robot config!", AlertType.kError);
             e.printStackTrace();
             return;
         }

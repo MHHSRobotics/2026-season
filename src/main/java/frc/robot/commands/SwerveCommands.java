@@ -117,7 +117,7 @@ public class SwerveCommands {
                                             swerve.getPose().getRotation().getRadians(),
                                             alliancePose.getRotation().getRadians());
                             swerve.setRotation(output);
-                            swerve.setPIDPosition(true);
+                            swerve.setPIDRotation(true);
                         },
                         swerveRotation)
                 .finallyDo(() -> {

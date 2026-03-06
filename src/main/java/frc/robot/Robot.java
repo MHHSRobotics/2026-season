@@ -107,6 +107,7 @@ public class Robot extends LoggedRobot {
             watchdog.setTimeout(Constants.loopOverrunWarningTimeout);
         } catch (Exception e) {
             Alerts.create("Failed to disable loop overrun warnings", AlertType.kWarning);
+            e.printStackTrace();
         }
         CommandScheduler.getInstance().setPeriod(Constants.loopOverrunWarningTimeout);
 

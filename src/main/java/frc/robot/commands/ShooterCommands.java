@@ -20,7 +20,7 @@ public class ShooterCommands {
     }
 
     public Command flyShoot() {
-        return Commands.startEnd(() -> shooter.flyShoot(), () -> shooter.flyStop())
+        return Commands.runEnd(() -> shooter.flyShoot(), () -> shooter.flyStop())
                 .withName("fly shoot");
     }
 
