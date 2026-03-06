@@ -191,6 +191,8 @@ public class Swerve extends SubsystemBase {
     private double dx, dy, dtheta;
     private boolean fieldCentric;
 
+    private boolean pidPosition, pidRotation; // Whether PID position/rotation are currently enabled
+
     // Whether the bot is currently in the X position
     private boolean locked;
 
@@ -421,14 +423,22 @@ public class Swerve extends SubsystemBase {
         return cameras;
     }
 
+    public void setPIDPosition(boolean pidPosition) {
+        this.pidPosition = pidPosition;
+    }
+
+    public void setPIDRotation(boolean pidRotation) {
+        this.pidRotation = pidRotation;
+    }
+
     // Gets translation error to the goal in meters
     public double getTranslationError() {
-        return Math.hypot(xController.getError(), yController.getError());
+        return pidPosition ? Math.hypot(xController.getError(), yController.getError()) : 0;
     }
 
     // Gets rotation error to the goal in radians
     public double getRotationError() {
-        return Math.abs(thetaController.getPositionError());
+        return pidRotation ? Math.abs(thetaController.getPositionError()) : 0;
     }
 
     @Override
@@ -471,10 +481,20 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/dtheta", dtheta);
         Logger.recordOutput("Swerve/PoseTranslationError", getTranslationError());
         Logger.recordOutput("Swerve/PoseRotationError", getRotationError());
-        Pose2d targetPose=new Pose2d(xController.getSetpoint(),yController.getSetpoint(),Rotation2d.fromRadians(thetaController.getSetpoint().position));
+        Logger.recordOutput("Swerve/PIDPosition", pidPosition);
+        Logger.recordOutput("Swerve/PIDRotation", pidRotation);
+        Pose2d currentPose = getPose();
+        Logger.recordOutput("Swerve/EstimatedPose", getPose());
+        Logger.recordOutput("Swerve/Rotation", getRotation());
+        double targetX = pidPosition ? xController.getSetpoint() : currentPose.getX();
+        double targetY = pidPosition ? yController.getSetpoint() : currentPose.getY();
+        double targetTheta = pidRotation
+                ? thetaController.getSetpoint().position
+                : currentPose.getRotation().getRadians();
+        Pose2d targetPose = new Pose2d(targetX, targetY, Rotation2d.fromRadians(targetTheta));
         Logger.recordOutput("Swerve/TargetPose", targetPose);
-        Transform2d hubTrans=targetPose.minus(Constants.hubPosition.get());
-        Logger.recordOutput("Swerve/DistanceFromHub", Math.hypot(hubTrans.getX(),hubTrans.getY()));
+        Transform2d hubTrans = currentPose.minus(Constants.hubPosition.get());
+        Logger.recordOutput("Swerve/DistanceFromHub", Math.hypot(hubTrans.getX(), hubTrans.getY()));
 
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < modules.length; i++) {
@@ -488,8 +508,6 @@ public class Swerve extends SubsystemBase {
         }
         Logger.recordOutput("Swerve/TargetStates", targetStates);
         Logger.recordOutput("Swerve/TargetChassisSpeeds", kinematics.toChassisSpeeds(targetStates));
-        Logger.recordOutput("Swerve/EstimatedPose", getPose());
-        Logger.recordOutput("Swerve/Rotation", getRotation());
 
         // Get measurements from all connected cameras and add them to the pose estimator
         for (CameraIO cam : cameras) {
