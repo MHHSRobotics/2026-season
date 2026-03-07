@@ -22,14 +22,13 @@ public class Shooter extends SubsystemBase {
 
         public static final double feedSpeed = 0.5;
 
-        public static final LoggedNetworkNumber lowDutyCycle = new LoggedNetworkNumber("Shooter/LowDutyCycle", 0.75);
-        public static final double highDutyCycle = 1;
-
         public static final boolean flyInverted = false;
+        public static final boolean flyInverted2 = false;
         public static final boolean feedInverted = true;
 
         public static final int flyMotorId = 16;
-        public static final int feedMotorId = 17;
+        public static final int flyMotorId2 = 17;
+        public static final int feedMotorId = 18;
 
         public static final double feedRatio = 1;
         public static final double flyRatio = 1;
@@ -42,17 +41,18 @@ public class Shooter extends SubsystemBase {
         public static final double flyInertia = 0.005; // Inertia of fly wheels in kg m^2
     }
 
-    private MotorIO feed;
-    private MotorIO fly;
+    private MotorIO feed, fly, fly2;
 
     private double targetSpeed;
 
-    public Shooter(MotorIO feedIO, MotorIO flyIO) {
-        this.feed = feedIO;
-        this.fly = flyIO;
+    public Shooter(MotorIO feedIO, MotorIO flyIO, MotorIO flyIO2) {
+        feed = feedIO;
+        fly = flyIO;
+        fly2 = flyIO2;
 
         fly.setInverted(Constants.flyInverted);
         fly.connectInternalSensor(Constants.flyRatio);
+        fly2.follow(Constants.flyMotorId, Constants.flyInverted ^ Constants.flyInverted2);
         feed.setInverted(Constants.feedInverted);
         feed.connectInternalSensor(Constants.feedRatio);
     }
@@ -116,6 +116,7 @@ public class Shooter extends SubsystemBase {
         fly.setkD(Constants.flykD.get());
 
         fly.update();
+        fly2.update();
         feed.update();
 
         Logger.recordOutput("Shooter/TargetSpeed", targetSpeed);

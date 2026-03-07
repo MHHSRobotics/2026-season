@@ -10,16 +10,17 @@ import frc.robot.io.MotorIO;
 
 public class ShooterSim extends SubsystemBase {
     private static final DCMotor feedGearbox = DCMotor.getKrakenX60Foc(1);
-    private static final DCMotor flyGearbox = DCMotor.getKrakenX60Foc(1);
+    private static final DCMotor flyGearbox = DCMotor.getKrakenX60Foc(2);
 
-    private MotorIO feed, fly;
+    private MotorIO feed, fly, fly2;
 
     private DCMotorSim feedMech;
     private DCMotorSim flyMech;
 
-    public ShooterSim(MotorIO feedIO, MotorIO flyIO) {
+    public ShooterSim(MotorIO feedIO, MotorIO flyIO, MotorIO flyIO2) {
         feed = feedIO;
         fly = flyIO;
+        fly2 = flyIO2;
         feedMech = new DCMotorSim(
                 LinearSystemId.createDCMotorSystem(
                         feedGearbox, Shooter.Constants.feedInertia, Shooter.Constants.feedRatio),
@@ -43,5 +44,7 @@ public class ShooterSim extends SubsystemBase {
 
         fly.setMechPosition(flyMech.getAngularPositionRad());
         fly.setMechVelocity(flyMech.getAngularVelocityRadPerSec());
+        fly2.setMechPosition(flyMech.getAngularPositionRad());
+        fly2.setMechVelocity(flyMech.getAngularVelocityRadPerSec());
     }
 }

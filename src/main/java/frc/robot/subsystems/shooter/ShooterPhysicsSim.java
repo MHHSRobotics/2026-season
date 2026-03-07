@@ -9,17 +9,17 @@ import frc.robot.Constants;
 import frc.robot.io.MotorIO;
 
 public class ShooterPhysicsSim extends SubsystemBase {
-    private MotorIO feed;
-    private MotorIO flywheel;
+    private MotorIO feed, fly, fly2;
 
     private DoubleSubscriber feedPos;
     private DoubleSubscriber feedVel;
     private DoubleSubscriber flywheelPos;
     private DoubleSubscriber flywheelVel;
 
-    public ShooterPhysicsSim(MotorIO feedIO, MotorIO flywheelIO, String path) {
+    public ShooterPhysicsSim(MotorIO feedIO, MotorIO flywheelIO, MotorIO flywheelIO2, String path) {
         feed = feedIO;
-        flywheel = flywheelIO;
+        fly = flywheelIO;
+        fly2 = flywheelIO2;
         feedPos = NetworkTableInstance.getDefault()
                 .getDoubleTopic(path + "/Feed/Position")
                 .subscribe(0, PubSubOption.periodic(Constants.loopTime));
@@ -38,7 +38,9 @@ public class ShooterPhysicsSim extends SubsystemBase {
     public void periodic() {
         feed.setMechPosition(feedPos.get());
         feed.setMechVelocity(feedVel.get());
-        flywheel.setMechPosition(flywheelPos.get());
-        flywheel.setMechVelocity(flywheelVel.get());
+        fly.setMechPosition(flywheelPos.get());
+        fly.setMechVelocity(flywheelVel.get());
+        fly2.setMechPosition(flywheelPos.get());
+        fly2.setMechVelocity(flywheelVel.get());
     }
 }

@@ -40,9 +40,6 @@ import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
 import frc.robot.subsystems.hang.Hang;
-import frc.robot.subsystems.hopper.Hopper;
-import frc.robot.subsystems.hopper.HopperPhysicsSim;
-import frc.robot.subsystems.hopper.HopperSim;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakePhysicsSim;
 import frc.robot.subsystems.intake.IntakeSim;
@@ -71,14 +68,12 @@ public class RobotContainer {
     private SwerveTranslation swerveTranslation;
     private SwerveRotation swerveRotation;
     private Hang hang;
-    private Hopper hopper;
     private Intake intake;
     private Shooter shooter;
     private LED led;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
-    private HopperCommands hopperCommands;
     private IntakeCommands intakeCommands;
     private ShooterCommands shooterCommands;
     private LEDCommands ledCommands;
@@ -298,7 +293,7 @@ public class RobotContainer {
         }
 
         if (Constants.shooterEnabled) {
-            MotorIO feedMotor, flyMotor;
+            MotorIO feedMotor, flyMotor, flyMotor2;
             switch (Constants.currentMode) {
                 // If in REAL or SIM mode, use MotorIOTalonFX for motors, EncoderIOCANcoder for encoders, and
                 // GyroIOPigeon for the gyro
@@ -311,42 +306,25 @@ public class RobotContainer {
                             Constants.defaultBus,
                             "shooter fly motor",
                             "Shooter/Flywheel");
+                    flyMotor2 = new MotorIOTalonFX(
+                            Shooter.Constants.flyMotorId2,
+                            Constants.defaultBus,
+                            "shooter fly motor 2",
+                            "Shooter/Flywheel2");
                     break;
                 default:
                     feedMotor = new MotorIO("shooter feed motor", "Shooter/Feed");
                     flyMotor = new MotorIO("shooter fly motor", "Shooter/Flywheel");
+                    flyMotor2 = new MotorIO("shooter fly motor 2", "Shooter/Flywheel2");
                     break;
             }
-            shooter = new Shooter(feedMotor, flyMotor);
+            shooter = new Shooter(feedMotor, flyMotor, flyMotor2);
 
             if (Constants.currentMode == Mode.SIM) {
                 if (!Constants.enablePhysicsSim) {
-                    new ShooterSim(feedMotor, flyMotor);
+                    new ShooterSim(feedMotor, flyMotor, flyMotor2);
                 } else {
-                    new ShooterPhysicsSim(feedMotor, flyMotor, "/MuJoCo/Shooter");
-                }
-            }
-        }
-
-        if (Constants.hopperEnabled) {
-            MotorIO hopperMotor;
-            switch (Constants.currentMode) {
-                case REAL:
-                case SIM:
-                    hopperMotor = new MotorIOTalonFX(
-                            Hopper.Constants.motorId, Constants.defaultBus, "hopper motor", "Hopper/Motor");
-                    break;
-                default:
-                    hopperMotor = new MotorIO("hopper motor", "Hopper/Motor");
-                    break;
-            }
-            hopper = new Hopper(hopperMotor);
-
-            if (Constants.currentMode == Mode.SIM) {
-                if (!Constants.enablePhysicsSim) {
-                    new HopperSim(hopperMotor);
-                } else {
-                    new HopperPhysicsSim(hopperMotor, "/MuJoCo/Hopper");
+                    new ShooterPhysicsSim(feedMotor, flyMotor, flyMotor2, "/MuJoCo/Shooter");
                 }
             }
         }
@@ -423,9 +401,6 @@ public class RobotContainer {
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve, swerveTranslation, swerveRotation);
         }
-        if (Constants.hopperEnabled) {
-            hopperCommands = new HopperCommands(hopper);
-        }
         if (Constants.hangEnabled) {
             hangCommands = new HangCommands(hang);
         }
@@ -438,8 +413,8 @@ public class RobotContainer {
         if (Constants.ledsEnabled) {
             ledCommands = new LEDCommands(led);
         }
-        if (Constants.shooterEnabled && Constants.hopperEnabled) {
-            multiCommands = new MultiCommands(hopperCommands, shooterCommands, ledCommands, shooter);
+        if (Constants.shooterEnabled) {
+            multiCommands = new MultiCommands(shooterCommands, ledCommands, shooter);
         }
     }
 
@@ -540,29 +515,6 @@ public class RobotContainer {
                     .whileTrue(intakeCommands.outtake());
             operator.R1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.outtake());
         }
-        if (Constants.hopperEnabled) {
-            // Hopper in is driver povUp on main controls, operator povUp on alt
-            driveController
-                    .povUp()
-                    .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
-                    .whileTrue(hopperCommands.forward());
-            operator.povUp()
-                    .and(() -> !testEnabled.get())
-                    .and(() -> altControls())
-                    .whileTrue(hopperCommands.forward());
-
-            // Hopper out is driver povUp on main controls, operator povUp on alt
-            driveController
-                    .povDown()
-                    .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
-                    .whileTrue(hopperCommands.reverse());
-            operator.povDown()
-                    .and(() -> !testEnabled.get())
-                    .and(() -> altControls())
-                    .whileTrue(hopperCommands.reverse());
-        }
         if (multiCommands != null) {
             // Shoot is driver R2 on main controls, operator R2 on alt
             driveController
@@ -654,26 +606,6 @@ public class RobotContainer {
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Hang"))
                     .whileTrue(hangCommands.setSpeed(() -> -testSpeed.get()));
-        }
-
-        if (Constants.hopperEnabled) {
-            testSubsystem.addOption("Hopper", "Hopper");
-
-            // Hopper slow forward test
-            driveController
-                    .cross()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("Hopper"))
-                    .whileTrue(hopperCommands.setSpeed(() -> testSpeed.get()));
-
-            // Hopper slow reverse test
-            driveController
-                    .circle()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("Hopper"))
-                    .whileTrue(hopperCommands.setSpeed(() -> -testSpeed.get()));
         }
 
         if (Constants.shooterEnabled) {
