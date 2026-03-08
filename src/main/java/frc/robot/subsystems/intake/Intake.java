@@ -29,7 +29,8 @@ public class Intake extends SubsystemBase {
         public static final int rightSwitchId = 1;
         public static final int leftSwitchId = 2;
 
-        public static final double defaultSpeed = frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.7;
+        public static final LoggedNetworkNumber defaultSpeed =
+                new LoggedNetworkNumber("Intake/FlySpeed", frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.7);
 
         public static final LoggedNetworkNumber hingeKP =
                 new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 4);
@@ -152,11 +153,11 @@ public class Intake extends SubsystemBase {
     }
 
     public void intake() {
-        rollerMotor.setDutyCycle(Constants.defaultSpeed);
+        rollerMotor.setDutyCycle(Constants.defaultSpeed.get());
     }
 
     public void outtake() {
-        rollerMotor.setDutyCycle(-Constants.defaultSpeed);
+        rollerMotor.setDutyCycle(-Constants.defaultSpeed.get());
     }
 
     public void intakeStop() {

@@ -4,18 +4,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import com.ctre.phoenix6.signals.RGBWColor;
 
-import frc.robot.subsystems.hopper.Hopper;
 import frc.robot.subsystems.shooter.Shooter;
 
 public class MultiCommands {
-    private HopperCommands hopperCommands;
     private ShooterCommands shooterCommands;
     private LEDCommands ledCommands;
     private Shooter shooter;
 
-    public MultiCommands(
-            HopperCommands hopperCommands, ShooterCommands shooterCommands, LEDCommands ledCommands, Shooter shooter) {
-        this.hopperCommands = hopperCommands;
+    public MultiCommands(ShooterCommands shooterCommands, LEDCommands ledCommands, Shooter shooter) {
         this.shooterCommands = shooterCommands;
         this.ledCommands = ledCommands;
         this.shooter = shooter;
@@ -23,29 +19,22 @@ public class MultiCommands {
 
     public Command shoot() {
         if (ledCommands != null) {
-            return hopperCommands
-                    .setSpeed(() -> shooter.atTargetSpeed() ? Hopper.Constants.rollerSpeed : 0)
+            return shooterCommands
+                    .setFeedSpeed(() -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0)
                     .alongWith(
-                            shooterCommands.setFeedSpeed(
-                                    () -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0),
                             shooterCommands.flyShoot(),
                             ledCommands.setColor(() ->
                                     shooter.atTargetSpeed() ? new RGBWColor(0, 255, 0) : new RGBWColor(255, 0, 0)))
                     .withName("shoot");
         } else {
-            return hopperCommands
-                    .setSpeed(() -> shooter.atTargetSpeed() ? Hopper.Constants.rollerSpeed : 0)
-                    .alongWith(
-                            shooterCommands.setFeedSpeed(
-                                    () -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0),
-                            shooterCommands.flyShoot())
+            return shooterCommands
+                    .setFeedSpeed(() -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0)
+                    .alongWith(shooterCommands.flyShoot())
                     .withName("shoot");
         }
     }
 
     public Command shootStop() {
-        return hopperCommands
-                .setSpeed(() -> 0)
-                .alongWith(shooterCommands.setFeedSpeed(() -> 0), shooterCommands.setFlySpeed(() -> 0));
+        return shooterCommands.setFeedSpeed(() -> 0).alongWith(shooterCommands.setFlySpeed(() -> 0));
     }
 }
