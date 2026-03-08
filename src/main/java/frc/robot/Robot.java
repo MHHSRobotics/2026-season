@@ -66,7 +66,6 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("Shooter", Constants.shooterEnabled ? "true" : "false");
         Logger.recordMetadata("Intake", Constants.intakeEnabled ? "true" : "false");
         Logger.recordMetadata("Hang", Constants.hangEnabled ? "true" : "false");
-        Logger.recordMetadata("Hopper", Constants.hopperEnabled ? "true" : "false");
         Logger.recordMetadata("PhysicsSim", Constants.physicsSimEnabled ? "true" : "false");
 
         // Set logging mode depending on the current running mode
