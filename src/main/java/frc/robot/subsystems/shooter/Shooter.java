@@ -23,8 +23,8 @@ public class Shooter extends SubsystemBase {
         public static final double feedSpeed = 0.5;
 
         public static final boolean flyInverted = false;
-        public static final boolean flyInverted2 = false;
-        public static final boolean feedInverted = true;
+        public static final boolean flyInverted2 = true;
+        public static final boolean feedInverted = false;
 
         public static final int flyMotorId = 16;
         public static final int flyMotorId2 = 17;
