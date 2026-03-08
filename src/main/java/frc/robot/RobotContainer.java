@@ -458,6 +458,11 @@ public class RobotContainer {
         testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
         altControls = new LoggedNetworkBoolean("AltControlsEnabled", false);
 
+        driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+                .cancelAll()));
+        operator.touchpad()
+                .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+
         if (Constants.swerveEnabled) {
             driveController.options().onTrue(swerveCommands.resetGyro());
             driveController.create().onTrue(swerveCommands.lock());
@@ -511,9 +516,6 @@ public class RobotContainer {
                         .and(() -> altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
-
-            driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                    .cancelAll()));
         }
         if (Constants.intakeEnabled) {
             // Toggle hinge is driver L1 on main controls, operator L1 on alt
@@ -530,7 +532,7 @@ public class RobotContainer {
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .whileTrue(intakeCommands.intake());
-            operator.L2().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.intake());
+            operator.L2().and(() -> !testEnabled.get()).and(() -> altControls()).whileTrue(intakeCommands.intake());
 
             // Outtake is driver R1 on main controls, operator R1 on alt
             driveController
@@ -538,7 +540,7 @@ public class RobotContainer {
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .whileTrue(intakeCommands.outtake());
-            operator.R1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.outtake());
+            operator.R1().and(() -> !testEnabled.get()).and(() -> altControls()).whileTrue(intakeCommands.outtake());
         }
         if (Constants.hopperEnabled) {
             // Hopper in is driver povUp on main controls, operator povUp on alt
