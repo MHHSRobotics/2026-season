@@ -15,6 +15,7 @@ import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.FieldTranslation2d;
+import frc.robot.util.RobotUtils;
 
 public class SwerveCommands {
     private final Swerve swerve;
@@ -39,10 +40,10 @@ public class SwerveCommands {
                                     MathUtil.applyDeadband(radius, Swerve.Constants.moveDeadband),
                                     Swerve.Constants.movePow);
                             double angle = Math.atan2(y, x);
-
+                            double sign = RobotUtils.onRedAlliance() ? -1 : 1;
                             swerve.setTranslation(
-                                    scale * Math.cos(angle) * Swerve.Constants.maxLinearSpeedMetersPerSec,
-                                    scale * Math.sin(angle) * Swerve.Constants.maxLinearSpeedMetersPerSec,
+                                    sign * scale * Math.cos(angle) * Swerve.Constants.maxLinearSpeedMetersPerSec,
+                                    sign * scale * Math.sin(angle) * Swerve.Constants.maxLinearSpeedMetersPerSec,
                                     fieldCentric.getAsBoolean());
                         },
                         swerveTranslation)
