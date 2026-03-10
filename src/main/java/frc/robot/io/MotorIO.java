@@ -1,7 +1,5 @@
 package frc.robot.io;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.Alert;
@@ -23,15 +21,6 @@ import frc.robot.util.Alerts;
 // - Arms/flywheels use radians (rad) and radians per second (rad/s)
 // - Elevators use meters (m) and meters per second (m/s)
 public class MotorIO {
-    private static final List<MotorIO> allMotors = new ArrayList<>();
-
-    public static double getTotalSupplyCurrent() {
-        double total = 0;
-        for (MotorIO motor : allMotors) {
-            total += Math.abs(motor.inputs.supplyCurrent);
-        }
-        return total;
-    }
 
     @AutoLog
     public static class MotorIOInputs {
@@ -89,7 +78,6 @@ public class MotorIO {
     public MotorIO(String name, String logPath) {
         this.name = name;
         this.logPath = logPath;
-        allMotors.add(this);
 
         // Create alerts with descriptive names for this motor
         disconnectAlert = new Alert("The " + name + " is disconnected", AlertType.kError);

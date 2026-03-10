@@ -448,8 +448,7 @@ public class RobotContainer {
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
             // Same controls for operator
-            new Trigger(() -> Math.hypot(operator.getLeftX(), operator.getLeftY())
-                            > Swerve.Constants.moveDeadband)
+            new Trigger(() -> Math.hypot(operator.getLeftX(), operator.getLeftY()) > Swerve.Constants.moveDeadband)
                     .onTrue(swerveCommands.drive(
                             () -> -operator.getLeftY(),
                             () -> -operator.getLeftX(),

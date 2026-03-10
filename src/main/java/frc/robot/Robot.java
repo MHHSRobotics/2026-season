@@ -30,7 +30,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.revrobotics.util.StatusLogger;
 import frc.robot.Constants.Mode;
-import frc.robot.io.MotorIO;
 import frc.robot.util.Alerts;
 
 public class Robot extends LoggedRobot {
@@ -68,6 +67,7 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("Intake", Constants.intakeEnabled ? "true" : "false");
         Logger.recordMetadata("Hang", Constants.hangEnabled ? "true" : "false");
         Logger.recordMetadata("PhysicsSim", Constants.physicsSimEnabled ? "true" : "false");
+        Logger.recordMetadata("AutoAlign", Constants.autoAlignEnabled ? "true" : "false");
 
         // Set logging mode depending on the current running mode
         switch (Constants.currentMode) {
@@ -157,9 +157,6 @@ public class Robot extends LoggedRobot {
         CANBusStatus status = Constants.swerveBus.getStatus();
         Logger.recordOutput("CANivore/Utilization", status.BusUtilization);
         Logger.recordOutput("CANivore/Status", status.Status.isOK());
-
-        // Log total current draw across all motors
-        Logger.recordOutput("TotalSupplyCurrent", MotorIO.getTotalSupplyCurrent());
 
         // RobotContainer periodic gets called _after_ the subsystems
         robotContainer.periodic();
