@@ -21,6 +21,7 @@ import frc.robot.util.Alerts;
 // - Arms/flywheels use radians (rad) and radians per second (rad/s)
 // - Elevators use meters (m) and meters per second (m/s)
 public class MotorIO {
+
     @AutoLog
     public static class MotorIOInputs {
         public boolean connected; // Is the motor controller connected

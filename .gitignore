@@ -193,5 +193,4 @@ compile_commands.json
 
 simgui-ds.json
 
-*.wpilog
 *.pyc

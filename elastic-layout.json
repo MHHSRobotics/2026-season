@@ -11,14 +11,14 @@
             "x": 0.0,
             "y": 256.0,
             "width": 384.0,
-            "height": 512.0,
+            "height": 640.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
             },
             "children": [
               {
-                "title": "GitBranch",
+                "title": "Branch",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
@@ -26,6 +26,20 @@
                 "type": "Text Display",
                 "properties": {
                   "topic": "/AdvantageKit/RealMetadata/GitBranch",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Build Date",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/BuildDate",
                   "period": 0.06,
                   "data_type": "string",
                   "show_submit_button": false
@@ -46,42 +60,98 @@
                 }
               },
               {
-                "title": "BuildDate",
+                "title": "Swerve",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/BuildDate",
+                  "topic": "/AdvantageKit/RealMetadata/Swerve",
                   "period": 0.06,
                   "data_type": "string",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "GitDate",
+                "title": "Vision",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/GitDate",
+                  "topic": "/AdvantageKit/RealMetadata/Vision",
                   "period": 0.06,
                   "data_type": "string",
                   "show_submit_button": false
                 }
               },
               {
-                "title": "GitSHA",
+                "title": "Auto Align",
                 "x": 0.0,
                 "y": 0.0,
                 "width": 128.0,
                 "height": 128.0,
                 "type": "Text Display",
                 "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/GitSHA",
+                  "topic": "/AdvantageKit/RealMetadata/AutoAlign",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Intake",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Intake",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Shooter",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Shooter",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Hang",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Hang",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Physics Sim",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/PhysicsSim",
                   "period": 0.06,
                   "data_type": "string",
                   "show_submit_button": false
@@ -100,18 +170,6 @@
             "type": "Alerts",
             "properties": {
               "topic": "/SmartDashboard/Alerts",
-              "period": 0.06
-            }
-          },
-          {
-            "title": "PhotonAlerts",
-            "x": 1536.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 384.0,
-            "type": "Alerts",
-            "properties": {
-              "topic": "/SmartDashboard/PhotonAlerts",
               "period": 0.06
             }
           },
@@ -183,19 +241,6 @@
             }
           },
           {
-            "title": "Bad Controls",
-            "x": 384.0,
-            "y": 640.0,
-            "width": 1152.0,
-            "height": 256.0,
-            "type": "Toggle Switch",
-            "properties": {
-              "topic": "AltControlsEnabled",
-              "period": 0.06,
-              "data_type": "boolean"
-            }
-          },
-          {
             "title": "AutoChooser",
             "x": 768.0,
             "y": 512.0,
@@ -215,89 +260,6 @@
       "name": "Testing",
       "grid_layout": {
         "layouts": [
-          {
-            "title": "Metadata",
-            "x": 1536.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 512.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "GitBranch",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/GitBranch",
-                  "period": 0.06,
-                  "data_type": "string",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "GitDirty",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/GitDirty",
-                  "period": 0.06,
-                  "data_type": "string",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "BuildDate",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/BuildDate",
-                  "period": 0.06,
-                  "data_type": "string",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "GitDate",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/GitDate",
-                  "period": 0.06,
-                  "data_type": "string",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "GitSHA",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealMetadata/GitSHA",
-                  "period": 0.06,
-                  "data_type": "string",
-                  "show_submit_button": false
-                }
-              }
-            ]
-          },
           {
             "title": "Shooter Settings",
             "x": 768.0,
@@ -331,45 +293,6 @@
                 "type": "Toggle Switch",
                 "properties": {
                   "topic": "Shooter/Locked",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              }
-            ]
-          },
-          {
-            "title": "Hopper Settings",
-            "x": 1024.0,
-            "y": 0.0,
-            "width": 256.0,
-            "height": 256.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Disabled",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Switch",
-                "properties": {
-                  "topic": "Hopper/Disabled",
-                  "period": 0.06,
-                  "data_type": "boolean"
-                }
-              },
-              {
-                "title": "Locked",
-                "x": 0.0,
-                "y": 0.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Toggle Switch",
-                "properties": {
-                  "topic": "Hopper/Locked",
                   "period": 0.06,
                   "data_type": "boolean"
                 }
@@ -517,7 +440,7 @@
             "x": 512.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 896.0,
+            "height": 768.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -693,10 +616,10 @@
           },
           {
             "title": "Hang Settings",
-            "x": 1280.0,
+            "x": 1024.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 256.0,
+            "height": 384.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -733,7 +656,7 @@
           {
             "title": "Test",
             "x": 1280.0,
-            "y": 256.0,
+            "y": 0.0,
             "width": 256.0,
             "height": 384.0,
             "type": "List Layout",
@@ -795,6 +718,231 @@
                 }
               }
             ]
+          },
+          {
+            "title": "Shooter Settings",
+            "x": 768.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Target Flywheel Speed (Rads/sec)",
+                "x": 1152.0,
+                "y": 768.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Number Slider",
+                "properties": {
+                  "topic": "Shooter/TargetSpeed",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "min_value": 300.0,
+                  "max_value": 600.0,
+                  "divisions": 5,
+                  "update_continuously": true
+                }
+              },
+              {
+                "title": "Current Flywheel Speed (Rads/sec)",
+                "x": 768.0,
+                "y": 640.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/Shooter/Flywheel/Velocity",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "kP",
+                "x": 1152.0,
+                "y": 768.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Shooter/FlykP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              },
+              {
+                "title": "kD",
+                "x": 1152.0,
+                "y": 768.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Shooter/FlykD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              }
+            ]
+          },
+          {
+            "title": "Metadata",
+            "x": 1536.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 768.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Branch",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/GitBranch",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Build Date",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/BuildDate",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "GitDirty",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/GitDirty",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Swerve",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Swerve",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Vision",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Vision",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Auto Align",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/AutoAlign",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Intake",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Intake",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Shooter",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Shooter",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Hang",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/Hang",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Physics Sim",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealMetadata/PhysicsSim",
+                  "period": 0.06,
+                  "data_type": "string",
+                  "show_submit_button": false
+                }
+              }
+            ]
           }
         ],
         "containers": [
@@ -811,21 +959,9 @@
             }
           },
           {
-            "title": "PhotonAlerts",
-            "x": 0.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 384.0,
-            "type": "Alerts",
-            "properties": {
-              "topic": "/SmartDashboard/PhotonAlerts",
-              "period": 0.06
-            }
-          },
-          {
             "title": "Alliance",
             "x": 0.0,
-            "y": 768.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -841,9 +977,9 @@
           },
           {
             "title": "BatteryVoltage",
-            "x": 1024.0,
-            "y": 256.0,
-            "width": 256.0,
+            "x": 1152.0,
+            "y": 384.0,
+            "width": 384.0,
             "height": 128.0,
             "type": "Voltage View",
             "properties": {
@@ -872,9 +1008,9 @@
             }
           },
           {
-            "title": "Position",
-            "x": 768.0,
-            "y": 384.0,
+            "title": "Intake Position (Radians)",
+            "x": 512.0,
+            "y": 768.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
@@ -886,45 +1022,17 @@
             }
           },
           {
-            "title": "TargetSpeed",
-            "x": 768.0,
+            "title": "Total Current",
+            "x": 1152.0,
             "y": 512.0,
-            "width": 256.0,
+            "width": 384.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "Shooter/TargetSpeed",
+              "topic": "/AdvantageKit/PowerDistribution/TotalCurrent",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": true
-            }
-          },
-          {
-            "title": "FlykD",
-            "x": 1024.0,
-            "y": 384.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "Shooter/FlykD",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": true
-            }
-          },
-          {
-            "title": "FlykP",
-            "x": 1024.0,
-            "y": 512.0,
-            "width": 256.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "Shooter/FlykP",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": true
+              "show_submit_button": false
             }
           }
         ]
