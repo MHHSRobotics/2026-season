@@ -28,7 +28,7 @@ public class MotorIO {
     public static double getTotalSupplyCurrent() {
         double total = 0;
         for (MotorIO motor : allMotors) {
-            total += motor.inputs.supplyCurrent;
+            total += Math.abs(motor.inputs.supplyCurrent);
         }
         return total;
     }
