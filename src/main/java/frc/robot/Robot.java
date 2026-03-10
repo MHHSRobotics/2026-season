@@ -28,6 +28,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.revrobotics.util.StatusLogger;
 import frc.robot.Constants.Mode;
 import frc.robot.util.Alerts;
 
@@ -60,6 +61,13 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
+        Logger.recordMetadata("Swerve", Constants.swerveEnabled ? "true" : "false");
+        Logger.recordMetadata("Vision", Constants.visionEnabled ? "true" : "false");
+        Logger.recordMetadata("Shooter", Constants.shooterEnabled ? "true" : "false");
+        Logger.recordMetadata("Intake", Constants.intakeEnabled ? "true" : "false");
+        Logger.recordMetadata("Hang", Constants.hangEnabled ? "true" : "false");
+        Logger.recordMetadata("PhysicsSim", Constants.physicsSimEnabled ? "true" : "false");
+        Logger.recordMetadata("AutoAlign", Constants.autoAlignEnabled ? "true" : "false");
 
         // Set logging mode depending on the current running mode
         switch (Constants.currentMode) {
@@ -69,8 +77,11 @@ public class Robot extends LoggedRobot {
                 if (!file.exists()) {
                     Alerts.create("Log USB drive not found!", AlertType.kWarning);
                 }
-            case SIM:
                 Logger.addDataReceiver(new WPILOGWriter());
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
+            case SIM:
+                Logger.addDataReceiver(new WPILOGWriter("logs/sim"));
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
             default:
@@ -79,7 +90,7 @@ public class Robot extends LoggedRobot {
                         LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
                 Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
                 Logger.addDataReceiver(
-                        new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
+                        new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replay"))); // Save outputs to a new log
                 break;
         }
 
@@ -87,6 +98,9 @@ public class Robot extends LoggedRobot {
 
         // Disable automatic Hoot logging
         SignalLogger.enableAutoLogging(false);
+
+        // Disable automatic REV logging
+        StatusLogger.disableAutoLogging();
 
         // Adjust loop overrun warning timeout
         try {
@@ -96,6 +110,7 @@ public class Robot extends LoggedRobot {
             watchdog.setTimeout(Constants.loopOverrunWarningTimeout);
         } catch (Exception e) {
             Alerts.create("Failed to disable loop overrun warnings", AlertType.kWarning);
+            e.printStackTrace();
         }
         CommandScheduler.getInstance().setPeriod(Constants.loopOverrunWarningTimeout);
 

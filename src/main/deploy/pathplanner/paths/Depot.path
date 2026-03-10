@@ -1,0 +1,95 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.568679706596268,
+        "y": 6.119547677261632
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.127611565287241,
+        "y": 5.9050865743847645
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.7960111111111112,
+        "y": 6.4029
+      },
+      "prevControl": {
+        "x": 0.9891505919991878,
+        "y": 7.31737552788164
+      },
+      "nextControl": {
+        "x": 0.5910455115783568,
+        "y": 5.432430244316484
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.7801999999999998,
+        "y": 4.950977777777777
+      },
+      "prevControl": {
+        "x": 1.719919373084881,
+        "y": 5.642205496131128
+      },
+      "nextControl": {
+        "x": 1.8019195795578171,
+        "y": 4.701923045110775
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.6282762836185811,
+        "y": 4.190232273838631
+      },
+      "prevControl": {
+        "x": 2.021241394120961,
+        "y": 5.177745159342997
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": -121.37300514010848
+    },
+    {
+      "waypointRelativePos": 2.0,
+      "rotationDegrees": -23.498565675952133
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 90.0
+  },
+  "reversed": false,
+  "folder": "Misc",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.30130561701654
+  },
+  "useDefaultConstraints": true
+}

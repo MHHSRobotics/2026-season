@@ -21,6 +21,7 @@ import frc.robot.util.Alerts;
 // - Arms/flywheels use radians (rad) and radians per second (rad/s)
 // - Elevators use meters (m) and meters per second (m/s)
 public class MotorIO {
+
     @AutoLog
     public static class MotorIOInputs {
         public boolean connected; // Is the motor controller connected
@@ -88,6 +89,10 @@ public class MotorIO {
 
     public String getName() {
         return name;
+    }
+
+    public String getLogPath() {
+        return logPath;
     }
 
     protected MotorIOInputsAutoLogged inputs = new MotorIOInputsAutoLogged();
@@ -247,12 +252,12 @@ public class MotorIO {
     }
 
     // Connects a forward hardware limit switch
-    public void connectForwardLimitSwitch(int id) {
+    public void connectForwardLimitSwitch(BitIO limitSwitch) {
         unsupportedFeature();
     }
 
     // Connects a reverse hardware limit switch
-    public void connectReverseLimitSwitch(int id) {
+    public void connectReverseLimitSwitch(BitIO limitSwitch) {
         unsupportedFeature();
     }
 
@@ -298,13 +303,18 @@ public class MotorIO {
 
     // Tell the motor to use its internal sensor with a gear ratio to the mechanism (unitless). Don't call both this and
     // connectEncoder.
-    public void setGearRatio(double gearRatio) {
+    public void connectInternalSensor(double gearRatio) {
         unsupportedFeature();
     }
 
-    // Tell the motor the absolute offset of the mechanism zero (radians). Do this AFTER connecting the encoder and the
-    // GravityType.
+    // Tell the motor the absolute offset of the mechanism zero (radians). Do this AFTER connecting the encoder.
     public void setOffset(double offset) {
+        unsupportedFeature();
+    }
+
+    // Directly sets the position of the motor sensor. Use for when no encoder is available. TalonFX automatically sets
+    // position to 0 on startup, so you don't need to do that.
+    public void setPosition(double position) {
         unsupportedFeature();
     }
 
