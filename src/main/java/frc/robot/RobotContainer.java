@@ -81,10 +81,9 @@ public class RobotContainer {
 
     private final GameController driveController = new GameController(0, "Driver");
 
-    private final GameController operator =
-            new GameController(1, "Operator");
+    private final GameController operator = new GameController(1, "Operator");
 
-    private final GameController otherController=new GameController(2, "Other");
+    private final GameController otherController = new GameController(2, "Other");
 
     private LoggedNetworkBoolean testEnabled;
     private LoggedNetworkNumber testSpeed;
@@ -427,8 +426,11 @@ public class RobotContainer {
          */
         testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
 
-        driveController.touchpad().or(operator.touchpad()).or(otherController.touchpad()).onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
-                .cancelAll()));
+        driveController
+                .touchpad()
+                .or(operator.touchpad())
+                .or(otherController.touchpad())
+                .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
             driveController.rightMenu().or(otherController.rightMenu()).onTrue(swerveCommands.resetGyro());
@@ -489,42 +491,22 @@ public class RobotContainer {
             }
         }
         if (Constants.intakeEnabled) {
-            otherController
-                    .leftBumper()
-                    .and(() -> !testEnabled.get())
-                    .onTrue(intakeCommands.switchHinge());
-            operator.leftBumper()
-                    .and(() -> !testEnabled.get())
-                    .onTrue(intakeCommands.switchHinge());
+            otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
+            operator.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
 
-            otherController
-                    .leftTrigger()
-                    .and(() -> !testEnabled.get())
-                    .whileTrue(intakeCommands.intake());
-            operator.leftTrigger()
-                    .and(() -> !testEnabled.get())
-                    .whileTrue(intakeCommands.intake());
+            otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
+            operator.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
 
-            otherController
-                    .rightBumper()
-                    .and(() -> !testEnabled.get())
-                    .whileTrue(intakeCommands.outtake());
-            operator.rightBumper()
-                    .and(() -> !testEnabled.get())
-                    .whileTrue(intakeCommands.outtake());
+            otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
+            operator.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
         }
-        if(Constants.shooterEnabled){
+        if (Constants.shooterEnabled) {
             operator.povLeft().whileTrue(shooterCommands.feedForward());
             operator.povRight().whileTrue(shooterCommands.feedReverse());
         }
         if (multiCommands != null) {
-            otherController
-                    .rightTrigger()
-                    .and(() -> !testEnabled.get())
-                    .whileTrue(multiCommands.shoot());
-            operator.rightTrigger()
-                    .and(() -> !testEnabled.get())
-                    .whileTrue(multiCommands.shoot());
+            otherController.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
+            operator.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
         }
     }
 
@@ -703,8 +685,10 @@ public class RobotContainer {
 
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {
-        controllerDisconnected.set(!driveController.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
-        operatorDisconnected.set(!operator.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
+        controllerDisconnected.set(
+                !driveController.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
+        operatorDisconnected.set(
+                !operator.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
     }
 
     // Initialize dashboard auto chooser
