@@ -754,7 +754,7 @@ public class RobotContainer {
                     RobotUtils::onRedAlliance,
                     swerve);
 
-            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
+            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B-BasicV1"));
         }
     }
 
