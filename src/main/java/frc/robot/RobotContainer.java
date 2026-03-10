@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -31,6 +30,7 @@ import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
 import frc.robot.io.EncoderIOCANcoder;
+import frc.robot.io.GameController;
 import frc.robot.io.GyroIO;
 import frc.robot.io.GyroIOPigeon;
 import frc.robot.io.LedIO;
@@ -79,10 +79,10 @@ public class RobotContainer {
 
     private MultiCommands multiCommands;
 
-    private final CommandPS5Controller driveController = new CommandPS5Controller(0);
+    private final GameController driveController = new GameController(0, "Driver");
 
-    private final CommandPS5Controller operator =
-            new CommandPS5Controller(1); // Manual controller for subsystems, for continuous change in PID goal
+    private final GameController operator =
+            new GameController(1, "Operator"); // Manual controller for subsystems, for continuous change in PID goal
 
     private LoggedNetworkBoolean testEnabled;
     private LoggedNetworkBoolean altControls;
@@ -110,7 +110,6 @@ public class RobotContainer {
         configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
-
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
     }
 
@@ -438,8 +437,8 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
-            driveController.options().onTrue(swerveCommands.resetGyro());
-            driveController.create().onTrue(swerveCommands.lock());
+            driveController.rightMenu().onTrue(swerveCommands.resetGyro());
+            driveController.leftMenu().onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
             new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
@@ -449,81 +448,92 @@ public class RobotContainer {
                             () -> Swerve.Constants.swerveFieldCentric.get()));
 
             // Rotation: right stick X controls omega
-            driveController
-                    .axisMagnitudeGreaterThan(2, Swerve.Constants.turnDeadband)
+            new Trigger(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
-            // Aim at hub: circle, L1 in alt controls
+            // Aim at hub: east, leftBumper in alt controls
             driveController
-                    .circle()
+                    .east()
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
             driveController
-                    .L1()
+                    .leftBumper()
                     .and(() -> !testEnabled.get())
                     .and(() -> altControls())
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
             if (Constants.autoAlignEnabled) {
-                // Go to outpost: cross, L2 in alt controls
+                // Go to outpost: south, leftTrigger in alt controls
                 driveController
-                        .cross()
+                        .south()
                         .and(() -> !testEnabled.get())
                         .and(() -> !altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
                 driveController
-                        .L2()
+                        .leftTrigger()
                         .and(() -> !testEnabled.get())
                         .and(() -> altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
 
-                // Go to hang: cross, L2 in alt controls
+                // Go to hang: west, rightTrigger in alt controls
                 driveController
-                        .square()
+                        .west()
                         .and(() -> !testEnabled.get())
                         .and(() -> !altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
                 driveController
-                        .R2()
+                        .rightTrigger()
                         .and(() -> !testEnabled.get())
                         .and(() -> altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
         }
         if (Constants.intakeEnabled) {
-            // Toggle hinge is driver L1 on main controls, operator L1 on alt
+            // Toggle hinge is driver leftBumper on main controls, operator leftBumper on alt
             driveController
-                    .L1()
+                    .leftBumper()
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .onTrue(intakeCommands.switchHinge());
-            operator.L1().and(() -> !testEnabled.get()).and(() -> altControls()).onTrue(intakeCommands.switchHinge());
+            operator.leftBumper()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> altControls())
+                    .onTrue(intakeCommands.switchHinge());
 
-            // Intake is driver L2 on main controls, operator L2 on alt
+            // Intake is driver leftTrigger on main controls, operator leftTrigger on alt
             driveController
-                    .L2()
+                    .leftTrigger()
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .whileTrue(intakeCommands.intake());
-            operator.L2().and(() -> !testEnabled.get()).and(() -> altControls()).whileTrue(intakeCommands.intake());
+            operator.leftTrigger()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> altControls())
+                    .whileTrue(intakeCommands.intake());
 
-            // Outtake is driver R1 on main controls, operator R1 on alt
+            // Outtake is driver rightBumper on main controls, operator rightBumper on alt
             driveController
-                    .R1()
+                    .rightBumper()
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .whileTrue(intakeCommands.outtake());
-            operator.R1().and(() -> !testEnabled.get()).and(() -> altControls()).whileTrue(intakeCommands.outtake());
+            operator.rightBumper()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> altControls())
+                    .whileTrue(intakeCommands.outtake());
         }
         if (multiCommands != null) {
-            // Shoot is driver R2 on main controls, operator R2 on alt
+            // Shoot is driver rightTrigger on main controls, operator rightTrigger on alt
             driveController
-                    .R2()
+                    .rightTrigger()
                     .and(() -> !testEnabled.get())
                     .and(() -> !altControls())
                     .whileTrue(multiCommands.shoot());
-            operator.R2().and(() -> !testEnabled.get()).and(() -> altControls()).whileTrue(multiCommands.shoot());
+            operator.rightTrigger()
+                    .and(() -> !testEnabled.get())
+                    .and(() -> altControls())
+                    .whileTrue(multiCommands.shoot());
         }
     }
 
@@ -549,7 +559,7 @@ public class RobotContainer {
 
             // Manual duty cycle forward test
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
@@ -558,7 +568,7 @@ public class RobotContainer {
 
             // Manual duty cycle backward test
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
@@ -567,7 +577,7 @@ public class RobotContainer {
 
             // Manual pose reset
             driveController
-                    .triangle()
+                    .north()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
@@ -575,7 +585,7 @@ public class RobotContainer {
 
             // PID to (1,1)
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
@@ -583,7 +593,7 @@ public class RobotContainer {
 
             // PID to (0,0)
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("Swerve"))
@@ -594,7 +604,7 @@ public class RobotContainer {
             testSubsystem.addOption("Hang", "Hang");
             // Hang move up test
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Hang"))
@@ -602,7 +612,7 @@ public class RobotContainer {
 
             // Hang move down test
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Hang"))
@@ -615,7 +625,7 @@ public class RobotContainer {
 
             // Flywheel forward test
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("ShooterFly"))
@@ -623,7 +633,7 @@ public class RobotContainer {
 
             // Feed forward test
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("ShooterFeed"))
@@ -631,7 +641,7 @@ public class RobotContainer {
 
             // Feed reverse test
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("ShooterFeed"))
@@ -643,56 +653,56 @@ public class RobotContainer {
             testSubsystem.addOption("IntakeHinge", "IntakeHinge");
 
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Intake"))
                     .whileTrue(intakeCommands.setIntakeSpeed(() -> testSpeed.get()));
 
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Intake"))
                     .whileTrue(intakeCommands.setIntakeSpeed(() -> -testSpeed.get()));
 
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .whileTrue(intakeCommands.setHingeSpeed(() -> testSpeed.get()));
 
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .whileTrue(intakeCommands.setHingeSpeed(() -> -testSpeed.get()));
 
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.hingeUp());
 
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.hingeDown());
 
             driveController
-                    .cross()
+                    .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PIDChange"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .whileTrue(intakeCommands.changeGoal(() -> testSpeed.get() / 10));
 
             driveController
-                    .circle()
+                    .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PIDChange"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
@@ -767,6 +777,9 @@ public class RobotContainer {
     }
 
     public void periodic() {
+        driveController.detectType();
+        operator.detectType();
+
         if (Constants.swerveEnabled) {
             publisher.publish(); // Publish 3D robot data
         }
