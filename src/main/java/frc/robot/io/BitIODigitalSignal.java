@@ -26,6 +26,8 @@ public class BitIODigitalSignal extends BitIO {
     @Override
     public void update() {
         inputs.value = Constants.currentMode == Mode.REAL ? input.get() : simValue;
+
+        super.update();
     }
 
     @Override

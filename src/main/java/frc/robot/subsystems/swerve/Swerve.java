@@ -11,6 +11,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -40,7 +41,6 @@ import frc.robot.io.CameraIO.CameraIOInputs;
 import frc.robot.io.GyroIO;
 import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
-import frc.robot.util.RobotUtils;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -103,7 +103,8 @@ public class Swerve extends SubsystemBase {
         public static final LoggedNetworkNumber driveKA = new LoggedNetworkNumber("Swerve/DriveKA", 0);
 
         // Steer motor PID
-        public static final LoggedNetworkNumber steerKP = new LoggedNetworkNumber("Swerve/SteerKP", 20);
+        public static final LoggedNetworkNumber steerKP =
+                new LoggedNetworkNumber("Swerve/SteerKP", frc.robot.Constants.physicsSimEnabled ? 10 : 20);
         public static final LoggedNetworkNumber steerKI = new LoggedNetworkNumber("Swerve/SteerKI", 0);
         public static final LoggedNetworkNumber steerKD = new LoggedNetworkNumber("Swerve/SteerKD", 0);
         public static final LoggedNetworkNumber steerKS = new LoggedNetworkNumber("Swerve/SteerKS", 0);
@@ -116,9 +117,18 @@ public class Swerve extends SubsystemBase {
         public static final LoggedNetworkNumber translationKI = new LoggedNetworkNumber("Swerve/TransKI", 0);
 
         // Auto align rotation PID
-        public static final LoggedNetworkNumber rotationKP = new LoggedNetworkNumber("Swerve/RotKP", 0.4);
+        public static final LoggedNetworkNumber rotationKP = new LoggedNetworkNumber("Swerve/RotKP", 5);
         public static final LoggedNetworkNumber rotationKD = new LoggedNetworkNumber("Swerve/RotKD", 0);
         public static final LoggedNetworkNumber rotationKI = new LoggedNetworkNumber("Swerve/RotKI", 0);
+
+        // Hub center position in blue alliance coordinates (meters)
+        public static final FieldPose2d hubPosition = new FieldPose2d(4.622, 4.035, 0);
+
+        // Outpost bot position in blue alliance coordinates (meters)
+        public static final FieldPose2d outpostPosition = new FieldPose2d(0.44, 0.58, Units.degreesToRadians(0));
+
+        // Hang bot position in blue alliance coordinates (meters)
+        public static final FieldPose2d hangPosition = new FieldPose2d(1.555, 3.29, Units.degreesToRadians(90));
 
         public static final double simSwerveError =
                 0; // Simulated error in swerve odometry, set to 0 for no error, 0.1 for some error
@@ -137,11 +147,19 @@ public class Swerve extends SubsystemBase {
         public static final double visionXYStdDevDistanceMultiplier = 0.1; // multiplied by distance²
         public static final double visionThetaStdDevDistanceMultiplier = 0.2; // multiplied by distance
 
-        public static final Transform3d bratPose = new Transform3d(
-                new Translation3d(-0.193, -0.288, 0.31), new Rotation3d(0, 0, Units.degreesToRadians(200)));
+        public static final Transform3d frontCamPose = new Transform3d(
+                new Translation3d(0.165, -0.318, 0.498), new Rotation3d(0, Units.degreesToRadians(-25), 0));
 
-        public static final Transform3d blatPose = new Transform3d(
-                new Translation3d(-0.208, 0.13, 0.33), new Rotation3d(0, 0, Units.degreesToRadians(210)));
+        public static final Transform3d rightCamPose = new Transform3d(
+                new Translation3d(-0.19, -0.286, 0.486),
+                new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-90)));
+
+        // public static final Transform3d hubRightCamPose = new Transform3d(
+        //         new Translation3d(0, -0.3, 0.5),
+        //         new Rotation3d(0, Units.degreesToRadians(-20), Units.degreesToRadians(-90)));
+
+        // public static final Transform3d hangCamPose =
+        //         new Transform3d(new Translation3d(0, -0.33, 0.3), new Rotation3d(0, 0, Units.degreesToRadians(-90)));
 
         // How many robot pose measurements to store per camera
         public static final int maxMeasurements = 8;
@@ -169,20 +187,11 @@ public class Swerve extends SubsystemBase {
     private final PIDController yController;
     private final ProfiledPIDController thetaController;
 
-    // Target pose for auto-align
-    private FieldPose2d targetPose = new FieldPose2d();
-
-    // Target dx, dy, dtheta for manual control
+    // Target dx, dy, dtheta for manual control (set by commands via setTranslation/setRotation)
     private double dx, dy, dtheta;
+    private boolean fieldCentric;
 
-    // Whether manual position control is field-oriented
-    private boolean fieldOriented = true;
-
-    // Whether PID is controlling position or manual is
-    private boolean pidPosition;
-
-    // Whether PID is controlling rotation or manual is
-    private boolean pidRotation;
+    private boolean pidPosition, pidRotation; // Whether PID position/rotation are currently enabled
 
     // Whether the bot is currently in the X position
     private boolean locked;
@@ -229,6 +238,11 @@ public class Swerve extends SubsystemBase {
 
         // Enable vision alert
         noVision.set(true);
+
+        dx = 0;
+        dy = 0;
+        dtheta = 0;
+        fieldCentric = false;
     }
 
     // Find out where the modules are mounted on the robot relative to the center (meters)
@@ -289,7 +303,7 @@ public class Swerve extends SubsystemBase {
     }
 
     // Tell the pose estimator to reset to a known field position (meters, radians)
-    public void setPose(Pose2d newPose) {
+    public void resetPose(Pose2d newPose) {
         estimator.resetPosition(gyroAngle, getModulePositions(), newPose);
     }
 
@@ -313,7 +327,7 @@ public class Swerve extends SubsystemBase {
     }
 
     // Tell the modules to reach a target chassis speed: vx (m/s), vy (m/s), omega (rad/s)
-    private void setChassisSpeeds(ChassisSpeeds speeds) {
+    public void setChassisSpeeds(ChassisSpeeds speeds) {
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, frc.robot.Constants.loopTime);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, Constants.maxLinearSpeedMetersPerSec);
@@ -322,67 +336,50 @@ public class Swerve extends SubsystemBase {
         }
     }
 
+    public ChassisSpeeds getChassisSpeeds() {
+        SwerveModuleState[] states = new SwerveModuleState[4];
+        for (int i = 0; i < modules.length; i++) {
+            states[i] = modules[i].getState();
+        }
+        return kinematics.toChassisSpeeds(states);
+    }
+
     // Make the modules point in an X pattern so it's harder to push the robot.
     public void lock() {
         locked = true;
     }
 
-    // Disables PID and stops movement
-    public void stop() {
-        setPositionOutput(0, 0);
-        setRotationOutput(0);
-    }
-
-    // Set manual control for position
-    public void setPositionOutput(double dx, double dy) {
+    // Set translation output (m/s) — called by commands each loop
+    public void setTranslation(double dx, double dy, boolean fieldCentric) {
         locked = false;
-        pidPosition = false;
         this.dx = dx;
         this.dy = dy;
+        this.fieldCentric = fieldCentric;
     }
 
-    public boolean getPositionPIDSetting() {
-        return pidPosition;
-    }
-
-    public boolean getRotationPIDSetting() {
-        return pidRotation;
-    }
-
-    // Set manual control for rotation
-    public void setRotationOutput(double dtheta) {
+    // Set rotation output (rad/s) — called by commands each loop
+    public void setRotation(double dtheta) {
         locked = false;
-        pidRotation = false;
         this.dtheta = dtheta;
     }
 
-    // Set PID control for position
-    public void setPositionTarget(double x, double y) {
-        locked = false;
-        pidPosition = true;
-        Pose2d lastPose = targetPose.getOnBlue();
-        targetPose = new FieldPose2d(new Pose2d(x, y, lastPose.getRotation()));
+    // Stops swerve movement
+    public void stop() {
+        setTranslation(0, 0, false);
+        setRotation(0);
     }
 
-    // Set PID control for rotation
-    public void setRotationTarget(double theta) {
-        locked = false;
-        pidRotation = true;
-        Pose2d lastPose = targetPose.getOnBlue();
-        targetPose = new FieldPose2d(new Pose2d(lastPose.getTranslation(), Rotation2d.fromRadians(theta)));
+    // Getters for PID controllers (used by SwerveCommands for auto-align)
+    public PIDController getXController() {
+        return xController;
     }
 
-    // Set the target pose (just position and rotation in one method)
-    public void setPoseTarget(FieldPose2d pose) {
-        locked = false;
-        pidPosition = true;
-        pidRotation = true;
-        targetPose = pose;
+    public PIDController getYController() {
+        return yController;
     }
 
-    // Sets whether manual position control should be field-oriented
-    public void setFieldOriented(boolean fieldOriented) {
-        this.fieldOriented = fieldOriented;
+    public ProfiledPIDController getThetaController() {
+        return thetaController;
     }
 
     // Add a vision measurement with the given pose, timestamp, and standard deviations
@@ -426,15 +423,22 @@ public class Swerve extends SubsystemBase {
         return cameras;
     }
 
+    public void setPIDPosition(boolean pidPosition) {
+        this.pidPosition = pidPosition;
+    }
+
+    public void setPIDRotation(boolean pidRotation) {
+        this.pidRotation = pidRotation;
+    }
+
     // Gets translation error to the goal in meters
     public double getTranslationError() {
-        return getPose().getTranslation().getDistance(targetPose.get().getTranslation());
+        return pidPosition ? Math.hypot(xController.getError(), yController.getError()) : 0;
     }
 
     // Gets rotation error to the goal in radians
     public double getRotationError() {
-        return Math.abs(
-                getPose().getRotation().minus(targetPose.get().getRotation()).getRadians());
+        return pidRotation ? Math.abs(thetaController.getPositionError()) : 0;
     }
 
     @Override
@@ -460,8 +464,6 @@ public class Swerve extends SubsystemBase {
         yController.setI(Constants.translationKI.get());
         thetaController.setI(Constants.rotationKI.get());
 
-        double xSpeed = 0, ySpeed = 0;
-
         // Set swerve module targets depending on current settings
         if (locked) {
             // Point each module toward the robot center (creates X pattern that resists pushing)
@@ -470,43 +472,29 @@ public class Swerve extends SubsystemBase {
                 modules[i].runSetpoint(new SwerveModuleState(0, lockAngle));
             }
         } else {
-
-            boolean positionFieldOriented = true;
-            if (pidPosition) {
-                xSpeed =
-                        xController.calculate(getPose().getX(), targetPose.get().getX());
-                ySpeed =
-                        yController.calculate(getPose().getY(), targetPose.get().getY());
-            } else {
-                xSpeed = dx;
-                ySpeed = dy;
-                if (!fieldOriented) {
-                    positionFieldOriented = false;
-                } else if (RobotUtils.onRedAlliance()) {
-                    xSpeed *= -1;
-                    ySpeed *= -1;
-                }
-            }
-            double thetaSpeed;
-            if (pidRotation) {
-                thetaSpeed = thetaController.calculate(
-                        getPose().getRotation().getRadians(),
-                        targetPose.get().getRotation().getRadians());
-            } else {
-                thetaSpeed = dtheta;
-            }
-            setSpeeds(xSpeed, ySpeed, thetaSpeed, positionFieldOriented);
+            setSpeeds(dx, dy, dtheta, fieldCentric);
         }
 
         Logger.recordOutput("Swerve/Locked", locked);
-        Logger.recordOutput("Swerve/dx", xSpeed);
-        Logger.recordOutput("Swerve/dy", ySpeed);
+        Logger.recordOutput("Swerve/dx", dx);
+        Logger.recordOutput("Swerve/dy", dy);
         Logger.recordOutput("Swerve/dtheta", dtheta);
-        Logger.recordOutput("Swerve/TargetPose", targetPose.get());
         Logger.recordOutput("Swerve/PoseTranslationError", getTranslationError());
         Logger.recordOutput("Swerve/PoseRotationError", getRotationError());
         Logger.recordOutput("Swerve/PIDPosition", pidPosition);
         Logger.recordOutput("Swerve/PIDRotation", pidRotation);
+        Pose2d currentPose = getPose();
+        Logger.recordOutput("Swerve/EstimatedPose", getPose());
+        Logger.recordOutput("Swerve/Rotation", getRotation());
+        double targetX = pidPosition ? xController.getSetpoint() : currentPose.getX();
+        double targetY = pidPosition ? yController.getSetpoint() : currentPose.getY();
+        double targetTheta = pidRotation
+                ? thetaController.getSetpoint().position
+                : currentPose.getRotation().getRadians();
+        Pose2d targetPose = new Pose2d(targetX, targetY, Rotation2d.fromRadians(targetTheta));
+        Logger.recordOutput("Swerve/TargetPose", targetPose);
+        Transform2d hubTrans = currentPose.minus(Constants.hubPosition.get());
+        Logger.recordOutput("Swerve/DistanceFromHub", Math.hypot(hubTrans.getX(), hubTrans.getY()));
 
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < modules.length; i++) {
@@ -520,8 +508,6 @@ public class Swerve extends SubsystemBase {
         }
         Logger.recordOutput("Swerve/TargetStates", targetStates);
         Logger.recordOutput("Swerve/TargetChassisSpeeds", kinematics.toChassisSpeeds(targetStates));
-        Logger.recordOutput("Swerve/EstimatedPose", getPose());
-        Logger.recordOutput("Swerve/Rotation", getRotation());
 
         // Get measurements from all connected cameras and add them to the pose estimator
         for (CameraIO cam : cameras) {

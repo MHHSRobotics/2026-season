@@ -27,6 +27,10 @@ public class BitIO {
         return name;
     }
 
+    public String getLogPath() {
+        return logPath;
+    }
+
     protected BitIOInputsAutoLogged inputs = new BitIOInputsAutoLogged();
 
     public void update() {

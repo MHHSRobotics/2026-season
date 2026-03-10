@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 import frc.robot.subsystems.shooter.Shooter;
 
@@ -12,19 +14,28 @@ public class ShooterCommands {
         this.shooter = shooter;
     }
 
+    public Command setFlySpeed(DoubleSupplier speed) {
+        return Commands.runEnd(() -> shooter.setFlyTargetSpeed(speed.getAsDouble()), () -> shooter.flyStop())
+                .withName("set fly speed");
+    }
+
     public Command flyShoot() {
-        return new InstantCommand(() -> shooter.flyShoot());
+        return Commands.runEnd(() -> shooter.flyShoot(), () -> shooter.flyStop())
+                .withName("fly shoot");
     }
 
-    public Command flyStop() {
-        return new InstantCommand(() -> shooter.flyStop());
+    public Command setFeedSpeed(DoubleSupplier speed) {
+        return Commands.runEnd(() -> shooter.setFeedSpeed(speed.getAsDouble()), () -> shooter.feedStop())
+                .withName("set feed speed");
     }
 
-    public Command feedShoot() {
-        return new InstantCommand(() -> shooter.feedShoot());
+    public Command feedForward() {
+        return Commands.startEnd(() -> shooter.feedShoot(), () -> shooter.feedStop())
+                .withName("feed shoot");
     }
 
-    public Command feedStop() {
-        return new InstantCommand(() -> shooter.feedStop());
+    public Command feedReverse() {
+        return Commands.startEnd(() -> shooter.feedReverse(), () -> shooter.feedStop())
+                .withName("feed reverse");
     }
 }

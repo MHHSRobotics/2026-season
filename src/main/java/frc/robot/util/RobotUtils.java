@@ -7,9 +7,15 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 // Utility functions used it multiple places
 public class RobotUtils {
+    public static Command schedule(Command cmd) {
+        return Commands.runOnce(() -> CommandScheduler.getInstance().schedule(cmd));
+    }
     /**
      * Checks if the robot is on the red alliance.
      *
@@ -23,22 +29,64 @@ public class RobotUtils {
         return false;
     }
 
-    // Mirror a Pose2d across the field depending on field symmetry (C2 = rotate 180°, D2 = reflect across center line)
-    public static Pose2d invert(Pose2d pose) {
+    // Inverts the X component of a pose
+    public static double invertX(double x) {
+        return Field.fieldLength - x;
+    }
+
+    // Invert the X component of a pose depending on alliance
+    public static double invertXToAlliance(double x) {
+        if (onRedAlliance()) {
+            return invertX(x);
+        } else {
+            return x;
+        }
+    }
+
+    // Inverts the Y component of a pose
+    public static double invertY(double y) {
         switch (Field.symm) {
             case C2:
-                // C2 symmetry: rotate 180° around field center (like spinning the field upside down)
-                return new Pose2d(
-                        Field.fieldLength - pose.getX(),
-                        Field.fieldWidth - pose.getY(),
-                        pose.getRotation().rotateBy(Rotation2d.k180deg));
-            default: // D2 symmetry
-                // D2 symmetry: reflect across the field centerline (like flipping the field left-to-right)
-                return new Pose2d(
-                        Field.fieldLength - pose.getX(),
-                        pose.getY(), // Y stays the same for reflection symmetry
-                        Rotation2d.fromRadians(Math.PI - pose.getRotation().getRadians())); // Reflect the angle
+                return Field.fieldWidth - y;
+            default:
+                return y;
         }
+    }
+
+    // Invert the Y component of a pose depending on alliance
+    public static double invertYToAlliance(double y) {
+        if (onRedAlliance()) {
+            return invertY(y);
+        } else {
+            return y;
+        }
+    }
+
+    // Inverts the theta component of a pose
+    public static double invertTheta(double theta) {
+        switch (Field.symm) {
+            case C2:
+                return theta + Math.PI;
+            default:
+                return Math.PI - theta;
+        }
+    }
+
+    // Invert the Y component of a pose depending on alliance
+    public static double invertThetaToAlliance(double theta) {
+        if (onRedAlliance()) {
+            return invertTheta(theta);
+        } else {
+            return theta;
+        }
+    }
+
+    // Mirror a Pose2d across the field depending on field symmetry (C2 = rotate 180°, D2 = reflect across center line)
+    public static Pose2d invert(Pose2d pose) {
+        return new Pose2d(
+                invertX(pose.getX()),
+                invertY(pose.getY()),
+                Rotation2d.fromRadians(invertTheta(pose.getRotation().getRadians())));
     }
 
     // Mirror a Pose2d if we're on the red alliance (blue alliance uses coordinates as-is)

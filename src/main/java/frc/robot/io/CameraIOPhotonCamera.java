@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 
+import org.littletonrobotics.junction.Logger;
+
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.subsystems.swerve.Swerve;
@@ -96,6 +98,11 @@ public class CameraIOPhotonCamera extends CameraIO {
         inputs.tagCounts = tagCountsList.stream().mapToInt(Integer::intValue).toArray();
 
         super.update();
+
+        Logger.recordOutput(getLogPath() + "/Transform", robotToCamera);
+        Logger.recordOutput(getLogPath() + "/FOV", fov);
+        Logger.recordOutput(getLogPath() + "/ResWidth", resWidth);
+        Logger.recordOutput(getLogPath() + "/ResHeight", resHeight);
     }
 
     @Override

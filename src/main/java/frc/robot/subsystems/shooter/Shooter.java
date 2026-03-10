@@ -2,69 +2,124 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import frc.robot.io.MotorIO;
 
 public class Shooter extends SubsystemBase {
     public static class Constants {
         // Subsystem Constants
-        public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", false);
+        public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", true);
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
+
+        public static final LoggedNetworkNumber flySpeed =
+                new LoggedNetworkNumber("Shooter/TargetSpeed", 500); // Target velocity in rad/s
+
+        public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 1); // kP
+        public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
 
         public static final double feedSpeed = 0.5;
 
-        // flyConstants
-        public static final double flyGearRatio = 20;
+        public static final boolean flyInverted = false;
+        public static final boolean flyInverted2 = true;
+        public static final boolean feedInverted = false;
 
-        public static final double flySpeed = 1;
+        public static final int flyMotorId = 16;
+        public static final int flyMotorId2 = 17;
+        public static final int feedMotorId = 18;
 
-        public static final int feedMotorId = 14;
-        public static final int flyMotorId = 15;
+        public static final double feedRatio = 1;
+        public static final double flyRatio = 1;
+
+        // Flywheel speed tolerance as a relative factor of speed
+        public static final double tol = 0.1;
+
+        // Used for simulation only
+        public static final double feedInertia = 0.000066; // Inertia of feed wheels in kg m^2
+        public static final double flyInertia = 0.005; // Inertia of fly wheels in kg m^2
     }
 
-    private MotorIO feed;
-    private MotorIO fly;
+    private MotorIO feed, fly, fly2;
 
-    public Shooter(MotorIO feedIO, MotorIO flyIO) {
-        this.feed = feedIO;
-        this.fly = flyIO;
+    private double targetSpeed;
 
-        fly.connectInternalSensor(Constants.flyGearRatio);
+    public Shooter(MotorIO feedIO, MotorIO flyIO, MotorIO flyIO2) {
+        feed = feedIO;
+        fly = flyIO;
+        fly2 = flyIO2;
+
+        fly.setInverted(Constants.flyInverted);
+        fly.connectInternalSensor(Constants.flyRatio);
+        fly2.follow(Constants.flyMotorId, Constants.flyInverted ^ Constants.flyInverted2);
+        feed.setInverted(Constants.feedInverted);
+        feed.connectInternalSensor(Constants.feedRatio);
     }
 
-    public void setLocked(boolean locked) {
+    public double getFlyVelocity() {
+        return fly.getInputs().velocity;
+    }
+
+    private void setLocked(boolean locked) {
         feed.setBraking(locked);
         fly.setBraking(locked);
     }
 
-    public void setDisabled(boolean disabled) {
+    private void setDisabled(boolean disabled) {
         feed.setDisabled(disabled);
         fly.setDisabled(disabled);
     }
 
-    public void feedShoot() {
-        feed.setDutyCycle(Constants.feedSpeed);
+    public void setFlyTargetSpeed(double speed) {
+        targetSpeed = speed;
     }
 
-    public void feedStop() {
-        feed.setDutyCycle(0);
+    public boolean atTargetSpeed() {
+        return Math.abs(getFlyVelocity() - targetSpeed) / targetSpeed < Constants.tol;
     }
 
     public void flyShoot() {
-        fly.setDutyCycle(Constants.flySpeed);
+        setFlyTargetSpeed(Constants.flySpeed.get());
     }
 
     public void flyStop() {
-        fly.setDutyCycle(0);
+        setFlyTargetSpeed(0);
+    }
+
+    public void setFeedSpeed(double speed) {
+        feed.setDutyCycle(speed);
+    }
+
+    public void feedShoot() {
+        setFeedSpeed(Constants.feedSpeed);
+    }
+
+    public void feedReverse() {
+        setFeedSpeed(-Constants.feedSpeed);
+    }
+
+    public void feedStop() {
+        setFeedSpeed(0);
     }
 
     @Override
     public void periodic() {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
+        if (targetSpeed == 0) {
+            fly.coast();
+        } else {
+            fly.setVelocityWithCurrent(targetSpeed);
+        }
+        fly.setkP(Constants.flykP.get());
+        fly.setkD(Constants.flykD.get());
 
         fly.update();
+        fly2.update();
         feed.update();
+
+        Logger.recordOutput("Shooter/TargetSpeed", targetSpeed);
+        Logger.recordOutput("Shooter/AtTarget", atTargetSpeed());
     }
 }
