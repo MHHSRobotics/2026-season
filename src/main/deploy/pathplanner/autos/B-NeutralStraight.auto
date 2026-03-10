@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "M 1"
+            "pathName": "B-NeutralStraight-1"
           }
         },
         {
@@ -37,7 +37,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "M 2"
+            "pathName": "B-NeutralStraight-2"
           }
         },
         {
@@ -67,7 +67,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "M 3"
+            "pathName": "B-NeutralStraight-3"
           }
         },
         {
@@ -111,7 +111,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "M 4"
+            "pathName": "B-NeutralStraight-4"
           }
         },
         {

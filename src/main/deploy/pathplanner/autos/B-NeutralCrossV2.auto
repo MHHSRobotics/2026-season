@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Cat 1"
+                  "pathName": "B-NeutralCrossV2-1"
                 }
               }
             ]
@@ -39,7 +39,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Cat 2"
+            "pathName": "B-NeutralCrossV2-2"
           }
         },
         {
@@ -64,7 +64,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Cat 3"
+            "pathName": "B-NeutralCrossV2-3"
           }
         },
         {
@@ -95,7 +95,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Cat 4"
+            "pathName": "B-NeutralCrossV2-4"
           }
         }
       ]
