@@ -447,6 +447,17 @@ public class RobotContainer {
             new Trigger(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
+            // Same controls for operator
+            new Trigger(() -> Math.hypot(operator.getLeftX(), operator.getLeftY())
+                            > Swerve.Constants.moveDeadband)
+                    .onTrue(swerveCommands.drive(
+                            () -> -operator.getLeftY(),
+                            () -> -operator.getLeftX(),
+                            () -> Swerve.Constants.swerveFieldCentric.get()));
+
+            new Trigger(() -> Math.abs(operator.getRightX()) > Swerve.Constants.turnDeadband)
+                    .onTrue(swerveCommands.steer(() -> -operator.getRightX()));
+
             // Same controls for other controller
             new Trigger(() -> Math.hypot(otherController.getLeftX(), otherController.getLeftY())
                             > Swerve.Constants.moveDeadband)
