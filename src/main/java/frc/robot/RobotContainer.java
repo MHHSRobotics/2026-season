@@ -82,10 +82,11 @@ public class RobotContainer {
     private final GameController driveController = new GameController(0, "Driver");
 
     private final GameController operator =
-            new GameController(1, "Operator"); // Manual controller for subsystems, for continuous change in PID goal
+            new GameController(1, "Operator");
+
+    private final GameController otherController=new GameController(2, "Other");
 
     private LoggedNetworkBoolean testEnabled;
-    private LoggedNetworkBoolean altControls;
     private LoggedNetworkNumber testSpeed;
     private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
@@ -416,10 +417,6 @@ public class RobotContainer {
         }
     }
 
-    private boolean altControls() {
-        return altControls.get() ? true : DriverStation.isFMSAttached();
-    }
-
     private void configureBindings() {
         /* ---- Main controller bindings ---- */
         /*
@@ -429,16 +426,13 @@ public class RobotContainer {
          * Touchpad: cancel all commands
          */
         testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
-        altControls = new LoggedNetworkBoolean("AltControlsEnabled", false);
 
-        driveController.touchpad().onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
+        driveController.touchpad().or(operator.touchpad()).or(otherController.touchpad()).onTrue(Commands.runOnce(() -> CommandScheduler.getInstance()
                 .cancelAll()));
-        operator.touchpad()
-                .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
-            driveController.rightMenu().onTrue(swerveCommands.resetGyro());
-            driveController.leftMenu().onTrue(swerveCommands.lock());
+            driveController.rightMenu().or(otherController.rightMenu()).onTrue(swerveCommands.resetGyro());
+            driveController.leftMenu().or(otherController.rightMenu()).onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
             new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
@@ -451,88 +445,85 @@ public class RobotContainer {
             new Trigger(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
-            // Aim at hub: east, leftBumper in alt controls
-            driveController
+            // Same controls for other controller
+            new Trigger(() -> Math.hypot(otherController.getLeftX(), otherController.getLeftY())
+                            > Swerve.Constants.moveDeadband)
+                    .onTrue(swerveCommands.drive(
+                            () -> -otherController.getLeftY(),
+                            () -> -otherController.getLeftX(),
+                            () -> Swerve.Constants.swerveFieldCentric.get()));
+
+            new Trigger(() -> Math.abs(otherController.getRightX()) > Swerve.Constants.turnDeadband)
+                    .onTrue(swerveCommands.steer(() -> -otherController.getRightX()));
+
+            // Aim at hub: leftBumper on drive, east on other
+            otherController
                     .east()
                     .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
             driveController
                     .leftBumper()
                     .and(() -> !testEnabled.get())
-                    .and(() -> altControls())
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
             if (Constants.autoAlignEnabled) {
-                // Go to outpost: south, leftTrigger in alt controls
-                driveController
+                // Go to outpost: leftTrigger on drive, south on other
+                otherController
                         .south()
                         .and(() -> !testEnabled.get())
-                        .and(() -> !altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
                 driveController
                         .leftTrigger()
                         .and(() -> !testEnabled.get())
-                        .and(() -> altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
 
-                // Go to hang: west, rightTrigger in alt controls
-                driveController
+                // Go to hang: rightTrigger on drive, west on other
+                otherController
                         .west()
                         .and(() -> !testEnabled.get())
-                        .and(() -> !altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
                 driveController
                         .rightTrigger()
                         .and(() -> !testEnabled.get())
-                        .and(() -> altControls())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
         }
         if (Constants.intakeEnabled) {
-            // Toggle hinge is driver leftBumper on main controls, operator leftBumper on alt
-            driveController
+            otherController
                     .leftBumper()
                     .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
                     .onTrue(intakeCommands.switchHinge());
             operator.leftBumper()
                     .and(() -> !testEnabled.get())
-                    .and(() -> altControls())
                     .onTrue(intakeCommands.switchHinge());
 
-            // Intake is driver leftTrigger on main controls, operator leftTrigger on alt
-            driveController
+            otherController
                     .leftTrigger()
                     .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
                     .whileTrue(intakeCommands.intake());
             operator.leftTrigger()
                     .and(() -> !testEnabled.get())
-                    .and(() -> altControls())
                     .whileTrue(intakeCommands.intake());
 
-            // Outtake is driver rightBumper on main controls, operator rightBumper on alt
-            driveController
+            otherController
                     .rightBumper()
                     .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
                     .whileTrue(intakeCommands.outtake());
             operator.rightBumper()
                     .and(() -> !testEnabled.get())
-                    .and(() -> altControls())
                     .whileTrue(intakeCommands.outtake());
         }
+        if(Constants.shooterEnabled){
+            operator.povLeft().whileTrue(shooterCommands.feedForward());
+            operator.povRight().whileTrue(shooterCommands.feedReverse());
+        }
         if (multiCommands != null) {
-            // Shoot is driver rightTrigger on main controls, operator rightTrigger on alt
-            driveController
+            otherController
                     .rightTrigger()
                     .and(() -> !testEnabled.get())
-                    .and(() -> !altControls())
                     .whileTrue(multiCommands.shoot());
             operator.rightTrigger()
                     .and(() -> !testEnabled.get())
-                    .and(() -> altControls())
                     .whileTrue(multiCommands.shoot());
         }
     }
@@ -712,8 +703,8 @@ public class RobotContainer {
 
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {
-        controllerDisconnected.set(!driveController.isConnected() && Constants.currentMode != Mode.SIM);
-        operatorDisconnected.set(!operator.isConnected() && Constants.currentMode != Mode.SIM && altControls());
+        controllerDisconnected.set(!driveController.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
+        operatorDisconnected.set(!operator.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
     }
 
     // Initialize dashboard auto chooser

@@ -17,7 +17,7 @@ public class LEDCommands {
     }
 
     public Command setColor(Supplier<RGBWColor> color) {
-        return Commands.runEnd(() -> led.setColor(color.get()), () -> led.setColor(new RGBWColor()))
+        return Commands.runEnd(() -> led.setColor(color.get()), () -> led.setColor(new RGBWColor()), led)
                 .withName("led set color");
     }
 
