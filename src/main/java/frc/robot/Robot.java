@@ -77,8 +77,11 @@ public class Robot extends LoggedRobot {
                 if (!file.exists()) {
                     Alerts.create("Log USB drive not found!", AlertType.kWarning);
                 }
-            case SIM:
                 Logger.addDataReceiver(new WPILOGWriter());
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
+            case SIM:
+                Logger.addDataReceiver(new WPILOGWriter("logs/sim"));
                 Logger.addDataReceiver(new NT4Publisher());
                 break;
             default:
@@ -87,7 +90,7 @@ public class Robot extends LoggedRobot {
                         LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
                 Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
                 Logger.addDataReceiver(
-                        new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
+                        new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replay"))); // Save outputs to a new log
                 break;
         }
 
