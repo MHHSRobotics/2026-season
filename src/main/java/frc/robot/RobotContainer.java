@@ -14,17 +14,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import frc.robot.Constants.Mode;
-import frc.robot.commands.HangCommands;
-import frc.robot.commands.IntakeCommands;
-import frc.robot.commands.LEDCommands;
-import frc.robot.commands.MultiCommands;
-import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
 import frc.robot.io.CameraIOPhotonCamera;
@@ -33,19 +23,9 @@ import frc.robot.io.EncoderIOCANcoder;
 import frc.robot.io.GameController;
 import frc.robot.io.GyroIO;
 import frc.robot.io.GyroIOPigeon;
-import frc.robot.io.LedIO;
-import frc.robot.io.LedIOCANdle;
 import frc.robot.io.MotorIO;
 import frc.robot.io.MotorIOTalonFX;
 import frc.robot.network.RobotPublisher;
-import frc.robot.subsystems.hang.Hang;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakePhysicsSim;
-import frc.robot.subsystems.intake.IntakeSim;
-import frc.robot.subsystems.leds.LED;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterPhysicsSim;
-import frc.robot.subsystems.shooter.ShooterSim;
 import frc.robot.subsystems.swerve.GyroSim;
 import frc.robot.subsystems.swerve.SimpleSwerveSim;
 import frc.robot.subsystems.swerve.Swerve;
@@ -57,27 +37,15 @@ import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
-import frc.robot.util.Alerts;
 import frc.robot.util.FieldPose2d;
-import frc.robot.util.RobotUtils;
 
 public class RobotContainer {
     // Subsystems
     private Swerve swerve;
     private SwerveTranslation swerveTranslation;
     private SwerveRotation swerveRotation;
-    private Hang hang;
-    private Intake intake;
-    private Shooter shooter;
-    private LED led;
 
     private SwerveCommands swerveCommands;
-    private HangCommands hangCommands;
-    private IntakeCommands intakeCommands;
-    private ShooterCommands shooterCommands;
-    private LEDCommands ledCommands;
-
-    private MultiCommands multiCommands;
 
     private final GameController driveController = new GameController(0, "Driver");
 
@@ -106,8 +74,6 @@ public class RobotContainer {
         if (!DriverStation.isFMSAttached()) {
             configureTestBindings();
         }
-
-        configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
@@ -289,130 +255,11 @@ public class RobotContainer {
                 }
             }
         }
-
-        if (Constants.shooterEnabled) {
-            MotorIO feedMotor, flyMotor, flyMotor2;
-            switch (Constants.currentMode) {
-                // If in REAL or SIM mode, use MotorIOTalonFX for motors, EncoderIOCANcoder for encoders, and
-                // GyroIOPigeon for the gyro
-                case REAL:
-                case SIM:
-                    feedMotor = new MotorIOTalonFX(
-                            Shooter.Constants.feedMotorId, Constants.defaultBus, "shooter feed motor", "Shooter/Feed");
-                    flyMotor = new MotorIOTalonFX(
-                            Shooter.Constants.flyMotorId,
-                            Constants.defaultBus,
-                            "shooter fly motor",
-                            "Shooter/Flywheel");
-                    flyMotor2 = new MotorIOTalonFX(
-                            Shooter.Constants.flyMotorId2,
-                            Constants.defaultBus,
-                            "shooter fly motor 2",
-                            "Shooter/Flywheel2");
-                    break;
-                default:
-                    feedMotor = new MotorIO("shooter feed motor", "Shooter/Feed");
-                    flyMotor = new MotorIO("shooter fly motor", "Shooter/Flywheel");
-                    flyMotor2 = new MotorIO("shooter fly motor 2", "Shooter/Flywheel2");
-                    break;
-            }
-            shooter = new Shooter(feedMotor, flyMotor, flyMotor2);
-
-            if (Constants.currentMode == Mode.SIM) {
-                if (!Constants.enablePhysicsSim) {
-                    new ShooterSim(feedMotor, flyMotor, flyMotor2);
-                } else {
-                    new ShooterPhysicsSim(feedMotor, flyMotor, flyMotor2, "/MuJoCo/Shooter");
-                }
-            }
-        }
-
-        if (Constants.hangEnabled) {
-            MotorIO hangMotor;
-            EncoderIO hangEncoder;
-            switch (Constants.currentMode) {
-                case REAL:
-                case SIM:
-                    hangMotor = new MotorIOTalonFX(
-                            Hang.Constants.motorId, Constants.defaultBus, "hang motor", "Hang/Motor");
-                    hangEncoder = new EncoderIOCANcoder(
-                            Hang.Constants.encoderId, Constants.defaultBus, "hang encoder", "Hang/Encoder");
-                    break;
-                default:
-                    hangMotor = new MotorIO("hang motor", "Hang/Motor");
-                    hangEncoder = new EncoderIO("hang encoder", "Hang/Encoder");
-                    break;
-            }
-            hang = new Hang(hangMotor);
-        }
-
-        if (Constants.intakeEnabled) {
-            MotorIO rollerMotor;
-            MotorIO hingeMotor;
-            EncoderIO hingeEncoder;
-            switch (Constants.currentMode) {
-                case REAL:
-                case SIM:
-                    rollerMotor = new MotorIOTalonFX(
-                            Intake.Constants.rollerMotorId,
-                            Constants.defaultBus,
-                            "intake roller motor",
-                            "Intake/Roller");
-                    hingeMotor = new MotorIOTalonFX(
-                            Intake.Constants.hingeMotorId, Constants.defaultBus, "intake hinge motor", "Intake/Hinge");
-                    hingeEncoder = new EncoderIOCANcoder(
-                            Intake.Constants.hingeEncoderId, "intake hinge encoder", "Intake/HingeEncoder");
-                    break;
-                default:
-                    rollerMotor = new MotorIO("intake roller motor", "Intake/Roller");
-                    hingeMotor = new MotorIO("intake hinge motor", "Intake/Hinge");
-                    hingeEncoder = new EncoderIO("intake hinge encoder", "Intake/HingeEncoder");
-                    break;
-            }
-            intake = new Intake(rollerMotor, hingeMotor, hingeEncoder);
-
-            if (Constants.currentMode == Mode.SIM) {
-                if (!Constants.physicsSimEnabled) {
-                    new IntakeSim(rollerMotor, hingeMotor, hingeEncoder);
-                } else {
-                    new IntakePhysicsSim(rollerMotor, hingeMotor, hingeEncoder, "/MuJoCo/Intake");
-                }
-            }
-        }
-
-        if (Constants.ledsEnabled) {
-            LedIO ledIO;
-            switch (Constants.currentMode) {
-                case REAL:
-                case SIM:
-                    ledIO = new LedIOCANdle("leds", "LED", LED.Constants.id);
-                    break;
-                default:
-                    ledIO = new LedIO("leds", "LED");
-                    break;
-            }
-            led = new LED(ledIO);
-        }
     }
 
     private void initCommands() {
         if (Constants.swerveEnabled) {
             swerveCommands = new SwerveCommands(swerve, swerveTranslation, swerveRotation);
-        }
-        if (Constants.hangEnabled) {
-            hangCommands = new HangCommands(hang);
-        }
-        if (Constants.intakeEnabled) {
-            intakeCommands = new IntakeCommands(intake);
-        }
-        if (Constants.shooterEnabled) {
-            shooterCommands = new ShooterCommands(shooter);
-        }
-        if (Constants.ledsEnabled) {
-            ledCommands = new LEDCommands(led);
-        }
-        if (Constants.shooterEnabled) {
-            multiCommands = new MultiCommands(shooterCommands, ledCommands, shooter);
         }
     }
 
@@ -469,14 +316,14 @@ public class RobotContainer {
                     .onTrue(swerveCommands.steer(() -> -otherController.getRightX()));
 
             // Aim at hub: leftBumper on drive, east on other
-            otherController
-                    .east()
-                    .and(() -> !testEnabled.get())
-                    .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
-            driveController
-                    .leftBumper()
-                    .and(() -> !testEnabled.get())
-                    .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            // otherController
+            //         .east()
+            //         .and(() -> !testEnabled.get())
+            //         .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            // driveController
+            //         .leftBumper()
+            //         .and(() -> !testEnabled.get())
+            //         .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
             if (Constants.autoAlignEnabled) {
                 // Go to outpost: leftTrigger on drive, south on other
@@ -499,24 +346,6 @@ public class RobotContainer {
                         .and(() -> !testEnabled.get())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
-        }
-        if (Constants.intakeEnabled) {
-            otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
-            operator.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
-
-            otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
-            operator.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
-
-            otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
-            operator.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
-        }
-        if (Constants.shooterEnabled) {
-            operator.povLeft().whileTrue(shooterCommands.feedForward());
-            operator.povRight().whileTrue(shooterCommands.feedReverse());
-        }
-        if (multiCommands != null) {
-            otherController.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
-            operator.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
         }
     }
 
@@ -582,115 +411,6 @@ public class RobotContainer {
                     .and(() -> testSubsystem.get().equals("Swerve"))
                     .onTrue(swerveCommands.setPoseTarget(new FieldPose2d()));
         }
-
-        if (Constants.hangEnabled) {
-            testSubsystem.addOption("Hang", "Hang");
-            // Hang move up test
-            driveController
-                    .south()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.setSpeed(() -> testSpeed.get()));
-
-            // Hang move down test
-            driveController
-                    .east()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("Hang"))
-                    .whileTrue(hangCommands.setSpeed(() -> -testSpeed.get()));
-        }
-
-        if (Constants.shooterEnabled) {
-            testSubsystem.addOption("ShooterFeed", "ShooterFeed");
-            testSubsystem.addOption("ShooterFly", "ShooterFly");
-
-            // Flywheel forward test
-            driveController
-                    .south()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("ShooterFly"))
-                    .whileTrue(shooterCommands.setFlySpeed(() -> testSpeed.get() * 600));
-
-            // Feed forward test
-            driveController
-                    .south()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("ShooterFeed"))
-                    .whileTrue(shooterCommands.setFeedSpeed(() -> testSpeed.get()));
-
-            // Feed reverse test
-            driveController
-                    .east()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("ShooterFeed"))
-                    .whileTrue(shooterCommands.setFeedSpeed(() -> -testSpeed.get()));
-        }
-
-        if (Constants.intakeEnabled) {
-            testSubsystem.addOption("Intake", "Intake");
-            testSubsystem.addOption("IntakeHinge", "IntakeHinge");
-
-            driveController
-                    .south()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("Intake"))
-                    .whileTrue(intakeCommands.setIntakeSpeed(() -> testSpeed.get()));
-
-            driveController
-                    .east()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("Intake"))
-                    .whileTrue(intakeCommands.setIntakeSpeed(() -> -testSpeed.get()));
-
-            driveController
-                    .south()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .whileTrue(intakeCommands.setHingeSpeed(() -> testSpeed.get()));
-
-            driveController
-                    .east()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("Manual"))
-                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .whileTrue(intakeCommands.setHingeSpeed(() -> -testSpeed.get()));
-
-            driveController
-                    .south()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("PID"))
-                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.hingeUp());
-
-            driveController
-                    .east()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("PID"))
-                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.hingeDown());
-
-            driveController
-                    .south()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("PIDChange"))
-                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .whileTrue(intakeCommands.changeGoal(() -> testSpeed.get() / 10));
-
-            driveController
-                    .east()
-                    .and(() -> testEnabled.get())
-                    .and(() -> testType.get().equals("PIDChange"))
-                    .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .whileTrue(intakeCommands.changeGoal(() -> -testSpeed.get() / 10));
-        }
     }
 
     // Refresh drive and operator disconnect alerts
@@ -701,64 +421,8 @@ public class RobotContainer {
                 !operator.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
     }
 
-    // Initialize dashboard auto chooser
-    public void configureAuto() {
-        // Register named commands for PathPlanner
-        if (Constants.intakeEnabled) {
-            NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
-            NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-            NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
-            NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
-        }
-
-        if (multiCommands != null) {
-            NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
-            NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
-        }
-
-        if (Constants.hangEnabled) {
-            NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
-            NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
-        }
-
-        RobotConfig config;
-
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            Alerts.create("Failed to load robot config!", AlertType.kError);
-            e.printStackTrace();
-            return;
-        }
-        if (Constants.swerveEnabled) {
-            AutoBuilder.configure(
-                    swerve::getPose,
-                    swerve::resetPose,
-                    swerve::getChassisSpeeds,
-                    swerve::setChassisSpeeds,
-                    new PPHolonomicDriveController(
-                            new PIDConstants(
-                                    Swerve.Constants.translationKP.get(),
-                                    Swerve.Constants.translationKI.get(),
-                                    Swerve.Constants.translationKD.get()),
-                            new PIDConstants(
-                                    Swerve.Constants.rotationKP.get(),
-                                    Swerve.Constants.rotationKI.get(),
-                                    Swerve.Constants.rotationKD.get())),
-                    config,
-                    RobotUtils::onRedAlliance,
-                    swerve);
-
-            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
-        }
-    }
-
     public Command getAutonomousCommand() {
-        if (autoChooser != null) {
-            return autoChooser.get();
-        } else {
-            return Commands.none();
-        }
+        return Commands.none();
     }
 
     public void periodic() {

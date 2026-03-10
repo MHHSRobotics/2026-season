@@ -63,9 +63,6 @@ public class Robot extends LoggedRobot {
         }
         Logger.recordMetadata("Swerve", Constants.swerveEnabled ? "true" : "false");
         Logger.recordMetadata("Vision", Constants.visionEnabled ? "true" : "false");
-        Logger.recordMetadata("Shooter", Constants.shooterEnabled ? "true" : "false");
-        Logger.recordMetadata("Intake", Constants.intakeEnabled ? "true" : "false");
-        Logger.recordMetadata("Hang", Constants.hangEnabled ? "true" : "false");
         Logger.recordMetadata("PhysicsSim", Constants.physicsSimEnabled ? "true" : "false");
         Logger.recordMetadata("AutoAlign", Constants.autoAlignEnabled ? "true" : "false");
 
