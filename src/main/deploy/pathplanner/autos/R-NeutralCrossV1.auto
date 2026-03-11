@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-NeutralCross-1"
+            "pathName": "R-NeutralCrossV1-1"
           }
         },
         {
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-NeutralCross-2"
+            "pathName": "R-NeutralCrossV1-2"
           }
         },
         {
@@ -57,7 +57,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-NeutralCross-3"
+            "pathName": "R-NeutralCrossV1-3"
           }
         },
         {
@@ -81,13 +81,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R-NeutralCross-4"
+            "pathName": "R-NeutralCrossV1-4"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "hang up"
+            "name": "HangUp"
           }
         }
       ]

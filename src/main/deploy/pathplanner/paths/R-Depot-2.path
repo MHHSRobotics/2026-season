@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 16.165447968605925,
-        "y": 1.9976559035999526
+        "x": 16.133056972676822,
+        "y": 1.9818722214216322
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 13.212567760342367,
-        "y": 3.3427817403708993
+        "x": 14.273537803138373,
+        "y": 3.5368616262482178
       },
       "prevControl": {
-        "x": 13.46217494013981,
-        "y": 3.3567908728767466
+        "x": 14.523488076362279,
+        "y": 3.541847698379138
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 149.79676224505735
+    "rotation": 165.52970589993424
   },
   "reversed": false,
-  "folder": "R-Depot-Folder",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
