@@ -59,7 +59,7 @@ public class Intake extends SubsystemBase {
                 frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
         public static final double hingeDown = Units.degreesToRadians(-15);
 
-        public static final double rollerRatio = 1;
+        public static final double rollerRatio = 0.8;
         public static final double hingeRatio = 15;
         public static final double encoderRatio = 1;
 

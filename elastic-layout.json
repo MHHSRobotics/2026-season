@@ -174,22 +174,6 @@
             }
           },
           {
-            "title": "Match Time",
-            "x": 0.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 256.0,
-            "type": "Match Time",
-            "properties": {
-              "topic": "/AdvantageKit/DriverStation/MatchTime",
-              "period": 0.06,
-              "data_type": "double",
-              "time_display_mode": "Minutes and Seconds",
-              "red_start_time": 15,
-              "yellow_start_time": 30
-            }
-          },
-          {
             "title": "BatteryVoltage",
             "x": 1152.0,
             "y": 512.0,
@@ -251,6 +235,22 @@
               "topic": "/SmartDashboard/AutoChooser",
               "period": 0.06,
               "sort_options": false
+            }
+          },
+          {
+            "title": "Match Time",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 256.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/FMSInfo/MatchTime",
+              "period": 0.06,
+              "data_type": "double",
+              "time_display_mode": "Minutes and Seconds",
+              "red_start_time": 20,
+              "yellow_start_time": 30
             }
           }
         ]
