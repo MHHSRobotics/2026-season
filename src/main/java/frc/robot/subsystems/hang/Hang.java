@@ -31,7 +31,7 @@ public class Hang extends SubsystemBase {
 
         public static final double encoderRatio = 1;
 
-        public static final double motorRatio = 32;
+        public static final double motorRatio = 125;
         public static final double offset = 0;
 
         public static final double minAngle = Units.degreesToRadians(-100);
