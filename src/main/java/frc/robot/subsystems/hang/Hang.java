@@ -68,7 +68,7 @@ public class Hang extends SubsystemBase {
         public static final LoggedNetworkNumber verticalPos = new LoggedNetworkNumber("Hang/VerticalPos", 1.57);
     }
 
-    private MotorIO motor;
+    private final MotorIO motor;
 
     // On-screen drawing of the wrist for dashboards (length is visual only)
     private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
@@ -116,10 +116,8 @@ public class Hang extends SubsystemBase {
         motor = motorIO;
 
         motor.setInverted(Constants.motorInverted);
-
         motor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
         motor.setPosition(0);
-
         motor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
     }
 
