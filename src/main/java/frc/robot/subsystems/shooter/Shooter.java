@@ -41,7 +41,9 @@ public class Shooter extends SubsystemBase {
         public static final double flyInertia = 0.005; // Inertia of fly wheels in kg m^2
     }
 
-    private MotorIO feed, fly, fly2;
+    private final MotorIO feed;
+    private final MotorIO fly;
+    private final MotorIO fly2;
 
     private double targetSpeed;
 
@@ -76,7 +78,10 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean atTargetSpeed() {
-        return Math.abs(getFlyVelocity() - targetSpeed) / targetSpeed < Constants.tol;
+        if (Math.abs(targetSpeed) < 1e-6) {
+            return false;
+        }
+        return Math.abs(getFlyVelocity() - targetSpeed) / Math.abs(targetSpeed) < Constants.tol;
     }
 
     public void flyShoot() {

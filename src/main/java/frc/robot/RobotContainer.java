@@ -329,18 +329,14 @@ public class RobotContainer {
 
         if (Constants.hangEnabled) {
             MotorIO hangMotor;
-            EncoderIO hangEncoder;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
                     hangMotor = new MotorIOTalonFX(
                             Hang.Constants.motorId, Constants.defaultBus, "hang motor", "Hang/Motor");
-                    hangEncoder = new EncoderIOCANcoder(
-                            Hang.Constants.encoderId, Constants.defaultBus, "hang encoder", "Hang/Encoder");
                     break;
                 default:
                     hangMotor = new MotorIO("hang motor", "Hang/Motor");
-                    hangEncoder = new EncoderIO("hang encoder", "Hang/Encoder");
                     break;
             }
             hang = new Hang(hangMotor);
@@ -434,7 +430,7 @@ public class RobotContainer {
 
         if (Constants.swerveEnabled) {
             driveController.rightMenu().or(otherController.rightMenu()).onTrue(swerveCommands.resetGyro());
-            driveController.leftMenu().or(otherController.rightMenu()).onTrue(swerveCommands.lock());
+            driveController.leftMenu().or(otherController.leftMenu()).onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
             new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
@@ -749,7 +745,7 @@ public class RobotContainer {
                     RobotUtils::onRedAlliance,
                     swerve);
 
-            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("B M"));
+            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("Basic"));
         }
     }
 
@@ -764,6 +760,7 @@ public class RobotContainer {
     public void periodic() {
         driveController.detectType();
         operator.detectType();
+        otherController.detectType();
 
         if (Constants.swerveEnabled) {
             publisher.publish(); // Publish 3D robot data
