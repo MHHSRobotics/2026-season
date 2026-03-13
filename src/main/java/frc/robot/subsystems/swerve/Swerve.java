@@ -385,8 +385,21 @@ public class Swerve extends SubsystemBase {
     // Add a vision measurement with the given pose, timestamp, and standard deviations
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        Pose2d poseBeforeUpdate = estimator.getEstimatedPosition();
         estimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+        Pose2d poseAfterUpdate = estimator.getEstimatedPosition();
+        Transform2d visionCorrection = poseAfterUpdate.minus(poseBeforeUpdate);
 
+        Logger.recordOutput("Vision/LastMeasurementTimestamp", timestampSeconds);
+        Logger.recordOutput("Vision/LastMeasurementStdDevs", new double[] {
+            visionMeasurementStdDevs.get(0, 0), visionMeasurementStdDevs.get(1, 0), visionMeasurementStdDevs.get(2, 0)
+        });
+        Logger.recordOutput("Vision/LastCorrectionX", visionCorrection.getX());
+        Logger.recordOutput("Vision/LastCorrectionY", visionCorrection.getY());
+        Logger.recordOutput(
+                "Vision/LastCorrectionTranslationMeters", Math.hypot(visionCorrection.getX(), visionCorrection.getY()));
+        Logger.recordOutput(
+                "Vision/LastCorrectionThetaDeg", visionCorrection.getRotation().getDegrees());
         // Disable vision alert
         noVision.set(false);
     }
