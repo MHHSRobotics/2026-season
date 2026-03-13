@@ -19,9 +19,8 @@ public class ShooterCommands {
                 .withName("set fly speed");
     }
 
-    public Command flyShoot() {
-        return Commands.runEnd(() -> shooter.flyShoot(), () -> shooter.flyStop())
-                .withName("fly shoot");
+    public Command shoot(DoubleSupplier speed) {
+        return setFeedSpeed(() -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0).alongWith(setFlySpeed(speed)).withName("fly shoot");
     }
 
     public Command setFeedSpeed(DoubleSupplier speed) {

@@ -454,6 +454,12 @@ public class Swerve extends SubsystemBase {
         return pidRotation ? Math.abs(thetaController.getPositionError()) : 0;
     }
 
+    // Gets distance from hub
+    public double getDistanceFromHub(){
+        Transform2d hubTrans = getPose().minus(Constants.hubPosition.get());
+        return Math.hypot(hubTrans.getX(),hubTrans.getY());
+    }
+
     @Override
     public void periodic() {
         // This runs every robot loop (~50 times per second)
@@ -506,8 +512,7 @@ public class Swerve extends SubsystemBase {
                 : currentPose.getRotation().getRadians();
         Pose2d targetPose = new Pose2d(targetX, targetY, Rotation2d.fromRadians(targetTheta));
         Logger.recordOutput("Swerve/TargetPose", targetPose);
-        Transform2d hubTrans = currentPose.minus(Constants.hubPosition.get());
-        Logger.recordOutput("Swerve/DistanceFromHub", Math.hypot(hubTrans.getX(), hubTrans.getY()));
+        Logger.recordOutput("Swerve/DistanceFromHub", getDistanceFromHub());
 
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < modules.length; i++) {
@@ -540,7 +545,7 @@ public class Swerve extends SubsystemBase {
             // If gyro is connected, read the angle
             gyroAngle = Rotation2d.fromRadians(gyro.getInputs().yawPositionRad);
         } else {
-            // If gyro is disconnected, like in sim, get module deltas and use odometry to figure out the change in
+            // If gyro is disconnected, get module deltas and use odometry to figure out the change in
             // angle
             Twist2d twist = kinematics.toTwist2d(getModuleDeltas());
             gyroAngle = gyroAngle.plus(Rotation2d.fromRadians(twist.dtheta));

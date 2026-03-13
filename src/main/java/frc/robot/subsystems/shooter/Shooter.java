@@ -14,8 +14,8 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", true);
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
-        public static final LoggedNetworkNumber flySpeed =
-                new LoggedNetworkNumber("Shooter/TargetSpeed", 500); // Target velocity in rad/s
+        public static final LoggedNetworkNumber defaultSpeed =
+                new LoggedNetworkNumber("Shooter/DefaultSpeed", 500); // Default shooter speed
 
         public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 1); // kP
         public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
@@ -34,7 +34,7 @@ public class Shooter extends SubsystemBase {
         public static final double flyRatio = 1;
 
         // Flywheel speed tolerance as a relative factor of speed
-        public static final double tol = 0.1;
+        public static final double tol = 0.05;
 
         // Used for simulation only
         public static final double feedInertia = 0.000066; // Inertia of feed wheels in kg m^2
@@ -84,8 +84,8 @@ public class Shooter extends SubsystemBase {
         return Math.abs(getFlyVelocity() - targetSpeed) / Math.abs(targetSpeed) < Constants.tol;
     }
 
-    public void flyShoot() {
-        setFlyTargetSpeed(Constants.flySpeed.get());
+    public void defaultShoot() {
+        setFlyTargetSpeed(Constants.defaultSpeed.get());
     }
 
     public void flyStop() {

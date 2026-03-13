@@ -408,7 +408,7 @@ public class RobotContainer {
             ledCommands = new LEDCommands(led);
         }
         if (Constants.shooterEnabled) {
-            multiCommands = new MultiCommands(shooterCommands, ledCommands, shooter);
+            multiCommands = new MultiCommands(shooterCommands, ledCommands, shooter, swerve);
         }
     }
 
@@ -429,8 +429,8 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
-            driveController.rightMenu().or(otherController.rightMenu()).onTrue(swerveCommands.resetGyro());
-            driveController.leftMenu().or(otherController.leftMenu()).onTrue(swerveCommands.lock());
+            driveController.rightMenu().or(otherController.rightMenu()).or(operator.rightMenu()).onTrue(swerveCommands.resetGyro());
+            driveController.leftMenu().or(otherController.leftMenu()).or(operator.leftMenu()).onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
             new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
@@ -471,7 +471,6 @@ public class RobotContainer {
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
             driveController
                     .leftBumper()
-                    .and(() -> !testEnabled.get())
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
             if (Constants.autoAlignEnabled) {
@@ -482,7 +481,6 @@ public class RobotContainer {
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
                 driveController
                         .leftTrigger()
-                        .and(() -> !testEnabled.get())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
 
                 // Go to hang: rightTrigger on drive, west on other
@@ -492,27 +490,31 @@ public class RobotContainer {
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
                 driveController
                         .rightTrigger()
-                        .and(() -> !testEnabled.get())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
         }
         if (Constants.intakeEnabled) {
             otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
-            operator.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
+            operator.leftBumper().onTrue(intakeCommands.switchHinge());
 
             otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
-            operator.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
+            operator.leftTrigger().whileTrue(intakeCommands.intake());
 
             otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
-            operator.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
+            operator.rightBumper().whileTrue(intakeCommands.outtake());
         }
         if (Constants.shooterEnabled) {
             operator.povLeft().whileTrue(shooterCommands.feedForward());
             operator.povRight().whileTrue(shooterCommands.feedReverse());
+
+            otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(shooterCommands.feedReverse());
+            operator.rightBumper().whileTrue(shooterCommands.feedReverse());
         }
         if (multiCommands != null) {
             otherController.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
-            operator.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
+            otherController.south().and(() -> !testEnabled.get()).whileTrue(multiCommands.shootDefault());
+            operator.rightTrigger().whileTrue(multiCommands.shoot());
+            operator.south().whileTrue(multiCommands.shootDefault());
         }
     }
 
@@ -608,7 +610,15 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("ShooterFly"))
-                    .whileTrue(shooterCommands.setFlySpeed(() -> testSpeed.get() * 600));
+                    .whileTrue(shooterCommands.setFlySpeed(() -> testSpeed.get()));
+
+            // Flywheel shoot
+            otherController
+                    .east()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("Manual"))
+                    .and(() -> testSubsystem.get().equals("ShooterFly"))
+                    .whileTrue(shooterCommands.shoot(() -> testSpeed.get()));
 
             // Feed forward test
             otherController
