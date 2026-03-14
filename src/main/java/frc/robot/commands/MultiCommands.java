@@ -56,8 +56,12 @@ public class MultiCommands {
     public Command shoot() {
         if (Constants.swerveEnabled && Constants.visionEnabled) {
             return shootAtSpeed(() -> {
+                double dist=swerve.getDistanceFromHub();
+                double goalSpeed=getShooterSpeed(dist);
+                double goalXVel=goalSpeed*Shooter.Constants.flywheelRadius*Shooter.Constants.efficiency*Math.cos(Shooter.Constants.exitAngle);
+                
                 // System.out.println(getShooterSpeed(swerve.getDistanceFromHub()));
-                return getShooterSpeed(swerve.getDistanceFromHub());
+                return getShooterSpeed();
             });
         } else {
             return shootDefault();
