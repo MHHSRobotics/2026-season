@@ -429,8 +429,16 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
-            driveController.rightMenu().or(otherController.rightMenu()).or(operator.rightMenu()).onTrue(swerveCommands.resetGyro());
-            driveController.leftMenu().or(otherController.leftMenu()).or(operator.leftMenu()).onTrue(swerveCommands.lock());
+            driveController
+                    .rightMenu()
+                    .or(otherController.rightMenu())
+                    .or(operator.rightMenu())
+                    .onTrue(swerveCommands.resetGyro());
+            driveController
+                    .leftMenu()
+                    .or(otherController.leftMenu())
+                    .or(operator.leftMenu())
+                    .onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
             new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
                             > Swerve.Constants.moveDeadband)
@@ -469,9 +477,7 @@ public class RobotContainer {
                     .east()
                     .and(() -> !testEnabled.get())
                     .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
-            driveController
-                    .leftBumper()
-                    .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            driveController.leftBumper().onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
 
             if (Constants.autoAlignEnabled) {
                 // Go to outpost: leftTrigger on drive, south on other
@@ -479,18 +485,14 @@ public class RobotContainer {
                         .south()
                         .and(() -> !testEnabled.get())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
-                driveController
-                        .leftTrigger()
-                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
+                driveController.leftTrigger().onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
 
                 // Go to hang: rightTrigger on drive, west on other
                 otherController
                         .west()
                         .and(() -> !testEnabled.get())
                         .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
-                driveController
-                        .rightTrigger()
-                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
+                driveController.rightTrigger().onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
             }
         }
         if (Constants.intakeEnabled) {

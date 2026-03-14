@@ -20,7 +20,9 @@ public class ShooterCommands {
     }
 
     public Command shoot(DoubleSupplier speed) {
-        return setFeedSpeed(() -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0).alongWith(setFlySpeed(speed)).withName("fly shoot");
+        return setFeedSpeed(() -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0)
+                .alongWith(setFlySpeed(speed))
+                .withName("fly shoot");
     }
 
     public Command setFeedSpeed(DoubleSupplier speed) {

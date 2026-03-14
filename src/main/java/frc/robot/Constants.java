@@ -58,5 +58,5 @@ public final class Constants {
     public static final boolean shooterEnabled = true;
     public static final boolean hangEnabled = false;
     public static final boolean intakeEnabled = true;
-    public static final boolean ledsEnabled = false;
+    public static final boolean ledsEnabled = true;
 }
