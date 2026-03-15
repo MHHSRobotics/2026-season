@@ -228,7 +228,7 @@ public class RobotContainer {
 
             if (Constants.visionEnabled) {
                 // Create camera variables
-                CameraIO frontCam, rightCam;
+                CameraIO frontCam, rightCam, leftCam, backCam;
                 switch (Constants.currentMode) {
                     case REAL:
                     case SIM:
@@ -237,25 +237,25 @@ public class RobotContainer {
                                 "FrontCam", "Vision/FrontCam", Swerve.VisionConstants.frontCamPose, 60);
                         rightCam = new CameraIOPhotonCamera(
                                 "RightCam", "Vision/RightCam", Swerve.VisionConstants.rightCamPose, 60);
-                        // hubRightCam = new CameraIOPhotonCamera(
-                        //         "right hub camera", "Vision/RightHubCam", Swerve.VisionConstants.hubRightCamPose,
-                        // 60);
-                        // hangCam = new CameraIOPhotonCamera(
-                        //         "hang camera", "Vision/HangCam", Swerve.VisionConstants.hangCamPose, 60);
+                        leftCam = new CameraIOPhotonCamera(
+                                "LeftCam", "Vision/LeftCam", Swerve.VisionConstants.leftCamPose,
+                        60);
+                        backCam = new CameraIOPhotonCamera(
+                                "BackCam", "Vision/BackCam", Swerve.VisionConstants.backCamPose, 60);
                         break;
                     default:
                         // If in replay use an empty CameraIO
                         frontCam = new CameraIO("FrontCam", "Vision/FrontCam");
                         rightCam = new CameraIO("RightCam", "Vision/RightCam");
-                        // hubRightCam = new CameraIO("right hub camera", "Vision/RightHubCam");
-                        // hangCam = new CameraIO("hang camera", "Vision/HangCam");
+                        leftCam = new CameraIO("LeftCam", "Vision/LeftCam");
+                        backCam = new CameraIO("BackCam", "Vision/BackCam");
                         break;
                 }
                 // Add cameras to swerve ododmetry
                 swerve.addCameraSource(frontCam);
                 swerve.addCameraSource(rightCam);
-                // swerve.addCameraSource(hubRightCam);
-                // swerve.addCameraSource(hangCam);
+                swerve.addCameraSource(leftCam);
+                swerve.addCameraSource(backCam);
             }
 
             // If mode is SIM, start the simulations for swerve modules and gyro
