@@ -238,8 +238,7 @@ public class RobotContainer {
                         rightCam = new CameraIOPhotonCamera(
                                 "RightCam", "Vision/RightCam", Swerve.VisionConstants.rightCamPose, 60);
                         leftCam = new CameraIOPhotonCamera(
-                                "LeftCam", "Vision/LeftCam", Swerve.VisionConstants.leftCamPose,
-                        60);
+                                "LeftCam", "Vision/LeftCam", Swerve.VisionConstants.leftCamPose, 60);
                         backCam = new CameraIOPhotonCamera(
                                 "BackCam", "Vision/BackCam", Swerve.VisionConstants.backCamPose, 60);
                         break;

@@ -120,9 +120,8 @@ public class MultiCommands {
         if (dist < 0.01) return Math.atan2(hubPos.getY() - shooterPos.getY(), hubPos.getX() - shooterPos.getX());
 
         // Conversion factor: rad/s → horizontal exit velocity (m/s)
-        double convFactor = Shooter.Constants.flywheelRadius
-                * Shooter.Constants.efficiency
-                * Math.cos(Shooter.Constants.exitAngle);
+        double convFactor =
+                Shooter.Constants.flywheelRadius * Shooter.Constants.efficiency * Math.cos(Shooter.Constants.exitAngle);
 
         // Approximate time of flight: distance / compensated horizontal ball speed
         double compensatedHorizontalVel = getShooterSpeed(dist) * convFactor - vRadial;

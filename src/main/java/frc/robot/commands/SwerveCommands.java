@@ -132,8 +132,7 @@ public class SwerveCommands {
     public Command setRotationTarget(DoubleSupplier thetaSupplier) {
         return Commands.run(
                         () -> {
-                            Pose2d alliancePose =
-                                    new FieldPose2d(0, 0, thetaSupplier.getAsDouble()).get();
+                            Pose2d alliancePose = new FieldPose2d(0, 0, thetaSupplier.getAsDouble()).get();
                             double output = swerve.getThetaController()
                                     .calculate(
                                             swerve.getPose().getRotation().getRadians(),
