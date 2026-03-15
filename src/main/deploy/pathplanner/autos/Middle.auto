@@ -49,19 +49,13 @@
         {
           "type": "named",
           "data": {
-            "name": "IntakeUp"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "IntakeStop"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.87
+            "waitTime": 0.1
           }
         },
         {
@@ -87,6 +81,12 @@
           "type": "wait",
           "data": {
             "waitTime": 5.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeUp"
           }
         },
         {

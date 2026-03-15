@@ -42,12 +42,6 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "IntakeUp"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
                   "name": "IntakeStop"
                 }
               }
@@ -76,6 +70,12 @@
           "type": "named",
           "data": {
             "name": "StopShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
           }
         },
         {
