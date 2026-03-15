@@ -39,16 +39,16 @@ public class Shooter extends SubsystemBase {
         public static final double tol = 0.05;
 
         // Approximate exit angle of the fuel, used for accounting for movement
-        public static final double exitAngle=Units.degreesToRadians(58);
+        public static final double exitAngle = Units.degreesToRadians(58);
         // Exit velocity/flywheel circumference speed
-        public static final double efficiency=0.4475;
+        public static final double efficiency = 0.4475;
         // Radius of flywheel (m)
-        public static final double flywheelRadius=0.05;
+        public static final double flywheelRadius = 0.05;
         // Location of shooter wrt center of bot
-        public static final Translation2d shooterPos=new Translation2d(-0.2,0);
+        public static final Translation2d shooterPos = new Translation2d(-0.2, 0);
 
         // Approx latency (s)
-        public static final double latency=0.05;
+        public static final double latency = 0.05;
 
         // Used for simulation only
         public static final double feedInertia = 0.000066; // Inertia of feed wheels in kg m^2

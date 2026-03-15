@@ -408,7 +408,7 @@ public class RobotContainer {
             ledCommands = new LEDCommands(led);
         }
         if (Constants.shooterEnabled) {
-            multiCommands = new MultiCommands(shooterCommands, ledCommands, shooter, swerve);
+            multiCommands = new MultiCommands(shooterCommands, swerveCommands, ledCommands, shooter, swerve);
         }
     }
 

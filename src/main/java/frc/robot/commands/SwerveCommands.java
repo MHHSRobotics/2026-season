@@ -128,6 +128,27 @@ public class SwerveCommands {
                 .withName("swerve set rotation target");
     }
 
+    // PID-controlled rotation to a dynamic field heading (blue-origin radians)
+    public Command setRotationTarget(DoubleSupplier thetaSupplier) {
+        return Commands.run(
+                        () -> {
+                            Pose2d alliancePose =
+                                    new FieldPose2d(0, 0, thetaSupplier.getAsDouble()).get();
+                            double output = swerve.getThetaController()
+                                    .calculate(
+                                            swerve.getPose().getRotation().getRadians(),
+                                            alliancePose.getRotation().getRadians());
+                            swerve.setRotation(output);
+                            swerve.setPIDRotation(true);
+                        },
+                        swerveRotation)
+                .finallyDo(() -> {
+                    swerve.setRotation(0);
+                    swerve.setPIDRotation(false);
+                })
+                .withName("swerve set rotation target");
+    }
+
     // PID-controlled rotation to aim at a field position (rotates to face the target)
     public Command aimAt(FieldPose2d target) {
         return Commands.run(
