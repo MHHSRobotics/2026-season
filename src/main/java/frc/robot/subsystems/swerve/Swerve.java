@@ -61,10 +61,10 @@ public class Swerve extends SubsystemBase {
 
         // Smart shortcut to make small moves easier: raise input to a power.
         // Example: stick = 0.5, movePow = 2 -> 0.5^2 = 0.25 (finer control near center)
-        public static final double movePow = 2;
+        public static final LoggedNetworkNumber movePow = new LoggedNetworkNumber("Swerve/MoveSensitivity", 2);
 
         // Same idea as movePow but for turning
-        public static final double turnPow = 2;
+        public static final LoggedNetworkNumber turnPow = new LoggedNetworkNumber("Swerve/TurnSensitivity", 2);
 
         // The maximum speed of the robot, obtained via characterization
         public static final double maxLinearSpeedMetersPerSec = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
