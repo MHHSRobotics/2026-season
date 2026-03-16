@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "IntakeUp"
+            "name": "IntakeDown"
           }
         },
         {
@@ -26,6 +26,12 @@
           "type": "wait",
           "data": {
             "waitTime": 4.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StopShoot"
           }
         },
         {
