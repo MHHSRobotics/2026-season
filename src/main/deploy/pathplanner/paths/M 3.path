@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.868532843802271,
-        "y": 0.8045676758811453
+        "x": 5.160285714285713,
+        "y": 0.63375
       },
       "isLocked": false,
       "linkedName": "End Point B M 2"
@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 3.238230765209397,
-        "y": 0.4631134782001156
+        "y": 0.46311347820011556
       },
       "nextControl": {
         "x": 1.999893437173156,
@@ -47,7 +47,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": -91.60591422783655
+      "rotationDegrees": -179.9378203170629
     }
   ],
   "constraintZones": [],
@@ -69,7 +69,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.72522429905932
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

@@ -51,12 +51,6 @@
                 "data": {
                   "name": "IntakeStop"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeUp"
-                }
               }
             ]
           }
@@ -72,15 +66,15 @@
           "data": {
             "commands": [
               {
-                "type": "wait",
-                "data": {
-                  "waitTime": 5.0
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "Shoot"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 5.0
                 }
               }
             ]
@@ -90,6 +84,12 @@
           "type": "named",
           "data": {
             "name": "StopShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeUp"
           }
         },
         {
