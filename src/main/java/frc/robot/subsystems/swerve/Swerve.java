@@ -61,10 +61,10 @@ public class Swerve extends SubsystemBase {
 
         // Smart shortcut to make small moves easier: raise input to a power.
         // Example: stick = 0.5, movePow = 2 -> 0.5^2 = 0.25 (finer control near center)
-        public static final double movePow = 2;
+        public static final LoggedNetworkNumber movePow = new LoggedNetworkNumber("Swerve/MoveSensitivity", 2);
 
         // Same idea as movePow but for turning
-        public static final double turnPow = 2;
+        public static final LoggedNetworkNumber turnPow = new LoggedNetworkNumber("Swerve/TurnSensitivity", 2);
 
         // The maximum speed of the robot, obtained via characterization
         public static final double maxLinearSpeedMetersPerSec = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -158,8 +158,9 @@ public class Swerve extends SubsystemBase {
                 new Translation3d(-0.203, 0.305, 0.489),
                 new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(90)));
 
-        public static final Transform3d backCamPose =
-                new Transform3d(new Translation3d(-0.33, 0.006, 0.5), new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
+        public static final Transform3d backCamPose = new Transform3d(
+                new Translation3d(-0.33, 0.006, 0.5),
+                new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
 
         // How many robot pose measurements to store per camera
         public static final int maxMeasurements = 8;

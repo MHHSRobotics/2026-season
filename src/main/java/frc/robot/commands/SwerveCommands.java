@@ -38,7 +38,7 @@ public class SwerveCommands {
                             double radius = Math.hypot(x, y);
                             double scale = Math.pow(
                                     MathUtil.applyDeadband(radius, Swerve.Constants.moveDeadband),
-                                    Swerve.Constants.movePow);
+                                    Swerve.Constants.movePow.get());
                             double angle = Math.atan2(y, x);
                             double sign = RobotUtils.onRedAlliance() ? -1 : 1;
                             swerve.setTranslation(
@@ -58,7 +58,7 @@ public class SwerveCommands {
                             double rotation = omega.getAsDouble();
                             double rotationScale = Math.pow(
                                     MathUtil.applyDeadband(Math.abs(rotation), Swerve.Constants.turnDeadband),
-                                    Swerve.Constants.turnPow);
+                                    Swerve.Constants.turnPow.get());
                             rotation = Math.copySign(rotationScale, rotation);
 
                             swerve.setRotation(rotation * Swerve.Constants.maxAngularSpeedRadPerSec);

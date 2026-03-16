@@ -30,7 +30,7 @@ public class Intake extends SubsystemBase {
         public static final int leftSwitchId = 2;
 
         public static final LoggedNetworkNumber defaultSpeed =
-                new LoggedNetworkNumber("Intake/FlySpeed", frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.7);
+                new LoggedNetworkNumber("Intake/FlySpeed", frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.5);
 
         public static final LoggedNetworkNumber hingeKP =
                 new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 4);
