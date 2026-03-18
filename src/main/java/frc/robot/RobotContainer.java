@@ -328,17 +328,21 @@ public class RobotContainer {
 
         if (Constants.hangEnabled) {
             MotorIO hangMotor;
+            EncoderIO hangEncoder;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
                     hangMotor = new MotorIOTalonFX(
                             Hang.Constants.motorId, Constants.defaultBus, "hang motor", "Hang/Motor");
+                    hangEncoder = new EncoderIOCANcoder(
+                            Hang.Constants.encoderId, Constants.defaultBus, "hang encoder", "Hang/Encoder");
                     break;
                 default:
                     hangMotor = new MotorIO("hang motor", "Hang/Motor");
+                    hangEncoder = new EncoderIO("hang encoder", "Hang/Encoder");
                     break;
             }
-            hang = new Hang(hangMotor);
+            hang = new Hang(hangMotor, hangEncoder);
         }
 
         if (Constants.intakeEnabled) {
@@ -518,8 +522,8 @@ public class RobotContainer {
             operator.south().whileTrue(multiCommands.shootDefault());
         }
         if (Constants.hangEnabled) {
-            operator.povUp().whileTrue(hangCommands.setSpeed(()->0.2));
-            operator.povDown().whileTrue(hangCommands.setSpeed(()->-0.2));
+            operator.povUp().whileTrue(hangCommands.setSpeed(() -> 0.2));
+            operator.povDown().whileTrue(hangCommands.setSpeed(() -> -0.2));
         }
     }
 
