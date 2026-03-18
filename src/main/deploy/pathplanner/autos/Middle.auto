@@ -113,12 +113,6 @@
           "data": {
             "pathName": "M 4"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "HangUp"
-          }
         }
       ]
     }

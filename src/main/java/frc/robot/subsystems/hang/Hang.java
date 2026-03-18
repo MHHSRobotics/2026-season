@@ -16,6 +16,7 @@ import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
 public class Hang extends SubsystemBase {
@@ -69,6 +70,7 @@ public class Hang extends SubsystemBase {
     }
 
     private final MotorIO motor;
+    private final EncoderIO encoder;
 
     // On-screen drawing of the wrist for dashboards (length is visual only)
     private final LoggedMechanism2d mech = new LoggedMechanism2d(3, 3);
@@ -112,13 +114,16 @@ public class Hang extends SubsystemBase {
     private final LoggedMechanismLigament2d iAmount =
             iRoot.append(new LoggedMechanismLigament2d("IAmount", 1.0, 90, 6, new Color8Bit(Color.kRed)));
 
-    public Hang(MotorIO motorIO) {
+    public Hang(MotorIO motorIO, EncoderIO encoderIO) {
         motor = motorIO;
-
+        encoder = encoderIO;
+        encoder.setInverted(Constants.encoderInverted);
+        encoder.setGearRatio(Constants.encoderRatio);
         motor.setInverted(Constants.motorInverted);
-        motor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
-        motor.setPosition(0);
+        motor.setFeedforwardType(GravityTypeValue.Elevator_Static);
+        motor.connectEncoder(encoder, Constants.motorRatio);
         motor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
+        motor.setOffset(Constants.offset);
     }
 
     public void setSpeed(double speed) {
@@ -134,10 +139,7 @@ public class Hang extends SubsystemBase {
     }
 
     public void setHingeGoal(double goal) {
-        motor.setGoalWithCurrentMagic(goal, () -> {
-            double position = motor.getInputs().position;
-            return Constants.kG.get() * Math.cos(position + Math.PI / 2 - Constants.verticalPos.get());
-        });
+        motor.setGoalWithCurrentMagic(goal);
     }
 
     public double getGoal() {
@@ -184,6 +186,7 @@ public class Hang extends SubsystemBase {
         motor.setkP(Constants.kP.get());
         motor.setkD(Constants.kD.get());
         motor.setkS(Constants.kS.get());
+        motor.setkG(Constants.kG.get());
         motor.setkV(Constants.kV.get());
         motor.setkA(Constants.kA.get());
         motor.setkI(Constants.kI.get());
