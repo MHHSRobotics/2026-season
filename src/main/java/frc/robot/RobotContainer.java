@@ -517,6 +517,10 @@ public class RobotContainer {
             operator.rightTrigger().whileTrue(multiCommands.shoot());
             operator.south().whileTrue(multiCommands.shootDefault());
         }
+        if (Constants.hangEnabled) {
+            operator.povUp().whileTrue(hangCommands.setSpeed(()->0.2));
+            operator.povDown().whileTrue(hangCommands.setSpeed(()->-0.2));
+        }
     }
 
     private void configureTestBindings() {
