@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.123455357142857,
-        "y": 3.273767857142857
+        "x": 1.3255277280858673,
+        "y": 1.1712164579606439
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.384766901912203,
-        "y": 3.3789456029902527
+        "x": 1.5868392728552134,
+        "y": 1.2763942038080396
       },
       "isLocked": false,
       "linkedName": "End Point B M 3"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 17.75825848264268
+    "rotation": 41.82854278370221
   },
   "useDefaultConstraints": true
 }
