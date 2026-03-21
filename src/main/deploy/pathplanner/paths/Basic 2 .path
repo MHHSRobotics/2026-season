@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.2449285714285714,
-        "y": 4.002607142857143
+        "x": 1.9745438282647583,
+        "y": 6.136189624329159
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0173386160486313,
-        "y": 3.899152746091434
+        "x": 1.7469538728848182,
+        "y": 6.03273522756345
       },
       "isLocked": false,
       "linkedName": "End Point Basic 1"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -38.09469370140614
   },
   "useDefaultConstraints": true
 }

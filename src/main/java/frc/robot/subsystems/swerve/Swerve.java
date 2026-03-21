@@ -148,7 +148,7 @@ public class Swerve extends SubsystemBase {
         public static final double visionThetaStdDevDistanceMultiplier = 0.2; // multiplied by distance
 
         public static final Transform3d frontCamPose = new Transform3d(
-                new Translation3d(0.165, -0.318, 0.498), new Rotation3d(0, Units.degreesToRadians(-25), 0));
+                new Translation3d(0.165, -0.318, 0.51), new Rotation3d(0, Units.degreesToRadians(-25), 0));
 
         public static final Transform3d rightCamPose = new Transform3d(
                 new Translation3d(-0.19, -0.286, 0.486),

@@ -5,35 +5,21 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 
-import com.ctre.phoenix6.signals.RGBWColor;
-
 import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
 
 public class MultiCommands {
     private ShooterCommands shooterCommands;
-    private LEDCommands ledCommands;
-    private Shooter shooter;
     private Swerve swerve;
 
-    public MultiCommands(ShooterCommands shooterCommands, LEDCommands ledCommands, Shooter shooter, Swerve swerve) {
+    public MultiCommands(ShooterCommands shooterCommands, Swerve swerve) {
         this.shooterCommands = shooterCommands;
-        this.ledCommands = ledCommands;
-        this.shooter = shooter;
         this.swerve = swerve;
     }
 
     public Command shootAtSpeed(DoubleSupplier speed) {
-        if (ledCommands != null) {
-            return shooterCommands
-                    .shoot(speed)
-                    .alongWith(ledCommands.setColor(
-                            () -> shooter.atTargetSpeed() ? new RGBWColor(0, 255, 0) : new RGBWColor(255, 0, 0)))
-                    .withName("shoot");
-        } else {
-            return shooterCommands.shoot(speed);
-        }
+        return shooterCommands.shoot(speed).withName("shoot");
     }
 
     public Command shootStop() {

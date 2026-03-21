@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "IntakeDown"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Basic 1"
@@ -31,25 +25,37 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 4.0
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeUp"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 5.0
           }
         },
         {
           "type": "named",
           "data": {
             "name": "StopShoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Basic 2 "
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "HangUp"
           }
         }
       ]

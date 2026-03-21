@@ -390,7 +390,7 @@ public class RobotContainer {
                     ledIO = new LedIO("leds", "LED");
                     break;
             }
-            led = new LED(ledIO);
+            led = new LED(ledIO, shooter, swerve);
         }
     }
 
@@ -411,7 +411,7 @@ public class RobotContainer {
             ledCommands = new LEDCommands(led);
         }
         if (Constants.shooterEnabled) {
-            multiCommands = new MultiCommands(shooterCommands, ledCommands, shooter, swerve);
+            multiCommands = new MultiCommands(shooterCommands, swerve);
         }
     }
 
