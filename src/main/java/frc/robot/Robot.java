@@ -1,6 +1,9 @@
 package frc.robot;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -140,6 +143,36 @@ public class Robot extends LoggedRobot {
 
         // Init robot container
         robotContainer = new RobotContainer();
+    }
+
+    @Override
+    public void startCompetition() {
+        // Catch uncaught exceptions/errors on any thread
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            writeLog(
+                    "uncaught_" + System.currentTimeMillis() + ".log",
+                    "Uncaught on thread: " + thread.getName(),
+                    throwable);
+        });
+
+        try {
+            super.startCompetition();
+        } catch (Throwable t) {
+            writeLog("fatal_" + System.currentTimeMillis() + ".log", "startCompetition threw:", t);
+            throw t;
+        }
+
+        // If we reach here, the main loop exited without throwing
+        writeLog("clean_exit_" + System.currentTimeMillis() + ".log", "startCompetition() returned cleanly", null);
+    }
+
+    private void writeLog(String filename, String message, Throwable t) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("/home/lvuser/" + filename))) {
+            pw.println(message);
+            if (t != null) t.printStackTrace(pw);
+            pw.flush();
+        } catch (IOException e) {
+        }
     }
 
     @Override

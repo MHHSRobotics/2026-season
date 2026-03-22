@@ -507,6 +507,15 @@ public class RobotContainer {
 
             otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
+
+            driveController
+                    .povUp()
+                    .onTrue(Commands.runOnce(
+                            () -> Intake.Constants.defaultSpeed.set(Intake.Constants.defaultSpeed.get() + 0.1)));
+            driveController
+                    .povDown()
+                    .onTrue(Commands.runOnce(
+                            () -> Intake.Constants.defaultSpeed.set(Intake.Constants.defaultSpeed.get() - 0.1)));
         }
         if (Constants.shooterEnabled) {
             operator.povLeft().whileTrue(shooterCommands.feedForward());
