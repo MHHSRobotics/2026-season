@@ -69,7 +69,8 @@ public class Intake extends SubsystemBase {
 
         public static final double hingeOffset = 0.5;
 
-        public static final LoggedNetworkNumber intakeDownward = new LoggedNetworkNumber("Intake/DownwardCurrent", 20);
+        public static final LoggedNetworkNumber hingeDownTorque = new LoggedNetworkNumber("Intake/HingeDown", 20);
+        public static final LoggedNetworkNumber hingeUpTorque = new LoggedNetworkNumber("Intake/HingeUp", 20);
 
         // Simulation only
         public static final double rollerInertia = 0.000132; // kg m^2
@@ -99,6 +100,8 @@ public class Intake extends SubsystemBase {
 
         rollerMotor.setInverted(Constants.rollerInverted);
         rollerMotor.connectInternalSensor(Constants.rollerRatio);
+
+        setHingeDown();
     }
 
     private void setLocked(boolean brake) {
@@ -134,6 +137,14 @@ public class Intake extends SubsystemBase {
         return intakeUp;
     }
 
+    public void setHingeDown() {
+        hingeMotor.setTorqueCurrent(-Constants.hingeDownTorque.get());
+    }
+
+    public void setHingeUp() {
+        hingeMotor.setTorqueCurrent(Constants.hingeUpTorque.get());
+    }
+
     public void setHingeGoal(double goal) {
         intakeUp = false;
         if (goal > 0) {
@@ -141,7 +152,7 @@ public class Intake extends SubsystemBase {
         }
         hingeMotor.setGoalWithCurrentMagic(goal, () -> {
             if (Math.abs(rollerMotor.getInputs().appliedVoltage) > 0) {
-                return -Constants.intakeDownward.get();
+                return -Constants.hingeDownTorque.get();
             }
             double position = hingeMotor.getInputs().position;
             double gravityFF =

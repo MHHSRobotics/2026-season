@@ -82,7 +82,7 @@
     "rotation": -42.6140559696111
   },
   "reversed": false,
-  "folder": "R-NeutralCross-Folder",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

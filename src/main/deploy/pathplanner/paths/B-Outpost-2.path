@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 23.96248897457831
+    "rotation": 23.962488974578314
   },
   "reversed": false,
-  "folder": "B-Outpost-Folder",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

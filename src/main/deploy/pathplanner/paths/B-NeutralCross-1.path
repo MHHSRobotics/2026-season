@@ -86,7 +86,7 @@
     "rotation": 157.28558764683277
   },
   "reversed": false,
-  "folder": "B-NeutralCross-Folder",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": -1.2453642667683138

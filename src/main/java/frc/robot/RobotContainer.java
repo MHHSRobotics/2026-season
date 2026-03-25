@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,6 +19,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.IntakeCommands;
@@ -59,7 +59,6 @@ import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
-import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.RobotUtils;
 
@@ -93,7 +92,6 @@ public class RobotContainer {
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
 
     private LoggedDashboardChooser<Command> autoChooser; // Choice of auto
-    private LoggedNetworkBoolean flipAuto;
 
     private RobotPublisher publisher; // Publishes 3D robot data to AdvantageScope for visualization
 
@@ -502,8 +500,8 @@ public class RobotContainer {
             }
         }
         if (Constants.intakeEnabled) {
-            otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
-            operator.leftBumper().onTrue(intakeCommands.switchHinge());
+            otherController.leftBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUp());
+            operator.leftBumper().whileTrue(intakeCommands.setHingeUp());
 
             otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
             operator.leftTrigger().whileTrue(intakeCommands.intake());
@@ -759,42 +757,10 @@ public class RobotContainer {
         }
         if (Constants.swerveEnabled) {
             AutoBuilder.configure(
-                    () -> {
-                        Pose2d p = swerve.getPose();
-                        if (flipAuto.get()) {
-                            return new Pose2d(
-                                    p.getX(),
-                                    Field.fieldWidth - p.getY(),
-                                    p.getRotation().unaryMinus());
-                        } else {
-                            return p;
-                        }
-                    },
-                    (Pose2d p) -> {
-                        if (flipAuto.get()) {
-                            swerve.resetPose(new Pose2d(
-                                    p.getX(),
-                                    Field.fieldWidth - p.getY(),
-                                    p.getRotation().unaryMinus()));
-                        } else {
-                            swerve.resetPose(p);
-                        }
-                    },
-                    () -> {
-                        ChassisSpeeds speeds = swerve.getChassisSpeeds();
-                        if (flipAuto.get()) {
-                            speeds.omegaRadiansPerSecond *= -1;
-                            speeds.vyMetersPerSecond *= -1;
-                        }
-                        return speeds;
-                    },
-                    (ChassisSpeeds speeds) -> {
-                        if (flipAuto.get()) {
-                            speeds.omegaRadiansPerSecond *= -1;
-                            speeds.vyMetersPerSecond *= -1;
-                        }
-                        swerve.setChassisSpeeds(speeds);
-                    },
+                    swerve::getPose,
+                    swerve::resetPose,
+                    swerve::getChassisSpeeds,
+                    swerve::setChassisSpeeds,
                     new PPHolonomicDriveController(
                             new PIDConstants(
                                     Swerve.Constants.translationKP.get(),
@@ -807,9 +773,25 @@ public class RobotContainer {
                     config,
                     RobotUtils::onRedAlliance,
                     swerve);
-
-            autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("Basic"));
-            flipAuto = new LoggedNetworkBoolean("AutoFlipped", false);
+            try {
+                PathPlannerPath li_ls = PathPlannerPath.fromPathFile("LI-LS");
+                PathPlannerPath li_ls_n = PathPlannerPath.fromPathFile("LI-LS-N");
+                autoChooser = new LoggedDashboardChooser<Command>("AutoChooser");
+                autoChooser.addDefaultOption("None", Commands.none());
+                autoChooser.addOption(
+                        "Basic Left", AutoBuilder.followPath(li_ls).andThen(multiCommands.shoot()));
+                autoChooser.addOption(
+                        "Basic Right",
+                        AutoBuilder.followPath(li_ls.mirrorPath()).andThen(multiCommands.shoot()));
+                autoChooser.addOption(
+                        "Left One Side", AutoBuilder.followPath(li_ls_n).andThen(multiCommands.shoot()));
+                autoChooser.addOption(
+                        "Right One Side",
+                        AutoBuilder.followPath(li_ls_n.mirrorPath()).andThen(multiCommands.shoot()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Alerts.create("Error when initializing paths", AlertType.kError);
+            }
         }
     }
 
