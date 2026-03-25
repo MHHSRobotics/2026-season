@@ -132,6 +132,9 @@ public class Swerve extends SubsystemBase {
 
         public static final double simSwerveError =
                 0; // Simulated error in swerve odometry, set to 0 for no error, 0.1 for some error
+
+        public static final double steerSupplyCurrent = 30;
+        public static final double driveSupplyCurrent = 120;
     }
 
     public static class VisionConstants {
@@ -160,7 +163,7 @@ public class Swerve extends SubsystemBase {
 
         public static final Transform3d backCamPose = new Transform3d(
                 new Translation3d(-0.33, 0.006, 0.5),
-                new Rotation3d(0, Units.degreesToRadians(-30), Units.degreesToRadians(180)));
+                new Rotation3d(0, Units.degreesToRadians(-22), Units.degreesToRadians(180)));
 
         // How many robot pose measurements to store per camera
         public static final int maxMeasurements = 8;

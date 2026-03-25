@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -58,6 +59,7 @@ import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
+import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.RobotUtils;
 
@@ -91,6 +93,7 @@ public class RobotContainer {
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
 
     private LoggedDashboardChooser<Command> autoChooser; // Choice of auto
+    private LoggedNetworkBoolean flipAuto;
 
     private RobotPublisher publisher; // Publishes 3D robot data to AdvantageScope for visualization
 
@@ -507,6 +510,15 @@ public class RobotContainer {
 
             otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
+
+            driveController
+                    .povUp()
+                    .onTrue(Commands.runOnce(
+                            () -> Intake.Constants.defaultSpeed.set(Intake.Constants.defaultSpeed.get() + 0.1)));
+            driveController
+                    .povDown()
+                    .onTrue(Commands.runOnce(
+                            () -> Intake.Constants.defaultSpeed.set(Intake.Constants.defaultSpeed.get() - 0.1)));
         }
         if (Constants.shooterEnabled) {
             operator.povLeft().whileTrue(shooterCommands.feedForward());
@@ -747,10 +759,42 @@ public class RobotContainer {
         }
         if (Constants.swerveEnabled) {
             AutoBuilder.configure(
-                    swerve::getPose,
-                    swerve::resetPose,
-                    swerve::getChassisSpeeds,
-                    swerve::setChassisSpeeds,
+                    () -> {
+                        Pose2d p = swerve.getPose();
+                        if (flipAuto.get()) {
+                            return new Pose2d(
+                                    p.getX(),
+                                    Field.fieldWidth - p.getY(),
+                                    p.getRotation().unaryMinus());
+                        } else {
+                            return p;
+                        }
+                    },
+                    (Pose2d p) -> {
+                        if (flipAuto.get()) {
+                            swerve.resetPose(new Pose2d(
+                                    p.getX(),
+                                    Field.fieldWidth - p.getY(),
+                                    p.getRotation().unaryMinus()));
+                        } else {
+                            swerve.resetPose(p);
+                        }
+                    },
+                    () -> {
+                        ChassisSpeeds speeds = swerve.getChassisSpeeds();
+                        if (flipAuto.get()) {
+                            speeds.omegaRadiansPerSecond *= -1;
+                            speeds.vyMetersPerSecond *= -1;
+                        }
+                        return speeds;
+                    },
+                    (ChassisSpeeds speeds) -> {
+                        if (flipAuto.get()) {
+                            speeds.omegaRadiansPerSecond *= -1;
+                            speeds.vyMetersPerSecond *= -1;
+                        }
+                        swerve.setChassisSpeeds(speeds);
+                    },
                     new PPHolonomicDriveController(
                             new PIDConstants(
                                     Swerve.Constants.translationKP.get(),
@@ -765,6 +809,7 @@ public class RobotContainer {
                     swerve);
 
             autoChooser = new LoggedDashboardChooser<Command>("AutoChooser", AutoBuilder.buildAutoChooser("Basic"));
+            flipAuto = new LoggedNetworkBoolean("AutoFlipped", false);
         }
     }
 

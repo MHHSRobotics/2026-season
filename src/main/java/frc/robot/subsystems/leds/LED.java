@@ -13,7 +13,7 @@ import frc.robot.subsystems.swerve.Swerve;
 public class LED extends SubsystemBase {
     public static class Constants {
         public static final int startIndex = 8;
-        public static final int endIndex = 100;
+        public static final int endIndex = 20;
 
         public static final int id = 22;
     }

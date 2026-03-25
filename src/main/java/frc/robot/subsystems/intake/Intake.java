@@ -30,7 +30,7 @@ public class Intake extends SubsystemBase {
         public static final int leftSwitchId = 2;
 
         public static final LoggedNetworkNumber defaultSpeed =
-                new LoggedNetworkNumber("Intake/FlySpeed", frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.5);
+                new LoggedNetworkNumber("Intake/FlySpeed", frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.65);
 
         public static final LoggedNetworkNumber hingeKP =
                 new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 7);
@@ -68,6 +68,8 @@ public class Intake extends SubsystemBase {
         public static final boolean encoderInverted = false;
 
         public static final double hingeOffset = 0.5;
+
+        public static final LoggedNetworkNumber intakeDownward = new LoggedNetworkNumber("Intake/DownwardCurrent", 20);
 
         // Simulation only
         public static final double rollerInertia = 0.000132; // kg m^2
@@ -139,7 +141,7 @@ public class Intake extends SubsystemBase {
         }
         hingeMotor.setGoalWithCurrentMagic(goal, () -> {
             if (Math.abs(rollerMotor.getInputs().appliedVoltage) > 0) {
-                return -10.;
+                return -Constants.intakeDownward.get();
             }
             double position = hingeMotor.getInputs().position;
             double gravityFF =
