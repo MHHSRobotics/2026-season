@@ -59,6 +59,7 @@ import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
 import frc.robot.util.Alerts;
+import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.RobotUtils;
 
@@ -480,23 +481,23 @@ public class RobotContainer {
             otherController
                     .east()
                     .and(() -> !testEnabled.get())
-                    .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
-            driveController.leftBumper().onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+                    .onTrue(swerveCommands.aimAt(Field.hubPosition));
+            driveController.leftBumper().onTrue(swerveCommands.aimAt(Field.hubPosition));
 
             if (Constants.autoAlignEnabled) {
                 // Go to outpost: leftTrigger on drive, south on other
                 otherController
                         .south()
                         .and(() -> !testEnabled.get())
-                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
-                driveController.leftTrigger().onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
+                        .onTrue(swerveCommands.setPoseTarget(Field.outpostPosition));
+                driveController.leftTrigger().onTrue(swerveCommands.setPoseTarget(Field.outpostPosition));
 
                 // Go to hang: rightTrigger on drive, west on other
                 otherController
                         .west()
                         .and(() -> !testEnabled.get())
-                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
-                driveController.rightTrigger().onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
+                        .onTrue(swerveCommands.setPoseTarget(Field.hangPosition));
+                driveController.rightTrigger().onTrue(swerveCommands.setPoseTarget(Field.hangPosition));
             }
         }
         if (Constants.intakeEnabled) {
