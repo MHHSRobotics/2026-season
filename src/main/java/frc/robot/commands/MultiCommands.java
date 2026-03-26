@@ -4,6 +4,8 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
@@ -11,10 +13,18 @@ import frc.robot.subsystems.swerve.Swerve;
 
 public class MultiCommands {
     private ShooterCommands shooterCommands;
+    private IntakeCommands intakeCommands;
+    private SwerveCommands swerveCommands;
     private Swerve swerve;
 
-    public MultiCommands(ShooterCommands shooterCommands, Swerve swerve) {
+    public MultiCommands(
+            ShooterCommands shooterCommands,
+            IntakeCommands intakeCommands,
+            SwerveCommands swerveCommands,
+            Swerve swerve) {
         this.shooterCommands = shooterCommands;
+        this.intakeCommands = intakeCommands;
+        this.swerveCommands = swerveCommands;
         this.swerve = swerve;
     }
 
@@ -48,5 +58,10 @@ public class MultiCommands {
         } else {
             return shootDefault();
         }
+    }
+
+    public Command shootWithHinge() {
+        return shoot().alongWith(new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
+                .alongWith(swerveCommands.aimAt(Swerve.Constants.hubPosition));
     }
 }

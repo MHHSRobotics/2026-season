@@ -45,7 +45,7 @@
     "rotation": -24.304549265936764
   },
   "reversed": false,
-  "folder": "B-Depot-Folder",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
