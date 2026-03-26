@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.util.Field;
 
 public class MultiCommands {
     private ShooterCommands shooterCommands;
@@ -62,6 +63,6 @@ public class MultiCommands {
 
     public Command shootWithHinge() {
         return shoot().alongWith(new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
-                .alongWith(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+                .alongWith(swerveCommands.aimAt(Field.hubPosition));
     }
 }

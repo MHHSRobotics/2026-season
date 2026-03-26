@@ -453,7 +453,7 @@ public class Swerve extends SubsystemBase {
 
     // Gets distance from hub
     public double getDistanceFromHub() {
-        Transform2d hubTrans = getPose().minus(Constants.hubPosition.get());
+        Transform2d hubTrans = getPose().minus(Field.hubPosition.get());
         return Math.hypot(hubTrans.getX(), hubTrans.getY());
     }
 
