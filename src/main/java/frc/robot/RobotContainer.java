@@ -412,7 +412,7 @@ public class RobotContainer {
             ledCommands = new LEDCommands(led);
         }
         if (Constants.shooterEnabled) {
-            multiCommands = new MultiCommands(shooterCommands, swerve);
+            multiCommands = new MultiCommands(shooterCommands, intakeCommands, swerveCommands, swerve);
         }
     }
 
@@ -500,8 +500,8 @@ public class RobotContainer {
             }
         }
         if (Constants.intakeEnabled) {
-            otherController.leftBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUp());
-            operator.leftBumper().whileTrue(intakeCommands.setHingeUp());
+            otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
+            operator.leftBumper().whileTrue(intakeCommands.switchHinge());
 
             otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
             operator.leftTrigger().whileTrue(intakeCommands.intake());
@@ -779,15 +779,29 @@ public class RobotContainer {
                 autoChooser = new LoggedDashboardChooser<Command>("AutoChooser");
                 autoChooser.addDefaultOption("None", Commands.none());
                 autoChooser.addOption(
-                        "Basic Left", AutoBuilder.followPath(li_ls).andThen(multiCommands.shoot()));
+                        "Basic Left",
+                        AutoBuilder.followPath(li_ls)
+                                .andThen(intakeCommands.intakeStop())
+                                .andThen(multiCommands.shootWithHinge()));
                 autoChooser.addOption(
                         "Basic Right",
-                        AutoBuilder.followPath(li_ls.mirrorPath()).andThen(multiCommands.shoot()));
+                        AutoBuilder.followPath(li_ls.mirrorPath())
+                                .andThen(intakeCommands.intakeStop())
+                                .andThen(multiCommands.shootWithHinge()));
                 autoChooser.addOption(
-                        "Left One Side", AutoBuilder.followPath(li_ls_n).andThen(multiCommands.shoot()));
+                        "Left One Side",
+                        Commands.runOnce(() -> intake.intake())
+                                .andThen(intakeCommands.setHingeDown())
+                                .andThen(AutoBuilder.followPath(li_ls_n))
+                                .andThen(intakeCommands.intakeStop())
+                                .andThen(multiCommands.shootWithHinge()));
                 autoChooser.addOption(
                         "Right One Side",
-                        AutoBuilder.followPath(li_ls_n.mirrorPath()).andThen(multiCommands.shoot()));
+                        Commands.runOnce(() -> intake.intake())
+                                .andThen(intakeCommands.setHingeDown())
+                                .andThen(AutoBuilder.followPath(li_ls_n.mirrorPath()))
+                                .andThen(intakeCommands.intakeStop())
+                                .andThen(multiCommands.shootWithHinge()));
             } catch (Exception e) {
                 e.printStackTrace();
                 Alerts.create("Error when initializing paths", AlertType.kError);

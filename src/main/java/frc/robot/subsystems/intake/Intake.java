@@ -33,7 +33,7 @@ public class Intake extends SubsystemBase {
                 new LoggedNetworkNumber("Intake/FlySpeed", frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.65);
 
         public static final LoggedNetworkNumber hingeKP =
-                new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 7);
+                new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 20);
         public static final LoggedNetworkNumber hingeKI = new LoggedNetworkNumber("Intake/Hinge/kI", 0);
         public static final LoggedNetworkNumber hingeKD =
                 new LoggedNetworkNumber("Intake/Hinge/kD", frc.robot.Constants.currentMode == Mode.SIM ? 25 : 10);
@@ -70,7 +70,7 @@ public class Intake extends SubsystemBase {
         public static final double hingeOffset = 0.5;
 
         public static final LoggedNetworkNumber hingeDownTorque = new LoggedNetworkNumber("Intake/HingeDown", 20);
-        public static final LoggedNetworkNumber hingeUpTorque = new LoggedNetworkNumber("Intake/HingeUp", 20);
+        public static final LoggedNetworkNumber hingeUpTorque = new LoggedNetworkNumber("Intake/HingeUp", 30);
 
         // Simulation only
         public static final double rollerInertia = 0.000132; // kg m^2

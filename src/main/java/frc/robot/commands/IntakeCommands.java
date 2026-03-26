@@ -21,6 +21,10 @@ public class IntakeCommands {
         return Commands.startEnd(() -> intake.setHingeUp(), () -> intake.setHingeDown(), intake);
     }
 
+    public Command setHingeDown() {
+        return Commands.runOnce(() -> intake.setHingeDown(), intake);
+    }
+
     public Command hingeDown() {
         return new InstantCommand(() -> intake.setHingeGoal(Constants.hingeDown)).withName("hinge down");
     }
