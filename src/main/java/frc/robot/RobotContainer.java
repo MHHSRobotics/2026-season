@@ -694,14 +694,14 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.hingeUp());
+                    .onTrue(intakeCommands.setHingeUp());
 
             otherController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.hingeDown());
+                    .onTrue(intakeCommands.setHingeDown());
 
             otherController
                     .south()
@@ -729,26 +729,7 @@ public class RobotContainer {
 
     // Initialize dashboard auto chooser
     public void configureAuto() {
-        // Register named commands for PathPlanner
-        if (Constants.intakeEnabled) {
-            NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
-            NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-            NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
-            NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
-        }
-
-        if (multiCommands != null) {
-            NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
-            NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
-        }
-
-        if (Constants.hangEnabled) {
-            NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
-            NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
-        }
-
         RobotConfig config;
-
         try {
             config = RobotConfig.fromGUISettings();
         } catch (Exception e) {
