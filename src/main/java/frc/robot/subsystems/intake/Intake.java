@@ -55,7 +55,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean(
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
-        public static final double hingeDown=Units.degreesToRadians(0);
+        public static final double hingeDown = Units.degreesToRadians(0);
         public static final double hingeUp =
                 frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
 
@@ -133,12 +133,12 @@ public class Intake extends SubsystemBase {
     }
 
     public void setHingeDown() {
-        intakeUp=false;
+        intakeUp = false;
         hingeMotor.setTorqueCurrent(-Constants.hingeDownTorque.get());
     }
 
     public void setHingeUp() {
-        intakeUp=true;
+        intakeUp = true;
         setHingeGoal(Constants.hingeUp);
     }
 

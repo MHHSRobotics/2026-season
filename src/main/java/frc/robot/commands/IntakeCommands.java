@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.Intake.Constants;
 
 public class IntakeCommands {
 
@@ -25,8 +24,8 @@ public class IntakeCommands {
         return Commands.runOnce(() -> intake.setHingeDown(), intake);
     }
 
-    public Command setHingeUp(){
-        return Commands.runOnce(()->intake.setHingeDown(),intake);
+    public Command setHingeUp() {
+        return Commands.runOnce(() -> intake.setHingeDown(), intake);
     }
 
     public Command switchHinge() {

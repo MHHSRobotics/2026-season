@@ -15,7 +15,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -478,10 +477,7 @@ public class RobotContainer {
                     .onTrue(swerveCommands.steer(() -> -otherController.getRightX()));
 
             // Aim at hub: leftBumper on drive, east on other
-            otherController
-                    .east()
-                    .and(() -> !testEnabled.get())
-                    .onTrue(swerveCommands.aimAt(Field.hubPosition));
+            otherController.east().and(() -> !testEnabled.get()).onTrue(swerveCommands.aimAt(Field.hubPosition));
             driveController.leftBumper().onTrue(swerveCommands.aimAt(Field.hubPosition));
 
             if (Constants.autoAlignEnabled) {
