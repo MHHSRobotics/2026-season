@@ -4,7 +4,36 @@
  "type":"Swerve",
  "variables":{
   "expressions":{},
-  "poses":{}
+  "poses":{
+   "LI":{
+    "x":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"0 deg",
+     "val":0.0
+    }
+   },
+   "LS":{
+    "x":{
+     "exp":"3 m",
+     "val":3.0
+    },
+    "y":{
+     "exp":"6.77 m",
+     "val":6.77
+    },
+    "heading":{
+     "exp":"-1.04 rad",
+     "val":-1.04
+    }
+   }
+  }
  },
  "config":{
   "frontLeft":{
@@ -77,8 +106,8 @@
  "generationFeatures":[],
  "codegen":{
   "root":"../C:/Users/npase_f77s7um/Projects/FRC/2026/2026-season/src/main/java/frc/robot/subsystems/swerve",
-  "genVars":true,
-  "genTrajData":true,
-  "useChoreoLib":true
+  "genVars":false,
+  "genTrajData":false,
+  "useChoreoLib":false
  }
 }
