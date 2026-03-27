@@ -17,7 +17,7 @@ public class IntakeCommands {
         this.intake = intake;
     }
 
-    public Command setHingeUp() {
+    public Command setHingeUpShort() {
         return Commands.startEnd(() -> intake.setHingeUp(), () -> intake.setHingeDown(), intake);
     }
 
@@ -25,12 +25,8 @@ public class IntakeCommands {
         return Commands.runOnce(() -> intake.setHingeDown(), intake);
     }
 
-    public Command hingeDown() {
-        return new InstantCommand(() -> intake.setHingeGoal(Constants.hingeDown)).withName("hinge down");
-    }
-
-    public Command hingeUp() {
-        return new InstantCommand(() -> intake.setHingeGoal(Constants.hingeUp)).withName("hinge up");
+    public Command setHingeUp(){
+        return Commands.runOnce(()->intake.setHingeDown(),intake);
     }
 
     public Command switchHinge() {
@@ -43,12 +39,8 @@ public class IntakeCommands {
     }
 
     public Command setHingeSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> intake.setHingeSpeed(speed.getAsDouble()), () -> intake.hingeStop(), intake)
+        return Commands.runEnd(() -> intake.setHingeSpeed(speed.getAsDouble()), () -> intake.setHingeSpeed(0), intake)
                 .withName("set hinge speed");
-    }
-
-    public Command hingeStop() {
-        return Commands.runOnce(() -> intake.hingeStop(), intake);
     }
 
     public Command setIntakeSpeed(DoubleSupplier speed) {

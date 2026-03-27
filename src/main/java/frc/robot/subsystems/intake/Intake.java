@@ -55,11 +55,11 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean(
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
+        public static final double hingeDown=Units.degreesToRadians(0);
         public static final double hingeUp =
                 frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
-        public static final double hingeDown = Units.degreesToRadians(-15);
 
-        public static final double rollerRatio = 0.8;
+        public static final double rollerRatio = 1.25;
         public static final double hingeRatio = 15;
         public static final double encoderRatio = 1;
 
@@ -70,7 +70,6 @@ public class Intake extends SubsystemBase {
         public static final double hingeOffset = 0.5;
 
         public static final LoggedNetworkNumber hingeDownTorque = new LoggedNetworkNumber("Intake/HingeDown", 20);
-        public static final LoggedNetworkNumber hingeUpTorque = new LoggedNetworkNumber("Intake/HingeUp", 30);
 
         // Simulation only
         public static final double rollerInertia = 0.000132; // kg m^2
@@ -117,43 +116,34 @@ public class Intake extends SubsystemBase {
         rollerMotor.setDutyCycle(speed);
     }
 
-    public void hingeStop() {
-        hingeMotor.setDutyCycle(0);
-    }
-
     public void setHingeSpeed(double speed) {
         hingeMotor.setDutyCycle(speed);
     }
 
     public void switchPos() {
         if (intakeUp == false) {
-            setHingeGoal(Constants.hingeUp);
+            setHingeUp();
         } else {
-            setHingeGoal(Constants.hingeDown);
+            setHingeDown();
         }
     }
 
-    public boolean getIntakePos() {
+    public boolean isIntakeUp() {
         return intakeUp;
     }
 
     public void setHingeDown() {
+        intakeUp=false;
         hingeMotor.setTorqueCurrent(-Constants.hingeDownTorque.get());
     }
 
     public void setHingeUp() {
-        hingeMotor.setTorqueCurrent(Constants.hingeUpTorque.get());
+        intakeUp=true;
+        setHingeGoal(Constants.hingeUp);
     }
 
     public void setHingeGoal(double goal) {
-        intakeUp = false;
-        if (goal > 0) {
-            intakeUp = true;
-        }
         hingeMotor.setGoalWithCurrentMagic(goal, () -> {
-            if (Math.abs(rollerMotor.getInputs().appliedVoltage) > 0) {
-                return -Constants.hingeDownTorque.get();
-            }
             double position = hingeMotor.getInputs().position;
             double gravityFF =
                     Constants.hingeKG.get() * Math.cos(position + Math.PI / 2 - Constants.hingeVerticalPos.get());

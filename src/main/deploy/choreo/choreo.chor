@@ -229,5 +229,8 @@
   "genVars":false,
   "genTrajData":false,
   "useChoreoLib":false
+  "genVars":false,
+  "genTrajData":false,
+  "useChoreoLib":false
  }
 }
