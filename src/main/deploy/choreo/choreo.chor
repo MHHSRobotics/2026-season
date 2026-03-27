@@ -4,7 +4,92 @@
  "type":"Swerve",
  "variables":{
   "expressions":{},
-  "poses":{}
+  "poses":{
+   "LD":{
+    "x":{
+     "exp":"1.72 m",
+     "val":1.72
+    },
+    "y":{
+     "exp":"5.86 m",
+     "val":5.86
+    },
+    "heading":{
+     "exp":"-0.56 rad",
+     "val":-0.56
+    }
+   },
+   "LI":{
+    "x":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "y":{
+     "exp":"7.5 m",
+     "val":7.5
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "LS":{
+    "x":{
+     "exp":"3 m",
+     "val":3.0
+    },
+    "y":{
+     "exp":"6.77 m",
+     "val":6.77
+    },
+    "heading":{
+     "exp":"-1.04 rad",
+     "val":-1.04
+    }
+   },
+   "RD":{
+    "x":{
+     "exp":"1.57 m",
+     "val":1.57
+    },
+    "y":{
+     "exp":"7.2 m",
+     "val":7.2
+    },
+    "heading":{
+     "exp":"-0.8 rad",
+     "val":-0.8
+    }
+   },
+   "RI":{
+    "x":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "y":{
+     "exp":"0.57 m",
+     "val":0.57
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "RS2":{
+    "x":{
+     "exp":"3 m",
+     "val":3.0
+    },
+    "y":{
+     "exp":"1.3 m",
+     "val":1.3
+    },
+    "heading":{
+     "exp":"1.04 rad",
+     "val":1.04
+    }
+   }
+  }
  },
  "config":{
   "frontLeft":{
@@ -77,8 +162,8 @@
  "generationFeatures":[],
  "codegen":{
   "root":"../C:/Users/npase_f77s7um/Projects/FRC/2026/2026-season/src/main/java/frc/robot/subsystems/swerve",
-  "genVars":true,
-  "genTrajData":true,
-  "useChoreoLib":true
+  "genVars":false,
+  "genTrajData":false,
+  "useChoreoLib":false
  }
 }
