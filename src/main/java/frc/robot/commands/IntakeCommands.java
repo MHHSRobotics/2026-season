@@ -25,7 +25,7 @@ public class IntakeCommands {
     }
 
     public Command setHingeUp() {
-        return Commands.runOnce(() -> intake.setHingeDown(), intake);
+        return Commands.runOnce(() -> intake.setHingeUp(), intake);
     }
 
     public Command switchHinge() {

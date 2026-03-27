@@ -62,7 +62,12 @@ public class MultiCommands {
     }
 
     public Command shootWithHinge() {
-        return shoot().alongWith(new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
+        if(Constants.intakeEnabled && Constants.swerveEnabled){
+            return shoot().alongWith(new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
                 .alongWith(swerveCommands.aimAt(Field.hubPosition));
+        }else{
+            return shoot();
+        }
+        
     }
 }

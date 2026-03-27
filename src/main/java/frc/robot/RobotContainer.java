@@ -500,6 +500,9 @@ public class RobotContainer {
             otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
             operator.leftBumper().whileTrue(intakeCommands.switchHinge());
 
+            otherController.east().and(()->!testEnabled.get()).whileTrue(intakeCommands.setHingeUpShort());
+            operator.east().whileTrue(intakeCommands.setHingeUpShort());
+
             otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
             operator.leftTrigger().whileTrue(intakeCommands.intake());
 
