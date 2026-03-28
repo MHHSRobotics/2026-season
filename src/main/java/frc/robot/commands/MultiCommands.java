@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.util.Field;
 
 public class MultiCommands {
     private ShooterCommands shooterCommands;
@@ -52,7 +53,6 @@ public class MultiCommands {
     public Command shoot() {
         if (Constants.swerveEnabled && Constants.visionEnabled) {
             return shootAtSpeed(() -> {
-                // System.out.println(getShooterSpeed(swerve.getDistanceFromHub()));
                 return getShooterSpeed(swerve.getDistanceFromHub());
             });
         } else {
@@ -61,7 +61,28 @@ public class MultiCommands {
     }
 
     public Command shootWithHinge() {
-        return shoot().alongWith(new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
-                .alongWith(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+        if (Constants.intakeEnabled && Constants.swerveEnabled) {
+            return shoot().alongWith(
+                            new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
+                    .alongWith(swerveCommands.aimAt(Field.hubPosition));
+        } else {
+            return shoot();
+        }
+    }
+
+    public Command getSingleAuto(String pathName, boolean flipped) {
+        return intakeCommands
+                .intake()
+                .alongWith(swerveCommands.getTrajCommand(pathName, flipped).andThen(shootWithHinge()));
+    }
+
+    public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
+        return intakeCommands
+                .intake()
+                .alongWith(swerveCommands
+                        .getTrajCommand(pathName1, flipped1)
+                        .andThen(shootWithHinge().withTimeout(5))
+                        .andThen(swerveCommands.getTrajCommand(pathName2, flipped2))
+                        .andThen(shootWithHinge()));
     }
 }

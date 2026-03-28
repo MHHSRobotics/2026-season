@@ -40,8 +40,8 @@ public class LED extends SubsystemBase {
     @Override
     public void periodic() {
         Logger.recordOutput("LED/Color", new int[] {currentColor.Red, currentColor.Green, currentColor.Blue});
-        if (shooter.getFlyVelocity() > -10000000) {
-            if (shooter.atTargetSpeed() && shooter.getFlyVelocity() > 10) {
+        if (shooter.getFlyVelocity() > 10) {
+            if (shooter.atTargetSpeed()) {
                 setColor(new RGBWColor(255, 0, 0));
             } else {
                 setColor(new RGBWColor(0, 255, 0));

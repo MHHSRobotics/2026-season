@@ -14,12 +14,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathPlannerPath;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.IntakeCommands;
@@ -58,9 +52,8 @@ import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
-import frc.robot.util.Alerts;
+import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
-import frc.robot.util.RobotUtils;
 
 public class RobotContainer {
     // Subsystems
@@ -477,31 +470,31 @@ public class RobotContainer {
                     .onTrue(swerveCommands.steer(() -> -otherController.getRightX()));
 
             // Aim at hub: leftBumper on drive, east on other
-            otherController
-                    .east()
-                    .and(() -> !testEnabled.get())
-                    .onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
-            driveController.leftBumper().onTrue(swerveCommands.aimAt(Swerve.Constants.hubPosition));
+            otherController.east().and(() -> !testEnabled.get()).onTrue(swerveCommands.aimAt(Field.hubPosition));
+            driveController.leftBumper().onTrue(swerveCommands.aimAt(Field.hubPosition));
 
             if (Constants.autoAlignEnabled) {
                 // Go to outpost: leftTrigger on drive, south on other
                 otherController
                         .south()
                         .and(() -> !testEnabled.get())
-                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
-                driveController.leftTrigger().onTrue(swerveCommands.setPoseTarget(Swerve.Constants.outpostPosition));
+                        .onTrue(swerveCommands.setPoseTarget(Field.outpostPosition));
+                driveController.leftTrigger().onTrue(swerveCommands.setPoseTarget(Field.outpostPosition));
 
                 // Go to hang: rightTrigger on drive, west on other
                 otherController
                         .west()
                         .and(() -> !testEnabled.get())
-                        .onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
-                driveController.rightTrigger().onTrue(swerveCommands.setPoseTarget(Swerve.Constants.hangPosition));
+                        .onTrue(swerveCommands.setPoseTarget(Field.hangPosition));
+                driveController.rightTrigger().onTrue(swerveCommands.setPoseTarget(Field.hangPosition));
             }
         }
         if (Constants.intakeEnabled) {
             otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
             operator.leftBumper().whileTrue(intakeCommands.switchHinge());
+
+            otherController.north().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUpShort());
+            operator.east().whileTrue(intakeCommands.setHingeUpShort());
 
             otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
             operator.leftTrigger().whileTrue(intakeCommands.intake());
@@ -693,14 +686,14 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.hingeUp());
+                    .onTrue(intakeCommands.setHingeUp());
 
             otherController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
-                    .onTrue(intakeCommands.hingeDown());
+                    .onTrue(intakeCommands.setHingeDown());
 
             otherController
                     .south()
@@ -728,85 +721,39 @@ public class RobotContainer {
 
     // Initialize dashboard auto chooser
     public void configureAuto() {
-        // Register named commands for PathPlanner
-        if (Constants.intakeEnabled) {
-            NamedCommands.registerCommand("IntakeDown", intakeCommands.hingeDown());
-            NamedCommands.registerCommand("IntakeUp", intakeCommands.hingeUp());
-            NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
-            NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
-        }
+        autoChooser = new LoggedDashboardChooser<Command>("AutoChooser");
+        autoChooser.addDefaultOption("None", Commands.none());
+        // 1 shot autos
+        autoChooser.addOption("LI_LS", multiCommands.getSingleAuto("LI_LS", false));
+        autoChooser.addOption("RI_RS", multiCommands.getSingleAuto("LI_LS", true));
+        autoChooser.addOption("LI_LD", multiCommands.getSingleAuto("LI_LD", false));
+        autoChooser.addOption("RI_RD", multiCommands.getSingleAuto("RI_RD", false));
+        autoChooser.addOption("LI_LS_N", multiCommands.getSingleAuto("LI_LS_N", false));
+        autoChooser.addOption("RI_RS_N", multiCommands.getSingleAuto("LI_LS_N", true));
+        autoChooser.addOption("LI_RS_N", multiCommands.getSingleAuto("LI_RS_N", false));
+        autoChooser.addOption("RI_LS_N", multiCommands.getSingleAuto("LI_RS_N", true));
 
-        if (multiCommands != null) {
-            NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
-            NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
-        }
-
-        if (Constants.hangEnabled) {
-            NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
-            NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
-        }
-
-        RobotConfig config;
-
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            Alerts.create("Failed to load robot config!", AlertType.kError);
-            e.printStackTrace();
-            return;
-        }
-        if (Constants.swerveEnabled) {
-            AutoBuilder.configure(
-                    swerve::getPose,
-                    swerve::resetPose,
-                    swerve::getChassisSpeeds,
-                    swerve::setChassisSpeeds,
-                    new PPHolonomicDriveController(
-                            new PIDConstants(
-                                    Swerve.Constants.translationKP.get(),
-                                    Swerve.Constants.translationKI.get(),
-                                    Swerve.Constants.translationKD.get()),
-                            new PIDConstants(
-                                    Swerve.Constants.rotationKP.get(),
-                                    Swerve.Constants.rotationKI.get(),
-                                    Swerve.Constants.rotationKD.get())),
-                    config,
-                    RobotUtils::onRedAlliance,
-                    swerve);
-            try {
-                PathPlannerPath li_ls = PathPlannerPath.fromPathFile("LI-LS");
-                PathPlannerPath li_ls_n = PathPlannerPath.fromPathFile("LI-LS-N");
-                autoChooser = new LoggedDashboardChooser<Command>("AutoChooser");
-                autoChooser.addDefaultOption("None", Commands.none());
-                autoChooser.addOption(
-                        "Basic Left",
-                        AutoBuilder.followPath(li_ls)
-                                .andThen(intakeCommands.intakeStop())
-                                .andThen(multiCommands.shootWithHinge()));
-                autoChooser.addOption(
-                        "Basic Right",
-                        AutoBuilder.followPath(li_ls.mirrorPath())
-                                .andThen(intakeCommands.intakeStop())
-                                .andThen(multiCommands.shootWithHinge()));
-                autoChooser.addOption(
-                        "Left One Side",
-                        Commands.runOnce(() -> intake.intake())
-                                .andThen(intakeCommands.setHingeDown())
-                                .andThen(AutoBuilder.followPath(li_ls_n))
-                                .andThen(intakeCommands.intakeStop())
-                                .andThen(multiCommands.shootWithHinge()));
-                autoChooser.addOption(
-                        "Right One Side",
-                        Commands.runOnce(() -> intake.intake())
-                                .andThen(intakeCommands.setHingeDown())
-                                .andThen(AutoBuilder.followPath(li_ls_n.mirrorPath()))
-                                .andThen(intakeCommands.intakeStop())
-                                .andThen(multiCommands.shootWithHinge()));
-            } catch (Exception e) {
-                e.printStackTrace();
-                Alerts.create("Error when initializing paths", AlertType.kError);
-            }
-        }
+        // 2 shot autos
+        autoChooser.addOption("LI_LS|LS_RS_N", multiCommands.getDoubleAuto("LI_LS", false, "LS_RS_N", false));
+        autoChooser.addOption("LI_LS|LS_LS_N", multiCommands.getDoubleAuto("LI_LS", false, "LS_LS_N", false));
+        autoChooser.addOption("RI_RS|RS_LS_N", multiCommands.getDoubleAuto("LI_LS", true, "LS_RS_N", true));
+        autoChooser.addOption("RI_RS|RS_RS_N", multiCommands.getDoubleAuto("LI_LS", true, "LS_LS_N", true));
+        autoChooser.addOption("LI_LD|LD_RS_N", multiCommands.getDoubleAuto("LI_LD", false, "LD_RS_N", false));
+        autoChooser.addOption("LI_LD|LD_LS_N", multiCommands.getDoubleAuto("LI_LD", false, "LD_LS_N", false));
+        autoChooser.addOption("RI_RD|LD_RS_N", multiCommands.getDoubleAuto("RI_RD", false, "RD_LS_N", false));
+        autoChooser.addOption("RI_RD|LD_RS_N", multiCommands.getDoubleAuto("RI_RD", false, "RD_RS_N", false));
+        autoChooser.addOption("LI_LS_N|LS_LD", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_LD", false));
+        autoChooser.addOption("LI_RS_N|RS_RD", multiCommands.getDoubleAuto("LI_RS_N", false, "RS_RD", false));
+        autoChooser.addOption("RI_LS_N|LS_LD", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_LD", false));
+        autoChooser.addOption("RI_RS_N|RS_RD", multiCommands.getDoubleAuto("LI_LS_N", true, "RS_RD", false));
+        autoChooser.addOption("LI_LS_N|LS_LS_N", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_LS_N", false));
+        autoChooser.addOption("LI_LS_N|LS_RS_N", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_RS_N", false));
+        autoChooser.addOption("LI_RS_N|RS_LS_N", multiCommands.getDoubleAuto("LI_RS_N", false, "LS_RS_N", true));
+        autoChooser.addOption("LI_RS_N|RS_RS_N", multiCommands.getDoubleAuto("LI_RS_N", false, "LS_LS_N", true));
+        autoChooser.addOption("RI_LS_N|LS_LS_N", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_LS_N", false));
+        autoChooser.addOption("RI_LS_N|LS_RS_N", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_RS_N", false));
+        autoChooser.addOption("RI_RS_N|RS_LS_N", multiCommands.getDoubleAuto("LI_LS_N", true, "LS_RS_N", true));
+        autoChooser.addOption("RI_RS_N|RS_RS_N", multiCommands.getDoubleAuto("LI_LS_N", true, "LS_LS_N", true));
     }
 
     public Command getAutonomousCommand() {
