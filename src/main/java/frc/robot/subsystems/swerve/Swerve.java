@@ -6,7 +6,6 @@ import java.util.List;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,11 +21,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,6 +38,7 @@ import frc.robot.io.CameraIO.CameraIOInputs;
 import frc.robot.io.GyroIO;
 import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
+import frc.robot.util.RobotUtils;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -182,7 +180,7 @@ public class Swerve extends SubsystemBase {
     // Holonomic controller for auto-align
     private final PIDController xController;
     private final PIDController yController;
-    private final ProfiledPIDController thetaController;
+    private final PIDController thetaController;
 
     // Target dx, dy, dtheta for manual control (set by commands via setTranslation/setRotation)
     private double dx, dy, dtheta;
@@ -218,11 +216,8 @@ public class Swerve extends SubsystemBase {
                 Constants.translationKP.get(), Constants.translationKI.get(), Constants.translationKD.get());
         yController = new PIDController(
                 Constants.translationKP.get(), Constants.translationKI.get(), Constants.translationKD.get());
-        thetaController = new ProfiledPIDController(
-                Constants.rotationKP.get(),
-                Constants.rotationKI.get(),
-                Constants.rotationKD.get(),
-                new Constraints(10, 10));
+        thetaController =
+                new PIDController(Constants.rotationKP.get(), Constants.rotationKI.get(), Constants.rotationKD.get());
 
         // Set wraparound on theta controller
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -375,7 +370,7 @@ public class Swerve extends SubsystemBase {
         return yController;
     }
 
-    public ProfiledPIDController getThetaController() {
+    public PIDController getThetaController() {
         return thetaController;
     }
 
@@ -505,7 +500,7 @@ public class Swerve extends SubsystemBase {
         double targetX = pidPosition ? xController.getSetpoint() : currentPose.getX();
         double targetY = pidPosition ? yController.getSetpoint() : currentPose.getY();
         double targetTheta = pidRotation
-                ? thetaController.getSetpoint().position
+                ? thetaController.getSetpoint()
                 : currentPose.getRotation().getRadians();
         Pose2d targetPose = new Pose2d(targetX, targetY, Rotation2d.fromRadians(targetTheta));
         Logger.recordOutput("Swerve/TargetPose", targetPose);
@@ -548,7 +543,7 @@ public class Swerve extends SubsystemBase {
             gyroAngle = gyroAngle.plus(Rotation2d.fromRadians(twist.dtheta));
         }
         // Feed odometry to the pose estimator (time, heading, and wheel distances)
-        estimator.updateWithTime(RobotController.getFPGATime() / 1000000., gyroAngle, getModulePositions());
+        estimator.updateWithTime(RobotUtils.getTime(), gyroAngle, getModulePositions());
 
         // Update field pose
         field.setRobotPose(getPose());
