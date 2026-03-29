@@ -194,16 +194,11 @@ public class SwerveCommands {
         }
 
         @Override
-        public void end(boolean e) {
-            swerve.setTranslation(0, 0, false);
-            swerve.setRotation(0);
-            swerve.setPIDPosition(false);
-            swerve.setPIDRotation(false);
-        }
+        public void end(boolean e) {}
 
         @Override
         public boolean isFinished() {
-            return false;
+            return RobotUtils.getTime() - startTime > traj.getTotalTime();
         }
     }
 

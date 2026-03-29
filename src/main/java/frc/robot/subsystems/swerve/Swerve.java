@@ -149,7 +149,7 @@ public class Swerve extends SubsystemBase {
                 new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(-90)));
 
         public static final Transform3d leftCamPose = new Transform3d(
-                new Translation3d(-0.203, 0.305, 0.489),
+                new Translation3d(-0.2, 0.33, 0.48),
                 new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(90)));
 
         public static final Transform3d backCamPose = new Transform3d(
