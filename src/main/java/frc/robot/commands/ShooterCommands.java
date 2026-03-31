@@ -30,6 +30,10 @@ public class ShooterCommands {
                 .withName("set feed speed");
     }
 
+    public boolean atTargetSpeed() {
+        return shooter.atTargetSpeed();
+    }
+
     public Command feedForward() {
         return Commands.startEnd(() -> shooter.feedShoot(), () -> shooter.feedStop())
                 .withName("feed shoot");
