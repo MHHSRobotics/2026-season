@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.util.Field;
 
 public class MultiCommands {
     private ShooterCommands shooterCommands;
@@ -63,8 +62,7 @@ public class MultiCommands {
     public Command shootWithHinge() {
         if (Constants.intakeEnabled && Constants.swerveEnabled) {
             return shoot().alongWith(
-                            new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
-                    .alongWith(swerveCommands.aimAt(Field.hubPosition));
+                            new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))));
         } else {
             return shoot();
         }
@@ -73,7 +71,9 @@ public class MultiCommands {
     public Command getSingleAuto(String pathName, boolean flipped) {
         return intakeCommands
                 .intake()
-                .alongWith(swerveCommands.getTrajCommand(pathName, flipped).andThen(shootWithHinge()));
+                .alongWith(swerveCommands
+                        .getTrajCommand(pathName, flipped)
+                        .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName, flipped))));
     }
 
     public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
@@ -81,8 +81,8 @@ public class MultiCommands {
                 .intake()
                 .alongWith(swerveCommands
                         .getTrajCommand(pathName1, flipped1)
-                        .andThen(shootWithHinge().withTimeout(5))
+                        .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName1, flipped1)).withTimeout(5))
                         .andThen(swerveCommands.getTrajCommand(pathName2, flipped2))
-                        .andThen(shootWithHinge()));
+                        .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName2, flipped2))));
     }
 }
