@@ -71,7 +71,7 @@ public class MultiCommands {
     public Command getSingleAuto(String pathName, boolean flipped) {
         return intakeCommands
                 .intake()
-                .alongWith(swerveCommands
+                .alongWith(swerveCommands.resetToTrajStart(pathName, flipped),swerveCommands
                         .getTrajCommand(pathName, flipped)
                         .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName, flipped))));
     }
@@ -79,7 +79,7 @@ public class MultiCommands {
     public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
         return intakeCommands
                 .intake()
-                .alongWith(swerveCommands
+                .alongWith(swerveCommands.resetToTrajStart(pathName1, flipped1),swerveCommands
                         .getTrajCommand(pathName1, flipped1)
                         .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName1, flipped1)).withTimeout(5))
                         .andThen(swerveCommands.getTrajCommand(pathName2, flipped2))

@@ -291,4 +291,18 @@ public class SwerveCommands {
     public Command resetPose(Pose2d pose) {
         return new InstantCommand(() -> swerve.resetPose(pose)).withName("reset pose");
     }
+
+    public Command resetToTrajStart(String name, boolean flipped) {
+        Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
+        if (traj.isEmpty()) {
+            Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
+            return Commands.none();
+        }
+        Trajectory<SwerveSample> realTraj = traj.get();
+        Pose2d initialPose = realTraj.getInitialPose(RobotUtils.onRedAlliance()).get();
+        if (flipped) {
+            initialPose = new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(), initialPose.getRotation());
+        }
+        return resetPose(initialPose);
+    }
 }
