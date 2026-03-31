@@ -33,15 +33,11 @@ public class MultiCommands {
     }
 
     // Shooter position relative to robot center (meters, robot-frame: +X = forward, +Y = left)
-    // TODO: Measure actual shooter offset on the robot
-    private static final Translation2d shooterOffset = new Translation2d(0.15, 0.0);
+    private static final Translation2d shooterOffset = new Translation2d(-0.3048, 0.0);
 
-    // Legacy launch-speed estimate retained as a seed for the new linear conversion.
-    private static final LoggedNetworkNumber ballSpeed = new LoggedNetworkNumber("Shooter/BallSpeed", 10.0);
     // Converts shooter speed units into estimated projectile exit speed in m/s.
-    // Default keeps behavior close to the old model: 10 m/s at 500 shooter-speed units.
-    private static final LoggedNetworkNumber launchSpeedPerShooterSpeed = new LoggedNetworkNumber(
-            "Shooter/LaunchSpeedPerShooterSpeed", ballSpeed.get() / Shooter.Constants.defaultSpeed.get());
+    private static final LoggedNetworkNumber launchSpeedPerShooterSpeed =
+            new LoggedNetworkNumber("Shooter/LaunchSpeedPerShooterSpeed", 0.0071);
     private static final double minLaunchSpeedMetersPerSecond = 0.1;
     private static final LoggedNetworkNumber aimToleranceRad =
             new LoggedNetworkNumber("Shooter/AimToleranceRad", Math.toRadians(2.0));
