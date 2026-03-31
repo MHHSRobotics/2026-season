@@ -53,6 +53,7 @@ public class MultiCommands {
     }
 
     // Shoots with auto distance calibration
+    @SuppressWarnings("unused")
     public Command shoot() {
         if (frc.robot.Constants.swerveEnabled && frc.robot.Constants.visionEnabled) {
             return shootAtSpeed(() -> {
@@ -63,6 +64,7 @@ public class MultiCommands {
         }
     }
 
+    @SuppressWarnings("unused")
     public Command shootWithHinge() {
         if (frc.robot.Constants.intakeEnabled && frc.robot.Constants.swerveEnabled) {
             return shoot().alongWith(new RepeatCommand(
