@@ -146,6 +146,13 @@ public class MultiCommands {
         return getShotVector(getShooterFieldPosition(), getShooterFieldVelocity());
     }
 
+    private double getAngleToHub() {
+        Translation2d hubPos = Field.hubPosition.get().getTranslation();
+        Translation2d shooterPos = getShooterFieldPosition();
+        double allianceAngle = Math.atan2(hubPos.getY() - shooterPos.getY(), hubPos.getX() - shooterPos.getX());
+        return RobotUtils.invertThetaToAlliance(allianceAngle);
+    }
+
     // Computes the angle from the shooter to the hub using the full launch-vector solve.
     // Returns angle in blue-origin coordinates (suitable for setRotationTarget).
     private double getCompensatedAngleToHub() {
@@ -183,8 +190,9 @@ public class MultiCommands {
     }
 
     public boolean isAimedAndSpunUp() {
-        double angleError =
-                Math.abs(MathUtil.angleModulus(swerve.getRotation().getRadians() - getCompensatedAngleToHub()));
+        double targetAngle =
+                Constants.shooterVelocityCompensationEnabled ? getCompensatedAngleToHub() : getAngleToHub();
+        double angleError = Math.abs(MathUtil.angleModulus(swerve.getRotation().getRadians() - targetAngle));
         boolean ready = angleError < aimToleranceRad.get() && shooterCommands.atTargetSpeed();
 
         Logger.recordOutput("Shooter/AimErrorRad", angleError);
@@ -198,13 +206,19 @@ public class MultiCommands {
         if (!Constants.swerveEnabled) {
             return swerveCommands.setRotationOutput(() -> 0);
         }
-        return swerveCommands.setRotationTarget(() -> getCompensatedAngleToHub(), () -> getAimFeedforward());
+        if (Constants.shooterVelocityCompensationEnabled) {
+            return swerveCommands.setRotationTarget(() -> getCompensatedAngleToHub(), () -> getAimFeedforward());
+        }
+        return swerveCommands.aimAt(Field.hubPosition);
     }
 
     // Shoots with auto distance calibration and radial velocity compensation
     public Command shoot() {
         if (Constants.swerveEnabled) {
-            return shootAtSpeed(() -> getCompensatedShooterSpeed());
+            if (Constants.shooterVelocityCompensationEnabled) {
+                return shootAtSpeed(() -> getCompensatedShooterSpeed());
+            }
+            return shootAtSpeed(() -> getShooterSpeed(getShooterDistanceFromHub()));
         } else {
             return shootDefault();
         }
