@@ -101,6 +101,10 @@ public class SwerveCommands {
         return setPositionTarget(() -> target.get(), () -> Pair.of(0., 0.));
     }
 
+    public Command setPositionTarget(Translation2d target) {
+        return setPositionTarget(() -> target, () -> Pair.of(0., 0.));
+    }
+
     // PID-controlled translation to a field position
     public Command setPositionTarget(Supplier<Translation2d> target, Supplier<Pair<Double, Double>> feedforwards) {
         return Commands.run(
@@ -194,7 +198,12 @@ public class SwerveCommands {
         }
 
         @Override
-        public void end(boolean e) {}
+        public void end(boolean e) {
+            swerve.setTranslation(0, 0, true);
+            swerve.setRotation(0);
+            swerve.setPIDPosition(false);
+            swerve.setPIDRotation(false);
+        }
 
         @Override
         public boolean isFinished() {
@@ -213,6 +222,20 @@ public class SwerveCommands {
             return Commands.none();
         }
         return followTraj(traj.get(), flipped);
+    }
+
+    public Command moveToTrajEnd(String name, boolean flipped) {
+        Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
+        if (traj.isEmpty()) {
+            Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
+            return Commands.none();
+        }
+        Trajectory<SwerveSample> realTraj = traj.get();
+        Pose2d finalPose = realTraj.getFinalPose(RobotUtils.onRedAlliance()).get();
+        if (flipped) {
+            finalPose = new Pose2d(finalPose.getX(), Field.fieldWidth - finalPose.getY(), finalPose.getRotation());
+        }
+        return setPoseTarget(finalPose);
     }
 
     // PID-controlled rotation to aim at a field position (rotates to face the target)
@@ -238,9 +261,14 @@ public class SwerveCommands {
 
     // PID-controlled drive to a field pose
     public Command setPoseTarget(FieldPose2d pose) {
+        return setPoseTarget(pose.get());
+    }
+
+    // PID-controlled drive to a field pose
+    public Command setPoseTarget(Pose2d pose) {
         return Commands.parallel(
                         setPositionTarget(pose.getTranslation()),
-                        setRotationTarget(pose.getOnBlue().getRotation().getRadians()))
+                        setRotationTarget(pose.getRotation().getRadians()))
                 .withName("swerve set pose target");
     }
 
