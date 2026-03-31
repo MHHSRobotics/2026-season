@@ -301,7 +301,8 @@ public class SwerveCommands {
         Trajectory<SwerveSample> realTraj = traj.get();
         Pose2d initialPose = realTraj.getInitialPose(RobotUtils.onRedAlliance()).get();
         if (flipped) {
-            initialPose = new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(), initialPose.getRotation());
+            initialPose =
+                    new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(), initialPose.getRotation());
         }
         return resetPose(initialPose);
     }

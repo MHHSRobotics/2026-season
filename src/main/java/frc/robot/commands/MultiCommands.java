@@ -7,11 +7,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
-import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
 
 public class MultiCommands {
+    public static class Constants {
+        public static final double intakeHingeTime = 0.75;
+        public static final double shootTime = 5;
+    }
+
     private ShooterCommands shooterCommands;
     private IntakeCommands intakeCommands;
     private SwerveCommands swerveCommands;
@@ -50,7 +54,7 @@ public class MultiCommands {
 
     // Shoots with auto distance calibration
     public Command shoot() {
-        if (Constants.swerveEnabled && Constants.visionEnabled) {
+        if (frc.robot.Constants.swerveEnabled && frc.robot.Constants.visionEnabled) {
             return shootAtSpeed(() -> {
                 return getShooterSpeed(swerve.getDistanceFromHub());
             });
@@ -60,9 +64,9 @@ public class MultiCommands {
     }
 
     public Command shootWithHinge() {
-        if (Constants.intakeEnabled && Constants.swerveEnabled) {
-            return shoot().alongWith(
-                            new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))));
+        if (frc.robot.Constants.intakeEnabled && frc.robot.Constants.swerveEnabled) {
+            return shoot().alongWith(new RepeatCommand(
+                    intakeCommands.switchHinge().andThen(new WaitCommand(Constants.intakeHingeTime))));
         } else {
             return shoot();
         }
@@ -71,18 +75,25 @@ public class MultiCommands {
     public Command getSingleAuto(String pathName, boolean flipped) {
         return intakeCommands
                 .intake()
-                .alongWith(swerveCommands.resetToTrajStart(pathName, flipped),swerveCommands
-                        .getTrajCommand(pathName, flipped)
-                        .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName, flipped))));
+                .alongWith(
+                        swerveCommands.resetToTrajStart(pathName, flipped),
+                        swerveCommands
+                                .getTrajCommand(pathName, flipped)
+                                .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName, flipped))));
     }
 
     public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
         return intakeCommands
                 .intake()
-                .alongWith(swerveCommands.resetToTrajStart(pathName1, flipped1),swerveCommands
-                        .getTrajCommand(pathName1, flipped1)
-                        .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName1, flipped1)).withTimeout(5))
-                        .andThen(swerveCommands.getTrajCommand(pathName2, flipped2))
-                        .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName2, flipped2))));
+                .alongWith(
+                        swerveCommands.resetToTrajStart(pathName1, flipped1),
+                        swerveCommands
+                                .getTrajCommand(pathName1, flipped1)
+                                .andThen(shootWithHinge()
+                                        .alongWith(swerveCommands.moveToTrajEnd(pathName1, flipped1))
+                                        .withTimeout(Constants.shootTime))
+                                .andThen(swerveCommands.getTrajCommand(pathName2, flipped2))
+                                .andThen(
+                                        shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName2, flipped2))));
     }
 }

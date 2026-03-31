@@ -443,7 +443,7 @@ public class Swerve extends SubsystemBase {
 
     // Gets rotation error to the goal in radians
     public double getRotationError() {
-        return pidRotation ? Math.abs(thetaController.getPositionError()) : 0;
+        return pidRotation ? Math.abs(thetaController.getError()) : 0;
     }
 
     // Gets distance from hub
