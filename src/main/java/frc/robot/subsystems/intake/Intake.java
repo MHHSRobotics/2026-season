@@ -55,7 +55,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean(
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
-        public static final double hingeDown = Units.degreesToRadians(0);
+        public static final double hingeDown = Units.degreesToRadians(-10);
         public static final double hingeUp =
                 frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
 
@@ -91,7 +91,7 @@ public class Intake extends SubsystemBase {
         hingeEncoder.setGearRatio(Constants.encoderRatio);
 
         hingeMotor.setInverted(Constants.hingeInverted);
-        hingeMotor.connectEncoder(hingeEncoder, Constants.hingeRatio);
+        hingeMotor.connectEncoder(hingeEncoder, Constants.hingeRatio, true);
         hingeMotor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
         hingeMotor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
         hingeMotor.setOffset(Constants.hingeOffset);
@@ -99,8 +99,6 @@ public class Intake extends SubsystemBase {
 
         rollerMotor.setInverted(Constants.rollerInverted);
         rollerMotor.connectInternalSensor(Constants.rollerRatio);
-
-        setHingeDown();
     }
 
     private void setLocked(boolean brake) {
@@ -134,7 +132,7 @@ public class Intake extends SubsystemBase {
 
     public void setHingeDown() {
         intakeUp = false;
-        hingeMotor.setTorqueCurrent(-Constants.hingeDownTorque.get());
+        setHingeGoal(Constants.hingeDown);
     }
 
     public void setHingeUp() {
@@ -145,9 +143,13 @@ public class Intake extends SubsystemBase {
     public void setHingeGoal(double goal) {
         hingeMotor.setGoalWithCurrentMagic(goal, () -> {
             double position = hingeMotor.getInputs().position;
-            double gravityFF =
-                    Constants.hingeKG.get() * Math.cos(position + Math.PI / 2 - Constants.hingeVerticalPos.get());
-            return gravityFF;
+            if (position > 0 || goal > 0) {
+                double gravityFF =
+                        Constants.hingeKG.get() * Math.cos(position + Math.PI / 2 - Constants.hingeVerticalPos.get());
+                return gravityFF;
+            } else {
+                return -Constants.hingeDownTorque.get();
+            }
         });
     }
 

@@ -14,6 +14,11 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import frc.robot.Constants.Mode;
 import frc.robot.commands.HangCommands;
 import frc.robot.commands.IntakeCommands;
@@ -52,8 +57,10 @@ import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.subsystems.swerve.VisionSim;
+import frc.robot.util.Alerts;
 import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
+import frc.robot.util.RobotUtils;
 
 public class RobotContainer {
     // Subsystems
@@ -374,17 +381,21 @@ public class RobotContainer {
         }
 
         if (Constants.ledsEnabled) {
-            LedIO ledIO;
+            LedIO backCandle;
+            LedIO frontCandle;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
-                    ledIO = new LedIOCANdle("leds", "LED", LED.Constants.id);
+                    backCandle = new LedIOCANdle("back candle", "LED/BackCandle", LED.Constants.backId);
+                    frontCandle = new LedIOCANdle("front candle", "LED/FrontCandle", LED.Constants.frontId);
                     break;
                 default:
-                    ledIO = new LedIO("leds", "LED");
+                    backCandle = new LedIO("back candle", "LED/BackCandle");
+                    frontCandle = new LedIO("front candle", "LED/FrontCandle");
+
                     break;
             }
-            led = new LED(ledIO, shooter, swerve);
+            led = new LED(frontCandle, backCandle, shooter, swerve);
         }
     }
 
@@ -501,15 +512,6 @@ public class RobotContainer {
 
             otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
-
-            driveController
-                    .povUp()
-                    .onTrue(Commands.runOnce(
-                            () -> Intake.Constants.defaultSpeed.set(Intake.Constants.defaultSpeed.get() + 0.1)));
-            driveController
-                    .povDown()
-                    .onTrue(Commands.runOnce(
-                            () -> Intake.Constants.defaultSpeed.set(Intake.Constants.defaultSpeed.get() - 0.1)));
         }
         if (Constants.shooterEnabled) {
             operator.povLeft().whileTrue(shooterCommands.feedForward());
@@ -754,6 +756,57 @@ public class RobotContainer {
         autoChooser.addOption("RI_LS_N|LS_RS_N", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_RS_N", false));
         autoChooser.addOption("RI_RS_N|RS_LS_N", multiCommands.getDoubleAuto("LI_LS_N", true, "LS_RS_N", true));
         autoChooser.addOption("RI_RS_N|RS_RS_N", multiCommands.getDoubleAuto("LI_LS_N", true, "LS_LS_N", true));
+
+        if (Constants.swerveEnabled) {
+            // Register named commands for PathPlanner
+            if (Constants.intakeEnabled) {
+                NamedCommands.registerCommand("IntakeDown", intakeCommands.setHingeDown());
+                NamedCommands.registerCommand("IntakeUp", intakeCommands.setHingeUp());
+                NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
+                NamedCommands.registerCommand(
+                        "IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
+            }
+
+            if (multiCommands != null) {
+                NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
+                NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
+            }
+
+            if (Constants.hangEnabled) {
+                NamedCommands.registerCommand("HangUp", RobotUtils.schedule(hangCommands.setSpeed(() -> 0.2)));
+                NamedCommands.registerCommand("HangDown", RobotUtils.schedule(hangCommands.setSpeed(() -> -0.2)));
+            }
+
+            RobotConfig config;
+
+            try {
+                config = RobotConfig.fromGUISettings();
+            } catch (Exception e) {
+                Alerts.create("Failed to load robot config!", AlertType.kError);
+                e.printStackTrace();
+                return;
+            }
+            AutoBuilder.configure(
+                    swerve::getPose,
+                    swerve::resetPose,
+                    swerve::getChassisSpeeds,
+                    swerve::setChassisSpeeds,
+                    new PPHolonomicDriveController(
+                            new PIDConstants(
+                                    Swerve.Constants.translationKP.get(),
+                                    Swerve.Constants.translationKI.get(),
+                                    Swerve.Constants.translationKD.get()),
+                            new PIDConstants(
+                                    Swerve.Constants.rotationKP.get(),
+                                    Swerve.Constants.rotationKI.get(),
+                                    Swerve.Constants.rotationKD.get())),
+                    config,
+                    RobotUtils::onRedAlliance,
+                    swerve);
+            for (String auto : AutoBuilder.getAllAutoNames()) {
+                autoChooser.addOption("PP_" + auto, AutoBuilder.buildAuto(auto));
+            }
+        }
     }
 
     public Command getAutonomousCommand() {

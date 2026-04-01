@@ -15,24 +15,29 @@ public class LED extends SubsystemBase {
         public static final int startIndex = 8;
         public static final int endIndex = 20;
 
-        public static final int id = 22;
+        public static final int backId = 22;
+        public static final int frontId = 21;
     }
 
-    private LedIO leds;
+    private LedIO frontCandle;
+    private LedIO backCandle;
     private Shooter shooter;
     private Swerve swerve;
     private RGBWColor currentColor;
 
-    public LED(LedIO ledIO, Shooter shooter, Swerve swerve) {
-        leds = ledIO;
+    public LED(LedIO frontCandle, LedIO backCandle, Shooter shooter, Swerve swerve) {
+        this.frontCandle = frontCandle;
+        this.backCandle = backCandle;
         this.shooter = shooter;
         this.swerve = swerve;
         currentColor = new RGBWColor(0, 0, 0);
+        backCandle.setColor(0, 7, new RGBWColor(0, 0, 255, 255));
+        frontCandle.setColor(0, 7, new RGBWColor(0, 0, 255, 255));
     }
 
     public void setColor(RGBWColor color) {
         if (currentColor.Red != color.Red || currentColor.Green != color.Green || currentColor.Blue != color.Blue) {
-            leds.setColor(Constants.startIndex, Constants.endIndex, color);
+            backCandle.setColor(Constants.startIndex, Constants.endIndex, color);
             currentColor = color;
         }
     }

@@ -21,11 +21,11 @@ public class IntakeCommands {
     }
 
     public Command setHingeDown() {
-        return Commands.runOnce(() -> intake.setHingeDown(), intake);
+        return Commands.runOnce(() -> intake.setHingeDown());
     }
 
     public Command setHingeUp() {
-        return Commands.runOnce(() -> intake.setHingeUp(), intake);
+        return Commands.runOnce(() -> intake.setHingeUp());
     }
 
     public Command switchHinge() {
