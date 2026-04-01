@@ -78,6 +78,7 @@ public class MultiCommands {
         return intakeCommands
                 .intake()
                 .alongWith(
+                        intakeCommands.setHingeDown(),
                         swerveCommands.resetToTrajStart(pathName, flipped),
                         swerveCommands
                                 .getTrajCommand(pathName, flipped)
@@ -88,13 +89,16 @@ public class MultiCommands {
         return intakeCommands
                 .intake()
                 .alongWith(
+                        intakeCommands.setHingeDown(),
                         swerveCommands.resetToTrajStart(pathName1, flipped1),
                         swerveCommands
                                 .getTrajCommand(pathName1, flipped1)
                                 .andThen(shootWithHinge()
                                         .alongWith(swerveCommands.moveToTrajEnd(pathName1, flipped1))
                                         .withTimeout(Constants.shootTime))
-                                .andThen(swerveCommands.getTrajCommand(pathName2, flipped2))
+                                .andThen(swerveCommands
+                                        .getTrajCommand(pathName2, flipped2)
+                                        .alongWith(intakeCommands.setHingeDown()))
                                 .andThen(
                                         shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName2, flipped2))));
     }

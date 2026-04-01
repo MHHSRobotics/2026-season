@@ -91,7 +91,7 @@ public class Intake extends SubsystemBase {
         hingeEncoder.setGearRatio(Constants.encoderRatio);
 
         hingeMotor.setInverted(Constants.hingeInverted);
-        hingeMotor.connectEncoder(hingeEncoder, Constants.hingeRatio, false);
+        hingeMotor.connectEncoder(hingeEncoder, Constants.hingeRatio, true);
         hingeMotor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
         hingeMotor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
         hingeMotor.setOffset(Constants.hingeOffset);
@@ -99,8 +99,6 @@ public class Intake extends SubsystemBase {
 
         rollerMotor.setInverted(Constants.rollerInverted);
         rollerMotor.connectInternalSensor(Constants.rollerRatio);
-
-        setHingeDown();
     }
 
     private void setLocked(boolean brake) {

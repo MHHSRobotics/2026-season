@@ -374,17 +374,21 @@ public class RobotContainer {
         }
 
         if (Constants.ledsEnabled) {
-            LedIO ledIO;
+            LedIO backCandle;
+            LedIO frontCandle;
             switch (Constants.currentMode) {
                 case REAL:
                 case SIM:
-                    ledIO = new LedIOCANdle("leds", "LED", LED.Constants.id);
+                    backCandle = new LedIOCANdle("back candle", "LED/BackCandle", LED.Constants.backId);
+                    frontCandle = new LedIOCANdle("front candle", "LED/FrontCandle", LED.Constants.frontId);
                     break;
                 default:
-                    ledIO = new LedIO("leds", "LED");
+                    backCandle = new LedIO("back candle", "LED/BackCandle");
+                    frontCandle = new LedIO("front candle", "LED/FrontCandle");
+
                     break;
             }
-            led = new LED(ledIO, shooter, swerve);
+            led = new LED(frontCandle, backCandle, shooter, swerve);
         }
     }
 

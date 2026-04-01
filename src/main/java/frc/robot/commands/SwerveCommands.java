@@ -171,26 +171,29 @@ public class SwerveCommands {
 
         @Override
         public void execute() {
-            SwerveSample trajSample = traj.sampleAt(RobotUtils.getTime() - startTime, RobotUtils.onRedAlliance())
+            SwerveSample trajSample1 = traj.sampleAt(RobotUtils.getTime() - startTime, RobotUtils.onRedAlliance())
+                    .get();
+            SwerveSample trajSample2 = traj.sampleAt(
+                            (RobotUtils.getTime() - startTime) + 0.1, RobotUtils.onRedAlliance())
                     .get();
             Pose2d currentPose = swerve.getPose();
-            Pose2d targetPose = trajSample.getPose();
-            double xOutput = swerve.getXController().calculate(currentPose.getX(), targetPose.getX()) + trajSample.vx;
+            Pose2d targetPose = trajSample1.getPose();
+            double xOutput = swerve.getXController().calculate(currentPose.getX(), targetPose.getX()) + trajSample2.vx;
             double yOutput = flipped
                     ? (swerve.getYController().calculate(currentPose.getY(), Field.fieldWidth - targetPose.getY())
-                            - trajSample.vy)
-                    : (swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) + trajSample.vy);
+                            - trajSample2.vy)
+                    : (swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) + trajSample2.vy);
             double thetaOutput = flipped
                     ? (swerve.getThetaController()
                                     .calculate(
                                             currentPose.getRotation().getRadians(),
                                             -targetPose.getRotation().getRadians())
-                            - trajSample.omega)
+                            - trajSample2.omega)
                     : (swerve.getThetaController()
                                     .calculate(
                                             currentPose.getRotation().getRadians(),
                                             targetPose.getRotation().getRadians())
-                            + trajSample.omega);
+                            + trajSample2.omega);
             swerve.setTranslation(xOutput, yOutput, true);
             swerve.setRotation(thetaOutput);
             swerve.setPIDPosition(true);
@@ -233,7 +236,10 @@ public class SwerveCommands {
         Trajectory<SwerveSample> realTraj = traj.get();
         Pose2d finalPose = realTraj.getFinalPose(RobotUtils.onRedAlliance()).get();
         if (flipped) {
-            finalPose = new Pose2d(finalPose.getX(), Field.fieldWidth - finalPose.getY(), finalPose.getRotation());
+            finalPose = new Pose2d(
+                    finalPose.getX(),
+                    Field.fieldWidth - finalPose.getY(),
+                    finalPose.getRotation().unaryMinus());
         }
         return setPoseTarget(finalPose);
     }
@@ -293,17 +299,19 @@ public class SwerveCommands {
     }
 
     public Command resetToTrajStart(String name, boolean flipped) {
-        Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
-        if (traj.isEmpty()) {
-            Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
-            return Commands.none();
-        }
-        Trajectory<SwerveSample> realTraj = traj.get();
-        Pose2d initialPose = realTraj.getInitialPose(RobotUtils.onRedAlliance()).get();
-        if (flipped) {
-            initialPose =
-                    new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(), initialPose.getRotation());
-        }
-        return resetPose(initialPose);
+        // Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
+        // if (traj.isEmpty()) {
+        //     Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
+        //     return Commands.none();
+        // }
+        // Trajectory<SwerveSample> realTraj = traj.get();
+        // Pose2d initialPose = realTraj.getInitialPose(RobotUtils.onRedAlliance()).get();
+        // if (flipped) {
+        //     initialPose =
+        //             new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(),
+        // initialPose.getRotation().unaryMinus());
+        // }
+        // return resetPose(initialPose);
+        return Commands.none();
     }
 }
