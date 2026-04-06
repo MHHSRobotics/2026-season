@@ -101,6 +101,13 @@ public class SwerveCommands {
         return setPositionTarget(() -> target.get(), () -> Pair.of(0., 0.));
     }
 
+    public Command setPositionTarget(Translation2d target) {
+        return setPositionTarget(() -> target, () -> Pair.of(0., 0.));
+    }
+
+    public Command setPositionTarget(Supplier<Translation2d> target) {
+        return setPositionTarget(target, () -> Pair.of(0., 0.));
+    }
     // PID-controlled translation to a field position
     public Command setPositionTarget(Supplier<Translation2d> target, Supplier<Pair<Double, Double>> feedforwards) {
         return Commands.run(
@@ -127,15 +134,16 @@ public class SwerveCommands {
         return setRotationTarget(() -> theta, () -> 0);
     }
 
+    public Command setRotationTarget(DoubleSupplier theta) {
+        return setRotationTarget(theta, () -> 0);
+    }
+
     // PID-controlled rotation to a field heading (blue-origin radians)
     public Command setRotationTarget(DoubleSupplier theta, DoubleSupplier feedforward) {
         return Commands.run(
                         () -> {
-                            Pose2d alliancePose = new FieldPose2d(0, 0, theta.getAsDouble()).get();
                             double output = swerve.getThetaController()
-                                    .calculate(
-                                            swerve.getPose().getRotation().getRadians(),
-                                            alliancePose.getRotation().getRadians());
+                                    .calculate(swerve.getPose().getRotation().getRadians(), theta.getAsDouble());
                             swerve.setRotation(output + feedforward.getAsDouble());
                             swerve.setPIDRotation(true);
                         },
@@ -167,26 +175,29 @@ public class SwerveCommands {
 
         @Override
         public void execute() {
-            SwerveSample trajSample = traj.sampleAt(RobotUtils.getTime() - startTime, RobotUtils.onRedAlliance())
+            SwerveSample trajSample1 = traj.sampleAt(RobotUtils.getTime() - startTime, RobotUtils.onRedAlliance())
+                    .get();
+            SwerveSample trajSample2 = traj.sampleAt(
+                            (RobotUtils.getTime() - startTime) + 0.1, RobotUtils.onRedAlliance())
                     .get();
             Pose2d currentPose = swerve.getPose();
-            Pose2d targetPose = trajSample.getPose();
-            double xOutput = swerve.getXController().calculate(currentPose.getX(), targetPose.getX()) + trajSample.vx;
+            Pose2d targetPose = trajSample1.getPose();
+            double xOutput = swerve.getXController().calculate(currentPose.getX(), targetPose.getX()) + trajSample2.vx;
             double yOutput = flipped
                     ? (swerve.getYController().calculate(currentPose.getY(), Field.fieldWidth - targetPose.getY())
-                            - trajSample.vy)
-                    : (swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) + trajSample.vy);
+                            - trajSample2.vy)
+                    : (swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) + trajSample2.vy);
             double thetaOutput = flipped
                     ? (swerve.getThetaController()
                                     .calculate(
                                             currentPose.getRotation().getRadians(),
                                             -targetPose.getRotation().getRadians())
-                            - trajSample.omega)
+                            - trajSample2.omega)
                     : (swerve.getThetaController()
                                     .calculate(
                                             currentPose.getRotation().getRadians(),
                                             targetPose.getRotation().getRadians())
-                            + trajSample.omega);
+                            + trajSample2.omega);
             swerve.setTranslation(xOutput, yOutput, true);
             swerve.setRotation(thetaOutput);
             swerve.setPIDPosition(true);
@@ -194,7 +205,12 @@ public class SwerveCommands {
         }
 
         @Override
-        public void end(boolean e) {}
+        public void end(boolean e) {
+            swerve.setTranslation(0, 0, true);
+            swerve.setRotation(0);
+            swerve.setPIDPosition(false);
+            swerve.setPIDRotation(false);
+        }
 
         @Override
         public boolean isFinished() {
@@ -213,6 +229,26 @@ public class SwerveCommands {
             return Commands.none();
         }
         return followTraj(traj.get(), flipped);
+    }
+
+    public Command moveToTrajEnd(String name, boolean flipped) {
+        Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
+        if (traj.isEmpty()) {
+            Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
+            return Commands.none();
+        }
+        Trajectory<SwerveSample> realTraj = traj.get();
+
+        return setPoseTarget(() -> {
+            Pose2d finalPose = realTraj.getFinalPose(RobotUtils.onRedAlliance()).get();
+            if (flipped) {
+                finalPose = new Pose2d(
+                        finalPose.getX(),
+                        Field.fieldWidth - finalPose.getY(),
+                        finalPose.getRotation().unaryMinus());
+            }
+            return finalPose;
+        });
     }
 
     // PID-controlled rotation to aim at a field position (rotates to face the target)
@@ -238,9 +274,22 @@ public class SwerveCommands {
 
     // PID-controlled drive to a field pose
     public Command setPoseTarget(FieldPose2d pose) {
+        return setPoseTarget(pose.get());
+    }
+
+    // PID-controlled drive to a field pose
+    public Command setPoseTarget(Pose2d pose) {
         return Commands.parallel(
                         setPositionTarget(pose.getTranslation()),
-                        setRotationTarget(pose.getOnBlue().getRotation().getRadians()))
+                        setRotationTarget(pose.getRotation().getRadians()))
+                .withName("swerve set pose target");
+    }
+
+    // PID-controlled drive to a field pose
+    public Command setPoseTarget(Supplier<Pose2d> pose) {
+        return Commands.parallel(
+                        setPositionTarget(() -> pose.get().getTranslation()),
+                        setRotationTarget(() -> pose.get().getRotation().getRadians()))
                 .withName("swerve set pose target");
     }
 
@@ -262,5 +311,22 @@ public class SwerveCommands {
     // Reset swerve pose
     public Command resetPose(Pose2d pose) {
         return new InstantCommand(() -> swerve.resetPose(pose)).withName("reset pose");
+    }
+
+    public Command resetToTrajStart(String name, boolean flipped) {
+        // Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
+        // if (traj.isEmpty()) {
+        //     Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
+        //     return Commands.none();
+        // }
+        // Trajectory<SwerveSample> realTraj = traj.get();
+        // Pose2d initialPose = realTraj.getInitialPose(RobotUtils.onRedAlliance()).get();
+        // if (flipped) {
+        //     initialPose =
+        //             new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(),
+        // initialPose.getRotation().unaryMinus());
+        // }
+        // return resetPose(initialPose);
+        return Commands.none();
     }
 }

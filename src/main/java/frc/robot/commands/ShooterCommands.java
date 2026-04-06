@@ -3,6 +3,7 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 import frc.robot.subsystems.shooter.Shooter;
@@ -22,6 +23,7 @@ public class ShooterCommands {
     public Command shoot(DoubleSupplier speed) {
         return setFeedSpeed(() -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0)
                 .alongWith(setFlySpeed(speed))
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("fly shoot");
     }
 

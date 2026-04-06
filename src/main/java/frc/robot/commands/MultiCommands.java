@@ -224,6 +224,7 @@ public class MultiCommands {
         }
     }
 
+    @SuppressWarnings("unused")
     public Command shootWithHinge() {
         if (Constants.intakeEnabled && Constants.swerveEnabled) {
             return shoot().alongWith(
@@ -237,16 +238,29 @@ public class MultiCommands {
     public Command getSingleAuto(String pathName, boolean flipped) {
         return intakeCommands
                 .intake()
-                .alongWith(swerveCommands.getTrajCommand(pathName, flipped).andThen(shootWithHinge()));
+                .alongWith(
+                        intakeCommands.setHingeDown(),
+                        swerveCommands.resetToTrajStart(pathName, flipped),
+                        swerveCommands
+                                .getTrajCommand(pathName, flipped)
+                                .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName, flipped))));
     }
 
     public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
         return intakeCommands
                 .intake()
-                .alongWith(swerveCommands
-                        .getTrajCommand(pathName1, flipped1)
-                        .andThen(shootWithHinge().withTimeout(5))
-                        .andThen(swerveCommands.getTrajCommand(pathName2, flipped2))
-                        .andThen(shootWithHinge()));
+                .alongWith(
+                        intakeCommands.setHingeDown(),
+                        swerveCommands.resetToTrajStart(pathName1, flipped1),
+                        swerveCommands
+                                .getTrajCommand(pathName1, flipped1)
+                                .andThen(shootWithHinge()
+                                        .alongWith(swerveCommands.moveToTrajEnd(pathName1, flipped1))
+                                        .withTimeout(Constants.shootTime))
+                                .andThen(swerveCommands
+                                        .getTrajCommand(pathName2, flipped2)
+                                        .alongWith(intakeCommands.setHingeDown()))
+                                .andThen(
+                                        shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName2, flipped2))));
     }
 }
