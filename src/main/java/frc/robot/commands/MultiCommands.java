@@ -20,6 +20,10 @@ import frc.robot.util.Field;
 import frc.robot.util.RobotUtils;
 
 public class MultiCommands {
+    public static class Constants{
+        public static final double hingeTime=0.75;
+        public static final double shootTime=5;
+    }
     private static class ShotVector {
         public final Translation2d robotRelativeLaunchVelocity;
         public final double shooterSpeed;
@@ -164,9 +168,9 @@ public class MultiCommands {
         Translation2d shooterPos = getShooterFieldPosition();
         Translation2d shooterVel = getShooterFieldVelocity();
         ShotVector currentShot = getShotVector(shooterPos, shooterVel);
-        Translation2d nextShooterPos = shooterPos.plus(shooterVel.times(Constants.loopTime));
+        Translation2d nextShooterPos = shooterPos.plus(shooterVel.times(frc.robot.Constants.loopTime));
         ShotVector nextShot = getShotVector(nextShooterPos, shooterVel);
-        double dAngleDt = MathUtil.angleModulus(nextShot.botAngleBlue - currentShot.botAngleBlue) / Constants.loopTime;
+        double dAngleDt = MathUtil.angleModulus(nextShot.botAngleBlue - currentShot.botAngleBlue) / frc.robot.Constants.loopTime;
 
         Logger.recordOutput("Shooter/AimFeedforward", dAngleDt);
 
@@ -191,7 +195,7 @@ public class MultiCommands {
 
     public boolean isAimedAndSpunUp() {
         double targetAngle =
-                Constants.shooterVelocityCompensationEnabled ? getCompensatedAngleToHub() : getAngleToHub();
+                frc.robot.Constants.shooterVelocityCompensationEnabled ? getCompensatedAngleToHub() : getAngleToHub();
         double angleError = Math.abs(MathUtil.angleModulus(swerve.getRotation().getRadians() - targetAngle));
         boolean ready = angleError < aimToleranceRad.get() && shooterCommands.atTargetSpeed();
 
@@ -203,10 +207,10 @@ public class MultiCommands {
 
     // Aims the robot at the hub with velocity compensation
     public Command aimAtHub() {
-        if (!Constants.swerveEnabled) {
+        if (!frc.robot.Constants.swerveEnabled) {
             return swerveCommands.setRotationOutput(() -> 0);
         }
-        if (Constants.shooterVelocityCompensationEnabled) {
+        if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
             return swerveCommands.setRotationTarget(() -> getCompensatedAngleToHub(), () -> getAimFeedforward());
         }
         return swerveCommands.aimAt(Field.hubPosition);
@@ -214,8 +218,8 @@ public class MultiCommands {
 
     // Shoots with auto distance calibration and radial velocity compensation
     public Command shoot() {
-        if (Constants.swerveEnabled) {
-            if (Constants.shooterVelocityCompensationEnabled) {
+        if (frc.robot.Constants.swerveEnabled) {
+            if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
                 return shootAtSpeed(() -> getCompensatedShooterSpeed());
             }
             return shootAtSpeed(() -> getShooterSpeed(getShooterDistanceFromHub()));
@@ -226,9 +230,9 @@ public class MultiCommands {
 
     @SuppressWarnings("unused")
     public Command shootWithHinge() {
-        if (Constants.intakeEnabled && Constants.swerveEnabled) {
+        if (frc.robot.Constants.intakeEnabled && frc.robot.Constants.swerveEnabled) {
             return shoot().alongWith(
-                            new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(0.75))))
+                            new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(Constants.hingeTime))))
                     .alongWith(aimAtHub());
         } else {
             return shoot();
