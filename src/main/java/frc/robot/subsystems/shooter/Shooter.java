@@ -15,7 +15,7 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
         public static final LoggedNetworkNumber defaultSpeed =
-                new LoggedNetworkNumber("Shooter/DefaultSpeed", 500); // Default shooter speed
+                new LoggedNetworkNumber("Shooter/DefaultSpeed", 250); // Default shooter speed
 
         public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 1); // kP
         public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
