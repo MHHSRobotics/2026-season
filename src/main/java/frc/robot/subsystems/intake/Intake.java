@@ -67,7 +67,7 @@ public class Intake extends SubsystemBase {
         public static final boolean rollerInverted = false;
         public static final boolean encoderInverted = false;
 
-        public static final double hingeOffset = 0.5;
+        public static final double hingeOffset = -0.5;
 
         public static final LoggedNetworkNumber hingeDownTorque = new LoggedNetworkNumber("Intake/HingeDown", 20);
 

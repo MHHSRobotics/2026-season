@@ -105,6 +105,9 @@ public class SwerveCommands {
         return setPositionTarget(() -> target, () -> Pair.of(0., 0.));
     }
 
+    public Command setPositionTarget(Supplier<Translation2d> target) {
+        return setPositionTarget(target, () -> Pair.of(0., 0.));
+    }
     // PID-controlled translation to a field position
     public Command setPositionTarget(Supplier<Translation2d> target, Supplier<Pair<Double, Double>> feedforwards) {
         return Commands.run(
@@ -131,15 +134,16 @@ public class SwerveCommands {
         return setRotationTarget(() -> theta, () -> 0);
     }
 
+    public Command setRotationTarget(DoubleSupplier theta) {
+        return setRotationTarget(theta, () -> 0);
+    }
+
     // PID-controlled rotation to a field heading (blue-origin radians)
     public Command setRotationTarget(DoubleSupplier theta, DoubleSupplier feedforward) {
         return Commands.run(
                         () -> {
-                            Pose2d alliancePose = new FieldPose2d(0, 0, theta.getAsDouble()).get();
                             double output = swerve.getThetaController()
-                                    .calculate(
-                                            swerve.getPose().getRotation().getRadians(),
-                                            alliancePose.getRotation().getRadians());
+                                    .calculate(swerve.getPose().getRotation().getRadians(), theta.getAsDouble());
                             swerve.setRotation(output + feedforward.getAsDouble());
                             swerve.setPIDRotation(true);
                         },
@@ -234,14 +238,17 @@ public class SwerveCommands {
             return Commands.none();
         }
         Trajectory<SwerveSample> realTraj = traj.get();
-        Pose2d finalPose = realTraj.getFinalPose(RobotUtils.onRedAlliance()).get();
-        if (flipped) {
-            finalPose = new Pose2d(
-                    finalPose.getX(),
-                    Field.fieldWidth - finalPose.getY(),
-                    finalPose.getRotation().unaryMinus());
-        }
-        return setPoseTarget(finalPose);
+
+        return setPoseTarget(() -> {
+            Pose2d finalPose = realTraj.getFinalPose(RobotUtils.onRedAlliance()).get();
+            if (flipped) {
+                finalPose = new Pose2d(
+                        finalPose.getX(),
+                        Field.fieldWidth - finalPose.getY(),
+                        finalPose.getRotation().unaryMinus());
+            }
+            return finalPose;
+        });
     }
 
     // PID-controlled rotation to aim at a field position (rotates to face the target)
@@ -275,6 +282,14 @@ public class SwerveCommands {
         return Commands.parallel(
                         setPositionTarget(pose.getTranslation()),
                         setRotationTarget(pose.getRotation().getRadians()))
+                .withName("swerve set pose target");
+    }
+
+    // PID-controlled drive to a field pose
+    public Command setPoseTarget(Supplier<Pose2d> pose) {
+        return Commands.parallel(
+                        setPositionTarget(() -> pose.get().getTranslation()),
+                        setRotationTarget(() -> pose.get().getRotation().getRadians()))
                 .withName("swerve set pose target");
     }
 
