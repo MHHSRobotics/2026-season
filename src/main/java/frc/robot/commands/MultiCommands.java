@@ -13,17 +13,17 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
-import frc.robot.Constants;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.util.Field;
 import frc.robot.util.RobotUtils;
 
 public class MultiCommands {
-    public static class Constants{
-        public static final double hingeTime=0.75;
-        public static final double shootTime=5;
+    public static class Constants {
+        public static final double hingeTime = 0.75;
+        public static final double shootTime = 5;
     }
+
     private static class ShotVector {
         public final Translation2d robotRelativeLaunchVelocity;
         public final double shooterSpeed;
@@ -170,7 +170,8 @@ public class MultiCommands {
         ShotVector currentShot = getShotVector(shooterPos, shooterVel);
         Translation2d nextShooterPos = shooterPos.plus(shooterVel.times(frc.robot.Constants.loopTime));
         ShotVector nextShot = getShotVector(nextShooterPos, shooterVel);
-        double dAngleDt = MathUtil.angleModulus(nextShot.botAngleBlue - currentShot.botAngleBlue) / frc.robot.Constants.loopTime;
+        double dAngleDt =
+                MathUtil.angleModulus(nextShot.botAngleBlue - currentShot.botAngleBlue) / frc.robot.Constants.loopTime;
 
         Logger.recordOutput("Shooter/AimFeedforward", dAngleDt);
 
@@ -231,8 +232,8 @@ public class MultiCommands {
     @SuppressWarnings("unused")
     public Command shootWithHinge() {
         if (frc.robot.Constants.intakeEnabled && frc.robot.Constants.swerveEnabled) {
-            return shoot().alongWith(
-                            new RepeatCommand(intakeCommands.switchHinge().andThen(new WaitCommand(Constants.hingeTime))))
+            return shoot().alongWith(new RepeatCommand(
+                            intakeCommands.switchHinge().andThen(new WaitCommand(Constants.hingeTime))))
                     .alongWith(aimAtHub());
         } else {
             return shoot();
