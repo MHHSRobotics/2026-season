@@ -21,7 +21,6 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.util.Alerts;
-import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.FieldTranslation2d;
 import frc.robot.util.RobotUtils;
@@ -159,11 +158,9 @@ public class SwerveCommands {
         private double startTime;
         private Trajectory<SwerveSample> traj;
         private Swerve swerve;
-        private boolean flipped;
 
-        public FollowTraj(Trajectory<SwerveSample> traj, boolean flipped, Swerve swerve) {
+        public FollowTraj(Trajectory<SwerveSample> traj, Swerve swerve) {
             this.traj = traj;
-            this.flipped = flipped;
             this.swerve = swerve;
             addRequirements(swerve);
         }
@@ -183,21 +180,12 @@ public class SwerveCommands {
             Pose2d currentPose = swerve.getPose();
             Pose2d targetPose = trajSample1.getPose();
             double xOutput = swerve.getXController().calculate(currentPose.getX(), targetPose.getX()) + trajSample2.vx;
-            double yOutput = flipped
-                    ? (swerve.getYController().calculate(currentPose.getY(), Field.fieldWidth - targetPose.getY())
-                            - trajSample2.vy)
-                    : (swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) + trajSample2.vy);
-            double thetaOutput = flipped
-                    ? (swerve.getThetaController()
-                                    .calculate(
-                                            currentPose.getRotation().getRadians(),
-                                            -targetPose.getRotation().getRadians())
-                            - trajSample2.omega)
-                    : (swerve.getThetaController()
-                                    .calculate(
-                                            currentPose.getRotation().getRadians(),
-                                            targetPose.getRotation().getRadians())
-                            + trajSample2.omega);
+            double yOutput = swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) + trajSample2.vy;
+            double thetaOutput = swerve.getThetaController()
+                            .calculate(
+                                    currentPose.getRotation().getRadians(),
+                                    targetPose.getRotation().getRadians())
+                    + trajSample2.omega;
             swerve.setTranslation(xOutput, yOutput, true);
             swerve.setRotation(thetaOutput);
             swerve.setPIDPosition(true);
@@ -218,8 +206,8 @@ public class SwerveCommands {
         }
     }
 
-    public Command followTraj(Trajectory<SwerveSample> traj, boolean flipped) {
-        return new FollowTraj(traj, flipped, swerve);
+    public Command followTraj(Trajectory<SwerveSample> traj) {
+        return new FollowTraj(traj, swerve);
     }
 
     public Command getTrajCommand(String name, boolean flipped) {
@@ -228,7 +216,8 @@ public class SwerveCommands {
             Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
             return Commands.none();
         }
-        return followTraj(traj.get(), flipped);
+        Trajectory<SwerveSample> flippedTraj = flipped ? traj.get().mirrorY() : traj.get();
+        return followTraj(flippedTraj);
     }
 
     public Command moveToTrajEnd(String name, boolean flipped) {
@@ -238,17 +227,9 @@ public class SwerveCommands {
             return Commands.none();
         }
         Trajectory<SwerveSample> realTraj = traj.get();
-
-        return setPoseTarget(() -> {
-            Pose2d finalPose = realTraj.getFinalPose(RobotUtils.onRedAlliance()).get();
-            if (flipped) {
-                finalPose = new Pose2d(
-                        finalPose.getX(),
-                        Field.fieldWidth - finalPose.getY(),
-                        finalPose.getRotation().unaryMinus());
-            }
-            return finalPose;
-        });
+        Trajectory<SwerveSample> flippedTraj = flipped ? realTraj.mirrorY() : realTraj;
+        return setPoseTarget(
+                () -> flippedTraj.getFinalPose(RobotUtils.onRedAlliance()).get());
     }
 
     // PID-controlled rotation to aim at a field position (rotates to face the target)
@@ -274,15 +255,12 @@ public class SwerveCommands {
 
     // PID-controlled drive to a field pose
     public Command setPoseTarget(FieldPose2d pose) {
-        return setPoseTarget(pose.get());
+        return setPoseTarget(() -> pose.get());
     }
 
     // PID-controlled drive to a field pose
     public Command setPoseTarget(Pose2d pose) {
-        return Commands.parallel(
-                        setPositionTarget(pose.getTranslation()),
-                        setRotationTarget(pose.getRotation().getRadians()))
-                .withName("swerve set pose target");
+        return setPoseTarget(() -> pose);
     }
 
     // PID-controlled drive to a field pose
@@ -310,23 +288,23 @@ public class SwerveCommands {
 
     // Reset swerve pose
     public Command resetPose(Pose2d pose) {
-        return new InstantCommand(() -> swerve.resetPose(pose)).withName("reset pose");
+        return resetPose(() -> pose);
+    }
+
+    // Reset swerve pose
+    public Command resetPose(Supplier<Pose2d> pose) {
+        return new InstantCommand(() -> swerve.resetPose(pose.get())).withName("reset pose");
     }
 
     public Command resetToTrajStart(String name, boolean flipped) {
-        // Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
-        // if (traj.isEmpty()) {
-        //     Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
-        //     return Commands.none();
-        // }
-        // Trajectory<SwerveSample> realTraj = traj.get();
-        // Pose2d initialPose = realTraj.getInitialPose(RobotUtils.onRedAlliance()).get();
-        // if (flipped) {
-        //     initialPose =
-        //             new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(),
-        // initialPose.getRotation().unaryMinus());
-        // }
-        // return resetPose(initialPose);
-        return Commands.none();
+        Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
+        if (traj.isEmpty()) {
+            Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
+            return Commands.none();
+        }
+        Trajectory<SwerveSample> realTraj = traj.get();
+        Trajectory<SwerveSample> flippedTraj = flipped ? realTraj.mirrorY() : realTraj;
+        return resetPose(
+                () -> flippedTraj.getInitialPose(RobotUtils.onRedAlliance()).get());
     }
 }

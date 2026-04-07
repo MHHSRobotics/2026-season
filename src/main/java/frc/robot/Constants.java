@@ -45,7 +45,7 @@ public final class Constants {
 
     public static final double lowBatteryTime = 5; // How long to wait before reporting low battery
 
-    public static final boolean simIsRedAlliance = true; // Whether simulated FMS is on red alliance
+    public static final boolean simIsRedAlliance = false; // Whether simulated FMS is on red alliance
 
     public static final double simSwerveError = 0; // Simulated error in swerve odometry, set to 0 for no error
 

@@ -233,8 +233,7 @@ public class MultiCommands {
     public Command shootWithHinge() {
         if (frc.robot.Constants.intakeEnabled && frc.robot.Constants.swerveEnabled) {
             return shoot().alongWith(new RepeatCommand(
-                            intakeCommands.switchHinge().andThen(new WaitCommand(Constants.hingeTime))))
-                    .alongWith(aimAtHub());
+                    intakeCommands.switchHinge().andThen(new WaitCommand(Constants.hingeTime))));
         } else {
             return shoot();
         }
