@@ -154,7 +154,7 @@ public class Swerve extends SubsystemBase {
 
         public static final Transform3d backCamPose = new Transform3d(
                 new Translation3d(-0.33, 0.006, 0.5),
-                new Rotation3d(0, Units.degreesToRadians(-22), Units.degreesToRadians(180)));
+                new Rotation3d(0, Units.degreesToRadians(-25), Units.degreesToRadians(180)));
 
         // How many robot pose measurements to store per camera
         public static final int maxMeasurements = 8;

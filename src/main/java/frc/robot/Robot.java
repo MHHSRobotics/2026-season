@@ -199,7 +199,7 @@ public class Robot extends LoggedRobot {
         robotContainer.periodic();
 
         // Log alliance
-        Logger.recordOutput("IsRedAlliance",RobotUtils.onRedAlliance());
+        Logger.recordOutput("IsRedAlliance", RobotUtils.onRedAlliance());
     }
 
     @Override

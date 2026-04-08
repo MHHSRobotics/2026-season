@@ -20,7 +20,7 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 1); // kP
         public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
 
-        public static final double feedSpeed = 0.5;
+        public static final double feedSpeed = 1;
 
         public static final boolean flyInverted = false;
         public static final boolean flyInverted2 = true;

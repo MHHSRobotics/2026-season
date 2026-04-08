@@ -79,7 +79,7 @@ public class MultiCommands {
     private double getShooterSpeed(double dist) {
         // Clamp equation from 1 to 7 meters
         dist = MathUtil.clamp(dist, 1, 7);
-        return 4.7143 * dist * dist - 3.119 * dist + 298.92;
+        return 32.64*dist + 219.9;
     }
 
     private double getEstimatedLaunchSpeed(double shooterSpeed) {
