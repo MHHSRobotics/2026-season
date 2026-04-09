@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
@@ -25,14 +26,12 @@ public class MultiCommands {
     }
 
     private static class ShotVector {
-        public final Translation2d robotRelativeLaunchVelocity;
         public final double shooterSpeed;
-        public final double botAngleBlue;
+        public final double botAngle;
 
-        ShotVector(Translation2d robotRelativeLaunchVelocity, double shooterSpeed, double botAngleBlue) {
-            this.robotRelativeLaunchVelocity = robotRelativeLaunchVelocity;
+        public ShotVector(double shooterSpeed, double botAngle) {
             this.shooterSpeed = shooterSpeed;
-            this.botAngleBlue = botAngleBlue;
+            this.botAngle = botAngle;
         }
     }
 
@@ -42,7 +41,6 @@ public class MultiCommands {
     // Converts shooter speed units into estimated projectile exit speed in m/s.
     private static final LoggedNetworkNumber launchSpeedPerShooterSpeed =
             new LoggedNetworkNumber("Shooter/LaunchSpeedPerShooterSpeed", 0.0071);
-    private static final double minLaunchSpeedMetersPerSecond = 0.1;
     private static final LoggedNetworkNumber aimToleranceRad =
             new LoggedNetworkNumber("Shooter/AimToleranceRad", Math.toRadians(2.0));
 
@@ -79,18 +77,18 @@ public class MultiCommands {
     private double getShooterSpeed(double dist) {
         // Clamp equation from 1 to 7 meters
         dist = MathUtil.clamp(dist, 1, 7);
-        return 32.64*dist + 219.9;
+        return 32.64 * dist + 219.9;
     }
 
     private double getEstimatedLaunchSpeed(double shooterSpeed) {
-        return Math.max(minLaunchSpeedMetersPerSecond, shooterSpeed * launchSpeedPerShooterSpeed.get());
+        return shooterSpeed * launchSpeedPerShooterSpeed.get();
     }
 
     // Gets the field-relative position of the shooter (not bot center)
     private Translation2d getShooterFieldPosition() {
         Pose2d pose = swerve.getPose();
         // Rotate the robot-relative shooter offset by the robot's heading, then add to robot position
-        return pose.getTranslation().plus(shooterOffset.rotateBy(pose.getRotation()));
+        return pose.getTranslation();
     }
 
     // Gets the field-relative velocity of the shooter (accounts for rotation around bot center)
@@ -110,29 +108,28 @@ public class MultiCommands {
         return new Translation2d(fieldVx + tangentialVx, fieldVy + tangentialVy);
     }
 
-    private ShotVector getShotVector(Translation2d shooterPos, Translation2d shooterVel) {
+    private ShotVector getShotVector(Translation2d botPos, Translation2d shooterVel) {
         Translation2d hubPos = Field.hubPosition.get().getTranslation();
-        Translation2d toHub = hubPos.minus(shooterPos);
+        Translation2d toHub = hubPos.minus(botPos);
         double dist = toHub.getNorm();
         if (dist < 0.01) {
             return new ShotVector(
-                    new Translation2d(),
-                    Shooter.Constants.defaultSpeed.get(),
-                    swerve.getRotation().getRadians());
+                    Shooter.Constants.defaultSpeed.get(), swerve.getRotation().getRadians());
         }
 
         double baseShooterSpeed = getShooterSpeed(dist);
         double baseLaunchSpeed = getEstimatedLaunchSpeed(baseShooterSpeed);
         Translation2d desiredFieldVelocity = toHub.div(dist).times(baseLaunchSpeed);
         Translation2d robotRelativeLaunchVelocity = desiredFieldVelocity.minus(shooterVel);
-        double compensatedLaunchSpeed = Math.max(minLaunchSpeedMetersPerSecond, robotRelativeLaunchVelocity.getNorm());
-        double compensatedShooterSpeed = compensatedLaunchSpeed / Math.max(1e-6, launchSpeedPerShooterSpeed.get());
-        double allianceAngle = Math.atan2(robotRelativeLaunchVelocity.getY(), robotRelativeLaunchVelocity.getX());
-        double blueAngle = RobotUtils.invertThetaToAlliance(allianceAngle);
+        double compensatedLaunchSpeed = robotRelativeLaunchVelocity.getNorm();
+        double compensatedShooterSpeed = compensatedLaunchSpeed / launchSpeedPerShooterSpeed.get();
+        double targetAngle = Math.atan2(robotRelativeLaunchVelocity.getY(), robotRelativeLaunchVelocity.getX());
+        double baseAngle = getAngleToHub();
 
         Logger.recordOutput("Shooter/DistanceToHub", dist);
         Logger.recordOutput("Shooter/BaseSpeed", baseShooterSpeed);
         Logger.recordOutput("Shooter/BaseLaunchSpeed", baseLaunchSpeed);
+        Logger.recordOutput("Shooter/BaseAngle", baseAngle);
         Logger.recordOutput("Shooter/DesiredFieldVelX", desiredFieldVelocity.getX());
         Logger.recordOutput("Shooter/DesiredFieldVelY", desiredFieldVelocity.getY());
         Logger.recordOutput("Shooter/ShooterFieldVelX", shooterVel.getX());
@@ -141,9 +138,11 @@ public class MultiCommands {
         Logger.recordOutput("Shooter/RobotRelativeLaunchVelY", robotRelativeLaunchVelocity.getY());
         Logger.recordOutput("Shooter/CompensatedLaunchSpeed", compensatedLaunchSpeed);
         Logger.recordOutput("Shooter/CompensatedSpeed", compensatedShooterSpeed);
-        Logger.recordOutput("Shooter/CompAngleToHub", Math.toDegrees(allianceAngle));
+        Logger.recordOutput("Shooter/SpeedDifference", compensatedShooterSpeed - baseShooterSpeed);
+        Logger.recordOutput("Shooter/CompAngleToHub", targetAngle);
+        Logger.recordOutput("Shooter/AngleDifference", targetAngle - baseAngle);
 
-        return new ShotVector(robotRelativeLaunchVelocity, compensatedShooterSpeed, blueAngle);
+        return new ShotVector(compensatedShooterSpeed, targetAngle);
     }
 
     private ShotVector getCurrentShotVector() {
@@ -160,7 +159,7 @@ public class MultiCommands {
     // Computes the angle from the shooter to the hub using the full launch-vector solve.
     // Returns angle in blue-origin coordinates (suitable for setRotationTarget).
     private double getCompensatedAngleToHub() {
-        return getCurrentShotVector().botAngleBlue;
+        return getCurrentShotVector().botAngle;
     }
 
     // Computes the angular feedforward (rad/s) from the time derivative of the solved bot angle.
@@ -171,7 +170,7 @@ public class MultiCommands {
         Translation2d nextShooterPos = shooterPos.plus(shooterVel.times(frc.robot.Constants.loopTime));
         ShotVector nextShot = getShotVector(nextShooterPos, shooterVel);
         double dAngleDt =
-                MathUtil.angleModulus(nextShot.botAngleBlue - currentShot.botAngleBlue) / frc.robot.Constants.loopTime;
+                MathUtil.angleModulus(nextShot.botAngle - currentShot.botAngle) / frc.robot.Constants.loopTime;
 
         Logger.recordOutput("Shooter/AimFeedforward", dAngleDt);
 
@@ -223,7 +222,7 @@ public class MultiCommands {
             if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
                 return shootAtSpeed(() -> getCompensatedShooterSpeed());
             }
-            return shootAtSpeed(() -> getShooterSpeed(getShooterDistanceFromHub()));
+            return shootAtSpeed(() -> getShooterSpeed(swerve.getDistanceFromHub()));
         } else {
             return shootDefault();
         }
@@ -243,28 +242,32 @@ public class MultiCommands {
         return intakeCommands
                 .intake()
                 .alongWith(
-                        intakeCommands.setHingeDown(),
+                        Commands.waitSeconds(1).andThen(intakeCommands.setHingeDown()),
                         swerveCommands.resetToTrajStart(pathName, flipped),
                         swerveCommands
                                 .getTrajCommand(pathName, flipped)
-                                .andThen(shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName, flipped))));
+                                .andThen(Commands.waitSeconds(0.5)
+                                        .andThen(shootWithHinge())
+                                        .alongWith(swerveCommands.moveToTrajEnd(pathName, flipped))));
     }
 
     public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
         return intakeCommands
                 .intake()
                 .alongWith(
-                        intakeCommands.setHingeDown(),
+                        Commands.waitSeconds(1).andThen(intakeCommands.setHingeDown()),
                         swerveCommands.resetToTrajStart(pathName1, flipped1),
                         swerveCommands
                                 .getTrajCommand(pathName1, flipped1)
-                                .andThen(shootWithHinge()
+                                .andThen(Commands.waitSeconds(0.5)
+                                        .andThen(shootWithHinge())
                                         .alongWith(swerveCommands.moveToTrajEnd(pathName1, flipped1))
                                         .withTimeout(Constants.shootTime))
                                 .andThen(swerveCommands
                                         .getTrajCommand(pathName2, flipped2)
                                         .alongWith(intakeCommands.setHingeDown()))
-                                .andThen(
-                                        shootWithHinge().alongWith(swerveCommands.moveToTrajEnd(pathName2, flipped2))));
+                                .andThen(Commands.waitSeconds(0.5)
+                                        .andThen(shootWithHinge())
+                                        .alongWith(swerveCommands.moveToTrajEnd(pathName2, flipped2))));
     }
 }
