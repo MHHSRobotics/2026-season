@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -14,6 +15,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
+import org.littletonrobotics.junction.Logger;
+
 import choreo.Choreo;
 import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
@@ -21,7 +24,6 @@ import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.subsystems.swerve.SwerveRotation;
 import frc.robot.subsystems.swerve.SwerveTranslation;
 import frc.robot.util.Alerts;
-import frc.robot.util.Field;
 import frc.robot.util.FieldPose2d;
 import frc.robot.util.FieldTranslation2d;
 import frc.robot.util.RobotUtils;
@@ -155,57 +157,160 @@ public class SwerveCommands {
                 .withName("swerve set rotation target");
     }
 
-    public static class FollowTraj extends Command {
-        private double startTime;
-        private Trajectory<SwerveSample> traj;
-        private Swerve swerve;
-        private boolean flipped;
+    // public static class FollowTraj extends Command {
+    //     private double startTime;
+    //     private Trajectory<SwerveSample> traj;
+    //     private Swerve swerve;
 
-        public FollowTraj(Trajectory<SwerveSample> traj, boolean flipped, Swerve swerve) {
+    //     public FollowTraj(Trajectory<SwerveSample> traj, Swerve swerve) {
+    //         this.traj = traj;
+    //         this.swerve = swerve;
+    //         addRequirements(swerve);
+    //     }
+
+    //     @Override
+    //     public void initialize() {
+    //         startTime = RobotUtils.getTime();
+    //     }
+
+    //     @Override
+    //     public void execute() {
+    //         SwerveSample trajSample1 = traj.sampleAt(RobotUtils.getTime() - startTime, RobotUtils.onRedAlliance())
+    //                 .get();
+    //         SwerveSample trajSample2 = traj.sampleAt(
+    //                         (RobotUtils.getTime() - startTime) + 0.1, RobotUtils.onRedAlliance())
+    //                 .get();
+    //         Pose2d currentPose = swerve.getPose();
+    //         Pose2d targetPose = trajSample1.getPose();
+    //         double xOutput = swerve.getXController().calculate(currentPose.getX(), targetPose.getX()) +
+    // trajSample2.vx;
+    //         double yOutput = swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) +
+    // trajSample2.vy;
+    //         double thetaOutput = swerve.getThetaController()
+    //                         .calculate(
+    //                                 currentPose.getRotation().getRadians(),
+    //                                 targetPose.getRotation().getRadians())
+    //                 + trajSample2.omega;
+    //         swerve.setTranslation(xOutput, yOutput, true);
+    //         swerve.setRotation(thetaOutput);
+    //         swerve.setPIDPosition(true);
+    //         swerve.setPIDRotation(true);
+    //     }
+
+    //     @Override
+    //     public void end(boolean e) {
+    //         swerve.setTranslation(0, 0, true);
+    //         swerve.setRotation(0);
+    //         swerve.setPIDPosition(false);
+    //         swerve.setPIDRotation(false);
+    //     }
+
+    //     @Override
+    //     public boolean isFinished() {
+    //         return RobotUtils.getTime() - startTime > traj.getTotalTime();
+    //     }
+    // }
+
+    public static class FollowTraj extends Command {
+        private static final double STEER_LOOKAHEAD = 0.1;
+        private static final double POSITION_TOLERANCE = 0.1;
+
+        private List<SwerveSample> samples;
+        private final Trajectory<SwerveSample> traj;
+        private final Swerve swerve;
+
+        private int currentSegment;
+        private double tCurrent;
+        private double lastTickTime;
+
+        public FollowTraj(Trajectory<SwerveSample> traj, Swerve swerve) {
             this.traj = traj;
-            this.flipped = flipped;
             this.swerve = swerve;
             addRequirements(swerve);
         }
 
         @Override
         public void initialize() {
-            startTime = RobotUtils.getTime();
-        }
+            samples = traj.samples();
 
-        @Override
-        public void execute() {
-            SwerveSample trajSample1 = traj.sampleAt(RobotUtils.getTime() - startTime, RobotUtils.onRedAlliance())
-                    .get();
-            SwerveSample trajSample2 = traj.sampleAt(
-                            (RobotUtils.getTime() - startTime) + 0.1, RobotUtils.onRedAlliance())
-                    .get();
-            Pose2d currentPose = swerve.getPose();
-            Pose2d targetPose = trajSample1.getPose();
-            double xOutput = swerve.getXController().calculate(currentPose.getX(), targetPose.getX()) + trajSample2.vx;
-            double yOutput = flipped
-                    ? (swerve.getYController().calculate(currentPose.getY(), Field.fieldWidth - targetPose.getY())
-                            - trajSample2.vy)
-                    : (swerve.getYController().calculate(currentPose.getY(), targetPose.getY()) + trajSample2.vy);
-            double thetaOutput = flipped
-                    ? (swerve.getThetaController()
-                                    .calculate(
-                                            currentPose.getRotation().getRadians(),
-                                            -targetPose.getRotation().getRadians())
-                            - trajSample2.omega)
-                    : (swerve.getThetaController()
-                                    .calculate(
-                                            currentPose.getRotation().getRadians(),
-                                            targetPose.getRotation().getRadians())
-                            + trajSample2.omega);
-            swerve.setTranslation(xOutput, yOutput, true);
-            swerve.setRotation(thetaOutput);
+            tCurrent = 0.0;
+            currentSegment = 0;
+            lastTickTime = RobotUtils.getTime();
+
             swerve.setPIDPosition(true);
             swerve.setPIDRotation(true);
         }
 
         @Override
-        public void end(boolean e) {
+        public void execute() {
+            double now = RobotUtils.getTime();
+            double dt = now - lastTickTime;
+            lastTickTime = now;
+
+            Pose2d currentPose = swerve.getPose();
+            Translation2d robotPos = currentPose.getTranslation();
+
+            // Find closest straight-line segment in the search window.
+            int bestSeg = currentSegment;
+            int searchSeg = currentSegment;
+            double bestDistSq = Double.MAX_VALUE;
+            while (samples.get(searchSeg).t < tCurrent + dt * 2.0 && searchSeg < samples.size() - 1) {
+                SwerveSample a = maybeFlip(samples.get(searchSeg));
+                SwerveSample b = maybeFlip(samples.get(searchSeg + 1));
+                double d = distanceSqToSegment(robotPos, a.x, a.y, b.x, b.y);
+                if (d < bestDistSq) {
+                    bestDistSq = d;
+                    bestSeg = searchSeg;
+                }
+                searchSeg++;
+            }
+
+            // Analytic projection onto the chosen segment.
+            SwerveSample segStart = maybeFlip(samples.get(bestSeg));
+            SwerveSample segEnd = maybeFlip(samples.get(bestSeg + 1));
+            double dx = segEnd.x - segStart.x;
+            double dy = segEnd.y - segStart.y;
+            double lenSq = dx * dx + dy * dy;
+            double segT;
+            if (lenSq < 1e-12) {
+                segT = 0.0;
+            } else {
+                segT = ((robotPos.getX() - segStart.x) * dx + (robotPos.getY() - segStart.y) * dy) / lenSq;
+                segT = MathUtil.clamp(segT, 0, 1);
+            }
+
+            // Resolve tCurrent from the segment parameter, with monotonicity enforcement.
+            double newTCurrent = segStart.t + segT * (segEnd.t - segStart.t);
+            if (newTCurrent < tCurrent) {
+                newTCurrent = tCurrent;
+            }
+            tCurrent = newTCurrent;
+            currentSegment = bestSeg;
+
+            SwerveSample pidTargetPose =
+                    traj.sampleAt(tCurrent, RobotUtils.onRedAlliance()).get();
+            SwerveSample feedforwardPose = traj.sampleAt(
+                            Math.min(tCurrent + STEER_LOOKAHEAD, traj.getTotalTime()), RobotUtils.onRedAlliance())
+                    .get();
+
+            // PID feedback on the projected point, feedforward velocities from the lookahead.
+            double xOutput =
+                    swerve.getXController().calculate(currentPose.getX(), pidTargetPose.x) + feedforwardPose.vx;
+            double yOutput =
+                    swerve.getYController().calculate(currentPose.getY(), pidTargetPose.y) + feedforwardPose.vy;
+            double thetaOutput = swerve.getThetaController()
+                            .calculate(currentPose.getRotation().getRadians(), pidTargetPose.heading)
+                    + feedforwardPose.omega;
+
+            swerve.setTranslation(xOutput, yOutput, true);
+            swerve.setRotation(thetaOutput);
+
+            Logger.recordOutput("Auto/CurrentSegment", currentSegment);
+            Logger.recordOutput("Auto/CurrentPathTime", tCurrent);
+        }
+
+        @Override
+        public void end(boolean interrupted) {
             swerve.setTranslation(0, 0, true);
             swerve.setRotation(0);
             swerve.setPIDPosition(false);
@@ -214,12 +319,43 @@ public class SwerveCommands {
 
         @Override
         public boolean isFinished() {
-            return RobotUtils.getTime() - startTime > traj.getTotalTime();
+
+            if (tCurrent < traj.getTotalTime() - 1e-3) {
+                return false;
+            }
+            Pose2d finalPose = traj.getFinalPose(RobotUtils.onRedAlliance()).get();
+            double dx = swerve.getPose().getX() - finalPose.getX();
+            double dy = swerve.getPose().getY() - finalPose.getY();
+            return Math.hypot(dx, dy) < POSITION_TOLERANCE;
+        }
+
+        // --- helpers ---
+
+        private SwerveSample maybeFlip(SwerveSample s) {
+            return RobotUtils.onRedAlliance() ? s.flipped() : s;
+        }
+
+        private double distanceSqToSegment(Translation2d p, double ax, double ay, double bx, double by) {
+            double dx = bx - ax;
+            double dy = by - ay;
+            double lenSq = dx * dx + dy * dy;
+            if (lenSq < 1e-12) {
+                double ex = p.getX() - ax;
+                double ey = p.getY() - ay;
+                return ex * ex + ey * ey;
+            }
+            double t = ((p.getX() - ax) * dx + (p.getY() - ay) * dy) / lenSq;
+            t = Math.max(0.0, Math.min(1.0, t));
+            double projX = ax + t * dx;
+            double projY = ay + t * dy;
+            double ex = p.getX() - projX;
+            double ey = p.getY() - projY;
+            return ex * ex + ey * ey;
         }
     }
 
-    public Command followTraj(Trajectory<SwerveSample> traj, boolean flipped) {
-        return new FollowTraj(traj, flipped, swerve);
+    public Command followTraj(Trajectory<SwerveSample> traj) {
+        return new FollowTraj(traj, swerve);
     }
 
     public Command getTrajCommand(String name, boolean flipped) {
@@ -228,7 +364,8 @@ public class SwerveCommands {
             Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
             return Commands.none();
         }
-        return followTraj(traj.get(), flipped);
+        Trajectory<SwerveSample> flippedTraj = flipped ? traj.get().mirrorY() : traj.get();
+        return followTraj(flippedTraj);
     }
 
     public Command moveToTrajEnd(String name, boolean flipped) {
@@ -238,17 +375,9 @@ public class SwerveCommands {
             return Commands.none();
         }
         Trajectory<SwerveSample> realTraj = traj.get();
-
-        return setPoseTarget(() -> {
-            Pose2d finalPose = realTraj.getFinalPose(RobotUtils.onRedAlliance()).get();
-            if (flipped) {
-                finalPose = new Pose2d(
-                        finalPose.getX(),
-                        Field.fieldWidth - finalPose.getY(),
-                        finalPose.getRotation().unaryMinus());
-            }
-            return finalPose;
-        });
+        Trajectory<SwerveSample> flippedTraj = flipped ? realTraj.mirrorY() : realTraj;
+        return setPoseTarget(
+                () -> flippedTraj.getFinalPose(RobotUtils.onRedAlliance()).get());
     }
 
     // PID-controlled rotation to aim at a field position (rotates to face the target)
@@ -274,15 +403,12 @@ public class SwerveCommands {
 
     // PID-controlled drive to a field pose
     public Command setPoseTarget(FieldPose2d pose) {
-        return setPoseTarget(pose.get());
+        return setPoseTarget(() -> pose.get());
     }
 
     // PID-controlled drive to a field pose
     public Command setPoseTarget(Pose2d pose) {
-        return Commands.parallel(
-                        setPositionTarget(pose.getTranslation()),
-                        setRotationTarget(pose.getRotation().getRadians()))
-                .withName("swerve set pose target");
+        return setPoseTarget(() -> pose);
     }
 
     // PID-controlled drive to a field pose
@@ -310,23 +436,23 @@ public class SwerveCommands {
 
     // Reset swerve pose
     public Command resetPose(Pose2d pose) {
-        return new InstantCommand(() -> swerve.resetPose(pose)).withName("reset pose");
+        return resetPose(() -> pose);
+    }
+
+    // Reset swerve pose
+    public Command resetPose(Supplier<Pose2d> pose) {
+        return new InstantCommand(() -> swerve.resetPose(pose.get())).withName("reset pose");
     }
 
     public Command resetToTrajStart(String name, boolean flipped) {
-        // Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
-        // if (traj.isEmpty()) {
-        //     Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
-        //     return Commands.none();
-        // }
-        // Trajectory<SwerveSample> realTraj = traj.get();
-        // Pose2d initialPose = realTraj.getInitialPose(RobotUtils.onRedAlliance()).get();
-        // if (flipped) {
-        //     initialPose =
-        //             new Pose2d(initialPose.getX(), Field.fieldWidth - initialPose.getY(),
-        // initialPose.getRotation().unaryMinus());
-        // }
-        // return resetPose(initialPose);
-        return Commands.none();
+        Optional<Trajectory<SwerveSample>> traj = Choreo.loadTrajectory(name);
+        if (traj.isEmpty()) {
+            Alerts.create("No trajectory named " + name + " could be found", AlertType.kError);
+            return Commands.none();
+        }
+        Trajectory<SwerveSample> realTraj = traj.get();
+        Trajectory<SwerveSample> flippedTraj = flipped ? realTraj.mirrorY() : realTraj;
+        return resetPose(
+                () -> flippedTraj.getInitialPose(RobotUtils.onRedAlliance()).get());
     }
 }

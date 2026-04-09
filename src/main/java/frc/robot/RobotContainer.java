@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -444,7 +443,7 @@ public class RobotContainer {
                     .or(operator.rightMenu())
                     .onTrue(swerveCommands.resetGyro());
             driveController
-                    .leftMenu()
+                    .rightTrigger()
                     .or(otherController.leftMenu())
                     .or(operator.leftMenu())
                     .onTrue(swerveCommands.lock());
@@ -461,14 +460,13 @@ public class RobotContainer {
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
             // Same controls for operator
-            if(!DriverStation.isFMSAttached()){
+            if (!DriverStation.isFMSAttached()) {
                 new Trigger(() -> Math.hypot(operator.getLeftX(), operator.getLeftY()) > Swerve.Constants.moveDeadband)
-                    .onTrue(swerveCommands.drive(
-                            () -> -operator.getLeftY(),
-                            () -> -operator.getLeftX(),
-                            () -> Swerve.Constants.swerveFieldCentric.get()));
+                        .onTrue(swerveCommands.drive(
+                                () -> -operator.getLeftY(),
+                                () -> -operator.getLeftX(),
+                                () -> Swerve.Constants.swerveFieldCentric.get()));
             }
-            
 
             new Trigger(() -> Math.abs(operator.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -operator.getRightX()));
@@ -483,10 +481,6 @@ public class RobotContainer {
 
             new Trigger(() -> Math.abs(otherController.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -otherController.getRightX()));
-
-            // Aim at hub: leftBumper on drive, east on other
-            otherController.east().and(() -> !testEnabled.get()).onTrue(swerveCommands.aimAt(Field.hubPosition));
-            driveController.leftBumper().onTrue(swerveCommands.aimAt(Field.hubPosition));
 
             if (Constants.autoAlignEnabled) {
                 // Go to outpost: leftTrigger on drive, south on other
@@ -529,6 +523,10 @@ public class RobotContainer {
             otherController.south().and(() -> !testEnabled.get()).whileTrue(multiCommands.shootDefault());
             operator.rightTrigger().whileTrue(multiCommands.shoot());
             operator.south().whileTrue(multiCommands.shootDefault());
+
+            // Aim at hub: leftBumper on drive, east on other
+            otherController.east().and(() -> !testEnabled.get()).onTrue(multiCommands.aimAtHub());
+            driveController.leftBumper().onTrue(multiCommands.aimAtHub());
         }
         if (Constants.hangEnabled) {
             operator.povUp().whileTrue(hangCommands.setSpeed(() -> 0.2));
@@ -732,34 +730,38 @@ public class RobotContainer {
         // 1 shot autos
         autoChooser.addOption("LI_LS", multiCommands.getSingleAuto("LI_LS", false));
         autoChooser.addOption("RI_RS", multiCommands.getSingleAuto("LI_LS", true));
-        autoChooser.addOption("LI_LD", multiCommands.getSingleAuto("LI_LD", false));
-        autoChooser.addOption("RI_RD", multiCommands.getSingleAuto("RI_RD", false));
+        // autoChooser.addOption("LI_LD", multiCommands.getSingleAuto("LI_LD", false));
+        // autoChooser.addOption("RI_RD", multiCommands.getSingleAuto("RI_RD", false));
         autoChooser.addOption("LI_LS_N", multiCommands.getSingleAuto("LI_LS_N", false));
         autoChooser.addOption("RI_RS_N", multiCommands.getSingleAuto("LI_LS_N", true));
-        autoChooser.addOption("LI_RS_N", multiCommands.getSingleAuto("LI_RS_N", false));
-        autoChooser.addOption("RI_LS_N", multiCommands.getSingleAuto("LI_RS_N", true));
+        // autoChooser.addOption("LI_RS_N", multiCommands.getSingleAuto("LI_RS_N", false));
+        // autoChooser.addOption("RI_LS_N", multiCommands.getSingleAuto("LI_RS_N", true));
 
         // 2 shot autos
-        autoChooser.addOption("LI_LS|LS_RS_N", multiCommands.getDoubleAuto("LI_LS", false, "LS_RS_N", false));
+        // autoChooser.addOption("LI_LS|LS_RS_N", multiCommands.getDoubleAuto("LI_LS", false, "LS_RS_N", false));
         autoChooser.addOption("LI_LS|LS_LS_N", multiCommands.getDoubleAuto("LI_LS", false, "LS_LS_N", false));
-        autoChooser.addOption("RI_RS|RS_LS_N", multiCommands.getDoubleAuto("LI_LS", true, "LS_RS_N", true));
+        // autoChooser.addOption("RI_RS|RS_LS_N", multiCommands.getDoubleAuto("LI_LS", true, "LS_RS_N", true));
         autoChooser.addOption("RI_RS|RS_RS_N", multiCommands.getDoubleAuto("LI_LS", true, "LS_LS_N", true));
-        autoChooser.addOption("LI_LD|LD_RS_N", multiCommands.getDoubleAuto("LI_LD", false, "LD_RS_N", false));
-        autoChooser.addOption("LI_LD|LD_LS_N", multiCommands.getDoubleAuto("LI_LD", false, "LD_LS_N", false));
-        autoChooser.addOption("RI_RD|LD_RS_N", multiCommands.getDoubleAuto("RI_RD", false, "RD_LS_N", false));
-        autoChooser.addOption("RI_RD|LD_RS_N", multiCommands.getDoubleAuto("RI_RD", false, "RD_RS_N", false));
-        autoChooser.addOption("LI_LS_N|LS_LD", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_LD", false));
-        autoChooser.addOption("LI_RS_N|RS_RD", multiCommands.getDoubleAuto("LI_RS_N", false, "RS_RD", false));
-        autoChooser.addOption("RI_LS_N|LS_LD", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_LD", false));
-        autoChooser.addOption("RI_RS_N|RS_RD", multiCommands.getDoubleAuto("LI_LS_N", true, "RS_RD", false));
+        // autoChooser.addOption("LI_LD|LD_RS_N", multiCommands.getDoubleAuto("LI_LD", false, "LD_RS_N", false));
+        // autoChooser.addOption("LI_LD|LD_LS_N", multiCommands.getDoubleAuto("LI_LD", false, "LD_LS_N", false));
+        // autoChooser.addOption("RI_RD|LD_RS_N", multiCommands.getDoubleAuto("RI_RD", false, "RD_LS_N", false));
+        // autoChooser.addOption("RI_RD|LD_RS_N", multiCommands.getDoubleAuto("RI_RD", false, "RD_RS_N", false));
+        // autoChooser.addOption("LI_LS_N|LS_LD", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_LD", false));
+        // autoChooser.addOption("LI_RS_N|RS_RD", multiCommands.getDoubleAuto("LI_RS_N", false, "RS_RD", false));
+        // autoChooser.addOption("RI_LS_N|LS_LD", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_LD", false));
+        // autoChooser.addOption("RI_RS_N|RS_RD", multiCommands.getDoubleAuto("LI_LS_N", true, "RS_RD", false));
         autoChooser.addOption("LI_LS_N|LS_LS_N", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_LS_N", false));
-        autoChooser.addOption("LI_LS_N|LS_RS_N", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_RS_N", false));
-        autoChooser.addOption("LI_RS_N|RS_LS_N", multiCommands.getDoubleAuto("LI_RS_N", false, "LS_RS_N", true));
-        autoChooser.addOption("LI_RS_N|RS_RS_N", multiCommands.getDoubleAuto("LI_RS_N", false, "LS_LS_N", true));
-        autoChooser.addOption("RI_LS_N|LS_LS_N", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_LS_N", false));
-        autoChooser.addOption("RI_LS_N|LS_RS_N", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_RS_N", false));
-        autoChooser.addOption("RI_RS_N|RS_LS_N", multiCommands.getDoubleAuto("LI_LS_N", true, "LS_RS_N", true));
+        // autoChooser.addOption("LI_LS_N|LS_RS_N", multiCommands.getDoubleAuto("LI_LS_N", false, "LS_RS_N", false));
+        // autoChooser.addOption("LI_RS_N|RS_LS_N", multiCommands.getDoubleAuto("LI_RS_N", false, "LS_RS_N", true));
+        // autoChooser.addOption("LI_RS_N|RS_RS_N", multiCommands.getDoubleAuto("LI_RS_N", false, "LS_LS_N", true));
+        // autoChooser.addOption("RI_LS_N|LS_LS_N", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_LS_N", false));
+        // autoChooser.addOption("RI_LS_N|LS_RS_N", multiCommands.getDoubleAuto("LI_RS_N", true, "LS_RS_N", false));
+        // autoChooser.addOption("RI_RS_N|RS_LS_N", multiCommands.getDoubleAuto("LI_LS_N", true, "LS_RS_N", true));
         autoChooser.addOption("RI_RS_N|RS_RS_N", multiCommands.getDoubleAuto("LI_LS_N", true, "LS_LS_N", true));
+
+        autoChooser.addOption("RB_RBS", multiCommands.getSingleAuto("LB_LBS", true));
+        autoChooser.addOption("LB_LBS", multiCommands.getSingleAuto("LB_LBS", false));
+        autoChooser.addOption("C_CS", multiCommands.getSingleAuto("C_CS", true));
 
         if (Constants.swerveEnabled) {
             // Register named commands for PathPlanner

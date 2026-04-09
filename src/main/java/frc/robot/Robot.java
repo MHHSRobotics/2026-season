@@ -34,6 +34,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import com.revrobotics.util.StatusLogger;
 import frc.robot.Constants.Mode;
 import frc.robot.util.Alerts;
+import frc.robot.util.RobotUtils;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -196,6 +197,9 @@ public class Robot extends LoggedRobot {
 
         // RobotContainer periodic gets called _after_ the subsystems
         robotContainer.periodic();
+
+        // Log alliance
+        Logger.recordOutput("IsRedAlliance", RobotUtils.onRedAlliance());
     }
 
     @Override
