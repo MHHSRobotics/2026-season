@@ -505,8 +505,8 @@ public class RobotContainer {
             otherController.north().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUpShort());
             operator.east().whileTrue(intakeCommands.setHingeUpShort());
 
-            otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(intakeCommands.intake());
-            operator.leftTrigger().whileTrue(intakeCommands.intake());
+            otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.intakeWithSpeed());
+            operator.leftTrigger().whileTrue(multiCommands.intakeWithSpeed());
 
             otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
@@ -662,14 +662,28 @@ public class RobotContainer {
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Intake"))
-                    .whileTrue(intakeCommands.setIntakeSpeed(() -> testSpeed.get()));
+                    .whileTrue(intakeCommands.setRollerSpeed(() -> testSpeed.get()));
 
             otherController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Intake"))
-                    .whileTrue(intakeCommands.setIntakeSpeed(() -> -testSpeed.get()));
+                    .whileTrue(intakeCommands.setRollerSpeed(() -> -testSpeed.get()));
+
+            otherController
+                    .south()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PID"))
+                    .and(() -> testSubsystem.get().equals("Intake"))
+                    .whileTrue(intakeCommands.setRollerTargetSpeed(() -> testSpeed.get()));
+
+            otherController
+                    .east()
+                    .and(() -> testEnabled.get())
+                    .and(() -> testType.get().equals("PID"))
+                    .and(() -> testSubsystem.get().equals("Intake"))
+                    .whileTrue(intakeCommands.setRollerTargetSpeed(() -> -testSpeed.get()));
 
             otherController
                     .south()
@@ -769,8 +783,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeDown", intakeCommands.setHingeDown());
                 NamedCommands.registerCommand("IntakeUp", intakeCommands.setHingeUp());
                 NamedCommands.registerCommand("IntakeStart", RobotUtils.schedule(intakeCommands.intake()));
-                NamedCommands.registerCommand(
-                        "IntakeStop", RobotUtils.schedule(intakeCommands.setIntakeSpeed(() -> 0)));
+                NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.rollerStop()));
             }
 
             if (multiCommands != null) {

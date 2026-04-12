@@ -42,22 +42,34 @@ public class IntakeCommands {
                 .withName("set hinge speed");
     }
 
-    public Command setIntakeSpeed(DoubleSupplier speed) {
-        return Commands.runEnd(() -> intake.setIntakeSpeed(speed.getAsDouble()), () -> intake.intakeStop(), intake)
+    public Command setRollerSpeed(DoubleSupplier speed) {
+        return Commands.runEnd(() -> intake.setRollerSpeed(speed.getAsDouble()), () -> intake.rollerStop(), intake)
                 .withName("set intake speed");
     }
 
+    public Command setRollerTargetSpeed(DoubleSupplier speed) {
+        return Commands.runEnd(
+                        () -> intake.setRollerTargetSpeed(speed.getAsDouble()), () -> intake.rollerStop(), intake)
+                .withName("set intake target speed");
+    }
+
     public Command intake() {
-        return Commands.startEnd(() -> intake.intake(), () -> intake.intakeStop(), intake)
+        return Commands.startEnd(
+                        () -> intake.setRollerTargetSpeed(Intake.Constants.defaultSpeed.get()),
+                        () -> intake.rollerStop(),
+                        intake)
                 .withName("intake");
     }
 
     public Command outtake() {
-        return Commands.startEnd(() -> intake.outtake(), () -> intake.intakeStop(), intake)
+        return Commands.startEnd(
+                        () -> intake.setRollerTargetSpeed(-Intake.Constants.outtakeSpeed.get()),
+                        () -> intake.rollerStop(),
+                        intake)
                 .withName("outtake");
     }
 
-    public Command intakeStop() {
-        return Commands.runOnce(() -> intake.intakeStop(), intake);
+    public Command rollerStop() {
+        return Commands.runOnce(() -> intake.rollerStop(), intake);
     }
 }

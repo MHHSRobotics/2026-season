@@ -17,8 +17,10 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkNumber defaultSpeed =
                 new LoggedNetworkNumber("Shooter/DefaultSpeed", 250); // Default shooter speed
 
-        public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 1); // kP
+        public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 2); // kP
         public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
+
+        public static final double flywheelCurrentLimit = 150;
 
         public static final double feedSpeed = 1;
 
@@ -54,7 +56,9 @@ public class Shooter extends SubsystemBase {
 
         fly.setInverted(Constants.flyInverted);
         fly.connectInternalSensor(Constants.flyRatio);
+        fly.setStatorCurrentLimit(Constants.flywheelCurrentLimit);
         fly2.follow(Constants.flyMotorId, Constants.flyInverted ^ Constants.flyInverted2);
+        fly2.setStatorCurrentLimit(Constants.flywheelCurrentLimit);
         feed.setInverted(Constants.feedInverted);
         feed.connectInternalSensor(Constants.feedRatio);
     }

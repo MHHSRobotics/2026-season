@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.swerve.Swerve;
 import frc.robot.util.Field;
@@ -238,9 +239,13 @@ public class MultiCommands {
         }
     }
 
+    public Command intakeWithSpeed() {
+        return intakeCommands.setRollerTargetSpeed(() -> Intake.Constants.minSpeed.get()
+                + Math.max(0, swerve.getChassisSpeeds().vxMetersPerSecond) / Intake.Constants.rollerRadius);
+    }
+
     public Command getSingleAuto(String pathName, boolean flipped) {
-        return intakeCommands
-                .intake()
+        return intakeWithSpeed()
                 .alongWith(
                         Commands.waitSeconds(1).andThen(intakeCommands.setHingeDown()),
                         swerveCommands.resetToTrajStart(pathName, flipped),
@@ -252,8 +257,7 @@ public class MultiCommands {
     }
 
     public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
-        return intakeCommands
-                .intake()
+        return intakeWithSpeed()
                 .alongWith(
                         Commands.waitSeconds(1).andThen(intakeCommands.setHingeDown()),
                         swerveCommands.resetToTrajStart(pathName1, flipped1),

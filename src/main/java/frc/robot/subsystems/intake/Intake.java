@@ -30,7 +30,14 @@ public class Intake extends SubsystemBase {
         public static final int leftSwitchId = 2;
 
         public static final LoggedNetworkNumber defaultSpeed =
-                new LoggedNetworkNumber("Intake/FlySpeed", frc.robot.Constants.currentMode == Mode.SIM ? 0.6 : 0.65);
+                new LoggedNetworkNumber("Intake/RollerSpeed", frc.robot.Constants.currentMode == Mode.SIM ? 288 : 312);
+
+        public static final LoggedNetworkNumber outtakeSpeed = new LoggedNetworkNumber("Intake/OuttakeSpeed", 300);
+
+        public static final LoggedNetworkNumber minSpeed = new LoggedNetworkNumber("Intake/MinSpeed", 240);
+
+        public static final LoggedNetworkNumber flyKP = new LoggedNetworkNumber("Intake/Roller/kP", 1.5);
+        public static final LoggedNetworkNumber flyKD = new LoggedNetworkNumber("Intake/Roller/kD", 0.03);
 
         public static final LoggedNetworkNumber hingeKP =
                 new LoggedNetworkNumber("Intake/Hinge/kP", frc.robot.Constants.currentMode == Mode.SIM ? 30 : 20);
@@ -55,6 +62,8 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean(
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
+        public static final double rollerCurrentLimit = 150;
+
         public static final double hingeDown = Units.degreesToRadians(-10);
         public static final double hingeUp =
                 frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
@@ -71,6 +80,7 @@ public class Intake extends SubsystemBase {
 
         public static final LoggedNetworkNumber hingeDownTorque = new LoggedNetworkNumber("Intake/HingeDown", 20);
 
+        public static final double rollerRadius = 0.0286; // 1.125 inches
         // Simulation only
         public static final double rollerInertia = 0.000132; // kg m^2
         public static final double hingeInertia = 0.3; // kg m^2
@@ -99,6 +109,7 @@ public class Intake extends SubsystemBase {
 
         rollerMotor.setInverted(Constants.rollerInverted);
         rollerMotor.connectInternalSensor(Constants.rollerRatio);
+        rollerMotor.setStatorCurrentLimit(Constants.rollerCurrentLimit);
     }
 
     private void setLocked(boolean brake) {
@@ -110,8 +121,12 @@ public class Intake extends SubsystemBase {
         rollerMotor.setDisabled(disabled);
     }
 
-    public void setIntakeSpeed(double speed) {
+    public void setRollerSpeed(double speed) {
         rollerMotor.setDutyCycle(speed);
+    }
+
+    public void setRollerTargetSpeed(double speed) {
+        rollerMotor.setVelocityWithCurrent(speed);
     }
 
     public void setHingeSpeed(double speed) {
@@ -157,15 +172,7 @@ public class Intake extends SubsystemBase {
         return hingeMotor.getInputs().setpoint;
     }
 
-    public void intake() {
-        rollerMotor.setDutyCycle(Constants.defaultSpeed.get());
-    }
-
-    public void outtake() {
-        rollerMotor.setDutyCycle(-Constants.defaultSpeed.get());
-    }
-
-    public void intakeStop() {
+    public void rollerStop() {
         rollerMotor.setDutyCycle(0);
     }
 
@@ -186,6 +193,9 @@ public class Intake extends SubsystemBase {
         hingeMotor.setkA(Constants.hingeKA.get());
         hingeMotor.setMaxVelocity(Constants.hingeMaxVel.get());
         hingeMotor.setMaxAccel(Constants.hingeMaxAccel.get());
+
+        rollerMotor.setkP(Constants.flyKP.get());
+        rollerMotor.setkD(Constants.flyKD.get());
 
         updateVis();
 
