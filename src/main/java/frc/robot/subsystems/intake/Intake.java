@@ -68,7 +68,7 @@ public class Intake extends SubsystemBase {
 
         public static final double rollerCurrentLimit = 150;
 
-        public static final double hingeDown = Units.degreesToRadians(-10);
+        public static final double hingeDown = Units.degreesToRadians(0);
         public static final double hingeUp =
                 frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
 
@@ -122,7 +122,7 @@ public class Intake extends SubsystemBase {
         hingeMotor.setFeedforwardType(GravityTypeValue.Arm_Cosine);
         hingeMotor.setStaticFeedforwardType(StaticFeedforwardSignValue.UseClosedLoopSign);
         hingeMotor.setOffset(Constants.hingeOffset);
-        // hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
+        hingeMotor.setLimits(Constants.hingeDown, Constants.hingeUp);
 
         rollerMotor.setInverted(Constants.rollerInverted);
         rollerMotor.connectInternalSensor(Constants.rollerRatio);
