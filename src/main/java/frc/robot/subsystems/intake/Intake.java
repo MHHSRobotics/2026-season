@@ -22,6 +22,8 @@ import frc.robot.Constants.Mode;
 import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
 
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 public class Intake extends SubsystemBase {
@@ -70,7 +72,7 @@ public class Intake extends SubsystemBase {
 
         public static final double hingeDown = Units.degreesToRadians(0);
         public static final double hingeUp =
-                frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(120) : Units.degreesToRadians(90);
+                frc.robot.Constants.currentMode == Mode.SIM ? Units.degreesToRadians(90) : Units.degreesToRadians(90);
 
         public static final double rollerRatio = 1.25;
         public static final double hingeRatio = 15;
@@ -96,9 +98,11 @@ public class Intake extends SubsystemBase {
 
     private boolean intakeUp = true;
 
+    // Hinge only travels ~90 degrees and is heavy (0.3 kg*m^2), so use a gentler ramp/step and a
+    // shorter timeout than the 1V/s, 7V, 10s defaults - the soft limits below are the real
+    // backstop, but there's no reason to build up more voltage/speed than needed for a good fit.
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
-            // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-            new SysIdRoutine.Config(),
+            new SysIdRoutine.Config(Volts.of(0.5).per(Second), Volts.of(3), Seconds.of(3), null),
             new SysIdRoutine.Mechanism(
                     // Tell SysId how to plumb the driving voltage to the motor(s).
                     (voltage) -> hingeMotor.setVoltage(voltage.in(Volts)),
@@ -193,8 +197,20 @@ public class Intake extends SubsystemBase {
         rollerMotor.setDutyCycle(0);
     }
 
+    // Margin kept clear of the soft limits so a test ends itself before ever reaching them.
+    private static final double sysIdSafetyMargin = Units.degreesToRadians(10);
+
+    // Stops a SysId test automatically once the hinge nears the limit it's moving toward, instead
+    // of relying only on the operator releasing the button in time.
+    private boolean nearSysIdLimit(SysIdRoutine.Direction direction) {
+        double position = hingeMotor.getInputs().position;
+        return direction == SysIdRoutine.Direction.kForward
+                ? position > Constants.hingeUp - sysIdSafetyMargin
+                : position < Constants.hingeDown + sysIdSafetyMargin;
+    }
+
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.quasistatic(direction);
+        return m_sysIdRoutine.quasistatic(direction).until(() -> nearSysIdLimit(direction));
     }
 
     /**
@@ -203,7 +219,7 @@ public class Intake extends SubsystemBase {
      * @param direction The direction (forward or reverse) to run the test in
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.dynamic(direction);
+        return m_sysIdRoutine.dynamic(direction).until(() -> nearSysIdLimit(direction));
     }
 
     @Override
