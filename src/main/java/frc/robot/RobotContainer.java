@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
@@ -531,6 +532,12 @@ public class RobotContainer {
         if (Constants.hangEnabled) {
             operator.povUp().whileTrue(hangCommands.setSpeed(() -> 0.2));
             operator.povDown().whileTrue(hangCommands.setSpeed(() -> -0.2));
+        }
+        if (Constants.SysidEnabled) {
+            otherController.povUp().whileTrue(intake.sysIdDynamic(SysIdRoutine.Direction.kForward));
+            otherController.povDown().whileTrue(intake.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+            otherController.povLeft().whileTrue(intake.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+            otherController.povRight().whileTrue(intake.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
         }
     }
 

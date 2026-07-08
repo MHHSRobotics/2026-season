@@ -4,7 +4,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
@@ -19,6 +21,8 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import frc.robot.Constants.Mode;
 import frc.robot.io.EncoderIO;
 import frc.robot.io.MotorIO;
+
+import static edu.wpi.first.units.Units.Volts;
 
 public class Intake extends SubsystemBase {
     public static class Constants {
@@ -91,6 +95,19 @@ public class Intake extends SubsystemBase {
     private EncoderIO hingeEncoder;
 
     private boolean intakeUp = true;
+
+    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+            // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+            new SysIdRoutine.Config(),
+            new SysIdRoutine.Mechanism(
+                    // Tell SysId how to plumb the driving voltage to the motor(s).
+                    (voltage) -> hingeMotor.setVoltage(voltage.in(Volts)),
+                    // AdvantageKit already logs appliedVoltage/position/velocity every cycle via the IO
+                    // layer, so this can stay null; use AdvantageScope's SysId tool on those logged fields.
+                    null,
+                    // Tell SysId to make generated commands require this subsystem, suffix test state in
+                    // WPILog with this subsystem's name ("shooter")
+                    this));
 
     public Intake(MotorIO rollerMotorIO, MotorIO hingeMotorIO, EncoderIO hingeEncoderIO) {
         hingeMotor = hingeMotorIO;
@@ -174,6 +191,19 @@ public class Intake extends SubsystemBase {
 
     public void rollerStop() {
         rollerMotor.setDutyCycle(0);
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.quasistatic(direction);
+    }
+
+    /**
+     * Returns a command that will execute a dynamic test in the given direction.
+     *
+     * @param direction The direction (forward or reverse) to run the test in
+     */
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.dynamic(direction);
     }
 
     @Override
