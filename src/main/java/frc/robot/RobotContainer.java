@@ -109,7 +109,7 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        configureAuto(); // Set up the auto names commands and chooser
+        // configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
@@ -506,9 +506,6 @@ public class RobotContainer {
             otherController.north().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUpShort());
             operator.east().whileTrue(intakeCommands.setHingeUpShort());
 
-            otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.intakeWithSpeed());
-            operator.leftTrigger().whileTrue(multiCommands.intakeWithSpeed());
-
             otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
         }
@@ -524,6 +521,9 @@ public class RobotContainer {
             otherController.south().and(() -> !testEnabled.get()).whileTrue(multiCommands.shootDefault());
             operator.rightTrigger().whileTrue(multiCommands.shoot());
             operator.south().whileTrue(multiCommands.shootDefault());
+
+            otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.intakeWithSpeed());
+            operator.leftTrigger().whileTrue(multiCommands.intakeWithSpeed());
 
             // Aim at hub: leftBumper on drive, east on other
             otherController.east().and(() -> !testEnabled.get()).onTrue(multiCommands.aimAtHub());

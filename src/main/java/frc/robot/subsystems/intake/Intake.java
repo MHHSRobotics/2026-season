@@ -5,6 +5,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -102,13 +103,16 @@ public class Intake extends SubsystemBase {
     // shorter timeout than the 1V/s, 7V, 10s defaults - the soft limits below are the real
     // backstop, but there's no reason to build up more voltage/speed than needed for a good fit.
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(Volts.of(0.5).per(Second), Volts.of(3), Seconds.of(3), null),
+            new SysIdRoutine.Config(Volts.of(3).per(Second), Volts.of(14), Seconds.of(20), null),
             new SysIdRoutine.Mechanism(
                     // Tell SysId how to plumb the driving voltage to the motor(s).
-                    (voltage) -> hingeMotor.setVoltage(voltage.in(Volts)),
+                    (voltage) -> hingeMotor.setTorqueCurrent(voltage.in(Volts)),
                     // AdvantageKit already logs appliedVoltage/position/velocity every cycle via the IO
                     // layer, so this can stay null; use AdvantageScope's SysId tool on those logged fields.
-                    null,
+                    log -> {
+                        // Record a frame for the shooter motor.
+                        log.motor("intake-hinge");
+                    },
                     // Tell SysId to make generated commands require this subsystem, suffix test state in
                     // WPILog with this subsystem's name ("shooter")
                     this));
@@ -210,7 +214,13 @@ public class Intake extends SubsystemBase {
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.quasistatic(direction).until(() -> nearSysIdLimit(direction));
+        return m_sysIdRoutine
+                .quasistatic(direction)
+                .beforeStarting(Commands.runOnce(() -> Logger.recordOutput(
+                        "Intake/sysidstate",
+                        direction == SysIdRoutine.Direction.kForward ? "quasistatic-forward" : "quasistatic-reverse")))
+                .until(() -> nearSysIdLimit(direction))
+                .andThen(Commands.runOnce(() -> Logger.recordOutput("Intake/sysidstate", "")));
     }
 
     /**
@@ -219,7 +229,13 @@ public class Intake extends SubsystemBase {
      * @param direction The direction (forward or reverse) to run the test in
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.dynamic(direction).until(() -> nearSysIdLimit(direction));
+        return m_sysIdRoutine
+                .dynamic(direction)
+                .beforeStarting(Commands.runOnce(() -> Logger.recordOutput(
+                        "Intake/sysidstate",
+                        direction == SysIdRoutine.Direction.kForward ? "dynamic-forward" : "dynamic-reverse")))
+                .until(() -> nearSysIdLimit(direction))
+                .andThen(Commands.runOnce(() -> Logger.recordOutput("Intake/sysidstate", "")));
     }
 
     @Override

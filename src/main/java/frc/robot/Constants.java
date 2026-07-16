@@ -56,9 +56,9 @@ public final class Constants {
     public static final boolean visionEnabled = true;
     public static final boolean autoAlignEnabled = false;
     public static final boolean shooterVelocityCompensationEnabled = false;
-    public static final boolean shooterEnabled = true;
+    public static final boolean shooterEnabled = false;
     public static final boolean hangEnabled = false;
     public static final boolean intakeEnabled = true;
-    public static final boolean ledsEnabled = true;
+    public static final boolean ledsEnabled = false;
     public static final boolean SysidEnabled = true;
 }
