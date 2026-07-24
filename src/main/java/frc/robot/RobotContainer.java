@@ -508,6 +508,8 @@ public class RobotContainer {
 
             otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
+
+            // otherController.povUp().onTrue(Commands.runOnce(() -> intake.setHingeGoal(0.75)));
         }
         if (Constants.shooterEnabled) {
             operator.povLeft().whileTrue(shooterCommands.feedForward());
@@ -534,10 +536,10 @@ public class RobotContainer {
             operator.povDown().whileTrue(hangCommands.setSpeed(() -> -0.2));
         }
         if (Constants.SysidEnabled) {
-            otherController.povUp().whileTrue(intake.sysIdDynamic(SysIdRoutine.Direction.kForward));
-            otherController.povDown().whileTrue(intake.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-            otherController.povLeft().whileTrue(intake.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-            otherController.povRight().whileTrue(intake.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+            otherController.povDown().whileTrue(swerve.sysIdDynamic(SysIdRoutine.Direction.kForward));
+            otherController.povUp().whileTrue(swerve.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+            otherController.povLeft().whileTrue(swerve.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+            otherController.povRight().whileTrue(swerve.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
         }
     }
 

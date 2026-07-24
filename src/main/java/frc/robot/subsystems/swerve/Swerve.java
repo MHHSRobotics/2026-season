@@ -26,7 +26,10 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -41,6 +44,9 @@ import frc.robot.util.FieldPose2d;
 import frc.robot.util.RobotUtils;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 // Make the swerve drive move the robot in any direction and rotate at the same time.
 // Uses a pose estimator to keep track of where the robot is on the field.
@@ -325,6 +331,51 @@ public class Swerve extends SubsystemBase {
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, Constants.maxLinearSpeedMetersPerSec);
         for (int i = 0; i < 4; i++) {
             modules[i].runSetpoint(setpointStates[i]);
+        }
+    }
+
+    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+            new SysIdRoutine.Config(Volts.of(1).per(Second), Volts.of(8), Seconds.of(10), null),
+            new SysIdRoutine.Mechanism(
+                    // Tell SysId how to plumb the driving voltage to the motor(s).
+                    (voltage) -> setVoltage(voltage.in(Volts)),
+                    // AdvantageKit already logs appliedVoltage/position/velocity every cycle via the IO
+                    // layer, so this can stay null; use AdvantageScope's SysId tool on those logged fields.
+                    log -> {
+                        // Record a frame for the shooter motor.
+                        log.motor("swerve");
+                    },
+                    // Tell SysId to make generated commands require this subsystem, suffix test state in
+                    // WPILog with this subsystem's name ("shooter")
+                    this));
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine
+                .quasistatic(direction)
+                .beforeStarting(Commands.runOnce(() -> Logger.recordOutput(
+                        "Swerve/sysidstate",
+                        direction == SysIdRoutine.Direction.kForward ? "quasistatic-forward" : "quasistatic-reverse")))
+                .andThen(Commands.runOnce(() -> Logger.recordOutput("Swerve/sysidstate", "")));
+    }
+
+    /**
+     * Returns a command that will execute a dynamic test in the given direction.
+     *
+     * @param direction The direction (forward or reverse) to run the test in
+     */
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine
+                .dynamic(direction)
+                .beforeStarting(Commands.runOnce(() -> Logger.recordOutput(
+                        "Swerve/sysidstate",
+                        direction == SysIdRoutine.Direction.kForward ? "dynamic-forward" : "dynamic-reverse")))
+                .andThen(Commands.runOnce(() -> Logger.recordOutput("Swerve/sysidstate", "")));
+    }
+
+    public void setVoltage(double num) {
+        for (int i = 0; i < 4; i++) {
+            modules[i].setDriveVoltage(num);
+            modules[i].setAnglePosition(0);
         }
     }
 
