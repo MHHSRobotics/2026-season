@@ -774,7 +774,9 @@ public class RobotContainer {
             }
 
             if (multiCommands != null) {
-                NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
+                // Ranged rather than aiming: inside a PathPlanner auto the path owns the
+                // heading, so a shot that steers as well would fight it.
+                NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shootRanged()));
                 NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
             }
 

@@ -39,12 +39,35 @@ def main():
         action="store_true",
         help="Run without NetworkTables (for testing)",
     )
+    parser.add_argument(
+        "--clear-fuel",
+        action="store_true",
+        help="Remove all fuel not inside the robot. NOTE: does not survive the viewer's reset "
+             "button, which restores qpos from the model. For a durable empty field run "
+             "make_nofuel_models.py and pass --model models/robot_nofuel.xml instead",
+    )
+    parser.add_argument(
+        "--preload",
+        type=int,
+        default=0,
+        metavar="N",
+        help="Place N fuel balls on the robot's hopper at startup (implies --clear-fuel). "
+             "Same reset caveat; make_nofuel_models.py --preload N bakes them into the model",
+    )
     args = parser.parse_args()
 
     # Initialize simulator
     print(f"Loading model from: {args.model}")
     sim = SwerveSimulator(args.model)
     print(f"Simulation timestep: {sim.get_timestep() * 1000:.1f} ms")
+
+    # Preload before clearing: clear_fuel keeps whatever is inside the robot.
+    if args.preload > 0:
+        placed = sim.preload_fuel(args.preload)
+        print(f"Preloaded {placed} fuel ball(s) into the robot")
+    if args.clear_fuel or args.preload > 0:
+        removed = sim.clear_fuel(keep_in_robot=True)
+        print(f"Removed {removed} fuel ball(s) from the field")
 
     # Initialize NetworkTables (unless standalone mode)
     nt = None

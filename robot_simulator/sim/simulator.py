@@ -54,10 +54,19 @@ SHOOTER_FLYWHEEL_BACK_EMF_DAMPING = _KT * _KV * SHOOTER_FLYWHEEL_GEAR_RATIO**2 /
 
 # Shooter analytical launch parameters
 SHOOTER_EXIT_ANGLE = 1.2741        # 73° from horizontal (radians)
-SHOOTER_SPEED_EFFICIENCY = 0.376   # ball_speed / flywheel_surface_speed → 31 ft/s at 4800 RPM
+# ball_speed / flywheel_surface_speed. 0.492 makes the sim agree with the robot's own
+# distance->flywheel table (MultiCommands.getShooterSpeed): that table plus a fixed 73 deg
+# hood implies an exit speed of ~0.0246 * omega, and 0.05 * 0.492 = 0.0246. The previous
+# 0.376 came from a 31 ft/s at 4800 RPM spec and left shots landing roughly half the
+# commanded distance. If real-robot flight-time video disagrees with the table, fix the
+# table first and re-derive this.
+SHOOTER_SPEED_EFFICIENCY = 0.492
 SHOOTER_SPEED_NOISE_STD = 0.05     # 5% speed noise (1 sigma)
 SHOOTER_ANGLE_NOISE_STD = 0.03     # ~1.7° angle noise (1 sigma)
-SHOOTER_MIN_LAUNCH_SPEED = 450.0   # min flywheel rad/s to trigger launch (~75% of free speed)
+# Min flywheel rad/s to trigger launch. Must sit below the slowest speed the robot code ever
+# commands: getShooterSpeed spans 252.5 (1 m) to 448.4 (7 m) and defaultSpeed is 250, so the
+# old 450 was above the entire usable range and only fired on spin-up overshoot.
+SHOOTER_MIN_LAUNCH_SPEED = 200.0
 FLYWHEEL_RADIUS = 0.05             # meters (0.1m diameter / 2)
 # Exit point in robot local frame (above last churro, behind frame center)
 SHOOTER_EXIT_POS_LOCAL = np.array([-0.31, 0.0, 0.3618])  # 17" above ground (0.4318m - 0.07m chassis center)
@@ -175,9 +184,10 @@ class SwerveSimulator:
                      "chassis_gyro", "chassis_accel"]:
             self.sensors[name] = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SENSOR, name)
 
-        # Robot chassis freejoint qpos address
+        # Robot chassis freejoint qpos and dof addresses
         chassis_jnt = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, "chassis_joint")
         self._chassis_qpos_adr = self.model.jnt_qposadr[chassis_jnt]
+        self._chassis_dof_adr = self.model.jnt_dofadr[chassis_jnt]
 
         # Fuel ball freejoint qpos addresses (each freejoint has 7 qpos: xyz + quat)
         self._fuel_qpos_adrs = []
@@ -307,6 +317,13 @@ class SwerveSimulator:
             if gid >= 0:
                 self._fuel_geom_to_ball[gid] = ball_idx
                 ball_idx += 1
+
+        # Ball index → fuel geom ID, for disabling individual balls in clear_fuel
+        self._ball_to_fuel_geom = {b: g for g, b in self._fuel_geom_to_ball.items()}
+
+        # (qpos_adr, dof_adr) pairs walked by the per-step rolling damping loop. clear_fuel
+        # prunes removed balls from this so the loop stops paying for them every step.
+        self._active_fuel_pairs = list(zip(self._fuel_qpos_adrs, self._fuel_dof_starts))
 
         self._step_counter = 0  # for throttling ball stats updates
         self._rng = np.random.default_rng()
@@ -535,10 +552,14 @@ class SwerveSimulator:
         Computes exit velocity from flywheel speed with noise, teleports ball
         to the exit point in world frame, and sets its velocity.
         """
-        # Chassis pose
+        # Chassis pose and velocity
         a = self._chassis_qpos_adr
         chassis_pos = self.data.qpos[a:a + 3].copy()
         chassis_quat = self.data.qpos[a + 3:a + 7].copy()
+        # Freejoint dofs: linear velocity is in the world frame, angular is in the body frame.
+        v = self._chassis_dof_adr
+        chassis_linvel = self.data.qvel[v:v + 3].copy()
+        chassis_angvel_local = self.data.qvel[v + 3:v + 6].copy()
 
         # Flywheel surface speed → ball exit speed
         flywheel_omega = abs(self.data.qvel[self._mech_jnt_dofs["shooter_flywheel_left_joint"]])
@@ -556,9 +577,17 @@ class SwerveSimulator:
             speed * math.sin(pitch),
         ])
 
-        # Transform to world frame
-        world_vel = _quat_rotate(chassis_quat, local_vel)
-        world_pos = chassis_pos + _quat_rotate(chassis_quat, SHOOTER_EXIT_POS_LOCAL)
+        # Transform to world frame. The ball inherits the velocity of the exit point on the
+        # robot, not just the launch vector: chassis linear velocity plus the tangential term
+        # omega x r from the chassis spinning about its own centre. Without this a moving
+        # robot's shot behaves exactly like a stationary one, which silently defeats any
+        # shoot-while-moving compensation being tested against the sim.
+        exit_offset_world = _quat_rotate(chassis_quat, SHOOTER_EXIT_POS_LOCAL)
+        chassis_angvel_world = _quat_rotate(chassis_quat, chassis_angvel_local)
+        carry_vel = chassis_linvel + np.cross(chassis_angvel_world, exit_offset_world)
+
+        world_vel = _quat_rotate(chassis_quat, local_vel) + carry_vel
+        world_pos = chassis_pos + exit_offset_world
 
         # Set ball state
         qpos_adr = self._fuel_qpos_adrs[ball_idx]
@@ -637,7 +666,7 @@ class SwerveSimulator:
             # Apply velocity damping to linear DOFs only (indices 0-2)
             # once per 5ms equivalent, regardless of sub-stepping.
             # Leave angular DOFs (3-5) undamped so balls roll naturally.
-            for qpos_adr, dof_adr in zip(self._fuel_qpos_adrs, self._fuel_dof_starts):
+            for qpos_adr, dof_adr in self._active_fuel_pairs:
                 z = self.data.qpos[qpos_adr + 2]  # z position
                 if z < fuel_radius + 0.01:  # within 1cm of ground contact
                     self.data.qvel[dof_adr:dof_adr + 3] *= fuel_damping
@@ -648,6 +677,99 @@ class SwerveSimulator:
             if self._step_counter >= 10:
                 self._step_counter = 0
                 self._update_ball_stats()
+
+    def _ball_local_pos(self, qpos_adr: int, chassis_pos, chassis_quat_conj):
+        """Position of a fuel ball in the chassis frame."""
+        world = self.data.qpos[qpos_adr:qpos_adr + 3]
+        return _quat_rotate(chassis_quat_conj, world - chassis_pos)
+
+    def preload_fuel(self, count: int) -> int:
+        """Drop `count` fuel balls onto the hopper rollers inside the robot.
+
+        Mirrors the placement test_shooter.py uses. Returns how many were placed. Call before
+        clear_fuel so the preloaded balls are the ones it keeps.
+        """
+        a = self._chassis_qpos_adr
+        chassis_pos = self.data.qpos[a:a + 3].copy()
+        chassis_quat = self.data.qpos[a + 3:a + 7].copy()
+
+        # Sit on top of the highest hopper roller (z=0.077, r=0.0255) plus ball radius
+        ball_z = 0.077 + 0.0255 + 0.075 + 0.005
+        hopper_y = -0.03
+
+        placed = 0
+        for i in range(min(count, len(self._fuel_qpos_adrs))):
+            local = np.array([-0.10 + 0.07 * i, hopper_y, ball_z])
+            if local[0] > 0.20:  # past the back of the hopper
+                break
+            world_pos = chassis_pos + _quat_rotate(chassis_quat, local)
+            qpos_adr = self._fuel_qpos_adrs[i]
+            dof_adr = self._fuel_dof_starts[i]
+            self.data.qpos[qpos_adr:qpos_adr + 3] = world_pos
+            self.data.qpos[qpos_adr + 3:qpos_adr + 7] = [1, 0, 0, 0]
+            self.data.qvel[dof_adr:dof_adr + 6] = 0
+            placed += 1
+
+        mujoco.mj_forward(self.model, self.data)
+        return placed
+
+    def clear_fuel(self, keep_in_robot: bool = True) -> int:
+        """Remove fuel from the field, optionally keeping balls that are inside the robot.
+
+        The field ships 408 fuel balls. Most of the cost is contacts plus the per-step Python
+        damping loop, and with a full field the sim can fall behind real time badly enough to
+        distort anything timing-sensitive.
+
+        MuJoCo cannot delete bodies at runtime, so removed balls are instead made inert:
+        collisions off, rendering off, velocity zeroed, parked under the floor, and dropped
+        from the damping loop. Gravity is compensated where the MuJoCo build supports it so
+        they stay put; otherwise they free-fall harmlessly with collisions disabled.
+
+        Returns the number of balls removed.
+        """
+        a = self._chassis_qpos_adr
+        chassis_pos = self.data.qpos[a:a + 3].copy()
+        w, x, y, z = self.data.qpos[a + 3:a + 7]
+        chassis_quat_conj = np.array([w, -x, -y, -z])
+
+        # Generous box around the 27.5" frame, tall enough to cover hopper and shooter track.
+        half_xy = 0.45
+        z_lo, z_hi = -0.15, 0.75
+
+        has_gravcomp = hasattr(self.model, "body_gravcomp")
+        active_pairs = []
+        removed = 0
+
+        for ball_idx, (qpos_adr, dof_adr) in enumerate(
+                zip(self._fuel_qpos_adrs, self._fuel_dof_starts)):
+            keep = False
+            if keep_in_robot:
+                local = self._ball_local_pos(qpos_adr, chassis_pos, chassis_quat_conj)
+                keep = (abs(local[0]) <= half_xy and abs(local[1]) <= half_xy
+                        and z_lo <= local[2] <= z_hi)
+            if keep:
+                active_pairs.append((qpos_adr, dof_adr))
+                continue
+
+            gid = self._ball_to_fuel_geom.get(ball_idx, -1)
+            if gid >= 0:
+                self.model.geom_contype[gid] = 0
+                self.model.geom_conaffinity[gid] = 0
+                self.model.geom_rgba[gid][3] = 0.0
+                if has_gravcomp:
+                    self.model.body_gravcomp[self.model.geom_bodyid[gid]] = 1.0
+
+            # Park well under the carpet, spread out so nothing overlaps.
+            self.data.qpos[qpos_adr:qpos_adr + 3] = [
+                -50.0 - 0.2 * (removed % 100), -50.0 - 0.2 * (removed // 100), -10.0]
+            self.data.qpos[qpos_adr + 3:qpos_adr + 7] = [1, 0, 0, 0]
+            self.data.qvel[dof_adr:dof_adr + 6] = 0
+            self._ball_states[ball_idx] = 0
+            removed += 1
+
+        self._active_fuel_pairs = active_pairs
+        mujoco.mj_forward(self.model, self.data)
+        return removed
 
     def get_timestep(self) -> float:
         """Get the simulation timestep in seconds."""

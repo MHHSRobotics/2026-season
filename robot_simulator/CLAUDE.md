@@ -17,7 +17,22 @@ python test_drive.py
 
 # Headless / custom options
 python main.py --standalone --no-viewer --nt-server <ip> --nt-port <port>
+
+# Fast mode: empty field with 5 balls preloaded on the hopper, survives reset
+python make_nofuel_models.py --preload 5
+python main.py --model models/robot_nofuel.xml
 ```
+
+**Fuel-free models.** The field ships 408 fuel balls, enough to push the sim below real time
+and distort anything timing-sensitive. `make_nofuel_models.py` generates
+`models/field_nofuel.xml` and `models/robot_nofuel.xml` by stripping every fuel body from
+`field.xml`; `--preload N` bakes N balls onto the hopper at the chassis start pose.
+Regenerate after editing `field.xml` or `robot.xml` — the outputs are generated files.
+
+This has to happen in the model rather than at runtime: MuJoCo's reset button calls
+`mj_resetData`, which restores `qpos` from the model, so any ball moved or parked after load
+comes back on the first reset. `main.py --clear-fuel` / `--preload` still exist for ad-hoc
+use but carry exactly that caveat.
 
 ## Dependencies
 
