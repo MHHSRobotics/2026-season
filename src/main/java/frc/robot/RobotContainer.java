@@ -27,6 +27,7 @@ import frc.robot.commands.MultiCommands;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.commands.SwerveCommands;
 import frc.robot.io.CameraIO;
+import frc.robot.io.CameraIOLimelightCamera;
 import frc.robot.io.CameraIOPhotonCamera;
 import frc.robot.io.EncoderIO;
 import frc.robot.io.EncoderIOCANcoder;
@@ -245,14 +246,22 @@ public class RobotContainer {
                         break;
                     default:
                         // If in replay use an empty CameraIO
-                        frontCam = new CameraIO("FrontCam", "Vision/FrontCam");
+                        // frontCam = new CameraIO("FrontCam", "Vision/FrontCam");
+                        frontCam = new CameraIOLimelightCamera(
+                                "FrontCam",
+                                "Vision/FrontCam",
+                                "limelight-front",
+                                Swerve.VisionConstants.frontCamPose,
+                                0);
+
                         rightCam = new CameraIO("RightCam", "Vision/RightCam");
                         leftCam = new CameraIO("LeftCam", "Vision/LeftCam");
                         backCam = new CameraIO("BackCam", "Vision/BackCam");
                         break;
                 }
                 // Add cameras to swerve ododmetry
-                swerve.addCameraSource(frontCam);
+                // swerve.addCameraSource(frontCam);
+
                 swerve.addCameraSource(rightCam);
                 swerve.addCameraSource(leftCam);
                 swerve.addCameraSource(backCam);
@@ -831,6 +840,7 @@ public class RobotContainer {
         if (Constants.swerveEnabled) {
             publisher.publish(); // Publish 3D robot data
         }
+
         refreshControllerAlerts(); // Enable alerts for controller disconnects
     }
 }

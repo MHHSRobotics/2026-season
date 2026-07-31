@@ -375,6 +375,7 @@ public class Swerve extends SubsystemBase {
     }
 
     // Add a vision measurement with the given pose, timestamp, and standard deviations
+
     public void addVisionMeasurement(
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
         Pose2d poseBeforeUpdate = estimator.getEstimatedPosition();
@@ -520,6 +521,7 @@ public class Swerve extends SubsystemBase {
         Logger.recordOutput("Swerve/TargetChassisSpeeds", kinematics.toChassisSpeeds(targetStates));
 
         // Get measurements from all connected cameras and add them to the pose estimator
+
         for (CameraIO cam : cameras) {
             cam.update();
             CameraIOInputs inputs = cam.getInputs();
