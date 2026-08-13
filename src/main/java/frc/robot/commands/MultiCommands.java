@@ -62,10 +62,16 @@ public class MultiCommands {
     }
 
     public Command shootAtSpeed(DoubleSupplier speed) {
+        if(shooterCommands==null){
+            return Commands.none();
+        }
         return shooterCommands.shoot(speed).withName("shoot");
     }
 
     public Command shootStop() {
+        if(shooterCommands==null){
+            return Commands.none();
+        }
         return shooterCommands.setFeedSpeed(() -> 0).alongWith(shooterCommands.setFlySpeed(() -> 0));
     }
 
@@ -208,8 +214,8 @@ public class MultiCommands {
 
     // Aims the robot at the hub with velocity compensation
     public Command aimAtHub() {
-        if (!frc.robot.Constants.swerveEnabled) {
-            return swerveCommands.setRotationOutput(() -> 0);
+        if (swerveCommands==null) {
+            return Commands.none();
         }
         if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
             return swerveCommands.setRotationTarget(() -> getCompensatedAngleToHub(), () -> getAimFeedforward());
@@ -219,32 +225,38 @@ public class MultiCommands {
 
     // Shoots with auto distance calibration and radial velocity compensation
     public Command shoot() {
-        if (frc.robot.Constants.swerveEnabled) {
-            if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
-                return shootAtSpeed(() -> getCompensatedShooterSpeed());
-            }
-            return shootAtSpeed(() -> getShooterSpeed(swerve.getDistanceFromHub()));
-        } else {
+        if(swerveCommands==null){
             return shootDefault();
         }
+        if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
+            return shootAtSpeed(() -> getCompensatedShooterSpeed());
+        }
+        return shootAtSpeed(() -> getShooterSpeed(swerve.getDistanceFromHub()));
     }
 
-    @SuppressWarnings("unused")
     public Command shootWithHinge() {
-        if (frc.robot.Constants.intakeEnabled && frc.robot.Constants.swerveEnabled) {
-            return shoot().alongWith(new RepeatCommand(
-                    intakeCommands.switchHinge().andThen(new WaitCommand(Constants.hingeTime))));
-        } else {
+        if(intakeCommands==null){
             return shoot();
         }
+        return shoot().alongWith(new RepeatCommand(
+            intakeCommands.switchHinge().andThen(new WaitCommand(Constants.hingeTime))));
     }
 
     public Command intakeWithSpeed() {
+        if(intakeCommands==null){
+            return Commands.none();
+        }
+        if(swerve==null){
+            return intakeCommands.setRollerTargetSpeed(() -> Intake.Constants.minSpeed.get());
+        }
         return intakeCommands.setRollerTargetSpeed(() -> Intake.Constants.minSpeed.get()
                 + Math.max(0, swerve.getChassisSpeeds().vxMetersPerSecond) / Intake.Constants.rollerRadius);
     }
 
     public Command getSingleAuto(String pathName, boolean flipped) {
+        if(intakeCommands==null || swerveCommands==null){
+            return Commands.none();
+        }
         return intakeWithSpeed()
                 .alongWith(
                         Commands.waitSeconds(1).andThen(intakeCommands.setHingeDown()),
@@ -257,6 +269,9 @@ public class MultiCommands {
     }
 
     public Command getDoubleAuto(String pathName1, boolean flipped1, String pathName2, boolean flipped2) {
+        if(intakeCommands==null || swerveCommands==null){
+            return Commands.none();
+        }
         return intakeWithSpeed()
                 .alongWith(
                         Commands.waitSeconds(1).andThen(intakeCommands.setHingeDown()),
