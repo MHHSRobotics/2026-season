@@ -5,11 +5,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -108,7 +110,7 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        configureAuto(); // Set up the auto names commands and chooser
+        // configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
@@ -434,7 +436,9 @@ public class RobotContainer {
                 .touchpad()
                 .or(operator.touchpad())
                 .or(otherController.touchpad())
-                .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+                //        .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
+                .onTrue(Commands.runOnce(() -> driveController.setRumble(RumbleType.kBothRumble, 1))
+                        .andThen(Commands.print("rumble")));
 
         if (Constants.swerveEnabled) {
             driveController
@@ -499,6 +503,7 @@ public class RobotContainer {
             }
         }
         if (Constants.intakeEnabled) {
+
             otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
             operator.leftBumper().whileTrue(intakeCommands.switchHinge());
 
@@ -823,6 +828,44 @@ public class RobotContainer {
         }
     }
 
+    // Flashes a color shortly before each shift change and end game so the driver gets a heads up in Elastic
+    public void refreshFlashSignal() {
+        double matchTime = DriverStation.getMatchTime();
+        double activeWarningTime = Double.POSITIVE_INFINITY;
+        String activeColor = null;
+
+        // The warning times and their colors are parallel arrays, so ignore any entry missing its counterpart
+        int warningCount = Math.min(Constants.shiftFlashWarningTimes.length, Constants.shiftFlashColors.length);
+
+        // Only warn during teleop, and only when the driver station is actually reporting a match clock
+        if (DriverStation.isTeleop() && matchTime > 0) {
+            for (double shiftTime : Constants.shiftChangeTimes) {
+                double timeUntilShift = matchTime - shiftTime;
+                for (int i = 0; i < warningCount; i++) {
+                    double warningTime = Constants.shiftFlashWarningTimes[i];
+                    // Skip warnings that would land at or before the start of teleop. The transition shift is only
+                    // 10s long, so its 10s warning would otherwise fire the instant teleop begins.
+                    if (shiftTime + warningTime >= Constants.teleopDuration) {
+                        continue;
+                    }
+                    if (timeUntilShift <= warningTime
+                            && timeUntilShift > warningTime - Constants.shiftFlashDuration
+                            && warningTime < activeWarningTime) {
+                        // Prefer the most urgent warning if two ever overlap
+                        activeWarningTime = warningTime;
+                        activeColor = Constants.shiftFlashColors[i];
+                    }
+                }
+            }
+        }
+
+        // Blink while a warning is active so the indicator reads as a flash instead of a steady light
+        boolean blinkOn = (int) Math.floor(Timer.getFPGATimestamp() * Constants.shiftFlashBlinkRate * 2) % 2 == 0;
+
+        Logger.recordOutput(
+                "ShiftChangeFlash", activeColor != null && blinkOn ? activeColor : Constants.shiftFlashOffColor);
+    }
+
     public void periodic() {
         driveController.detectType();
         operator.detectType();
@@ -832,5 +875,6 @@ public class RobotContainer {
             publisher.publish(); // Publish 3D robot data
         }
         refreshControllerAlerts(); // Enable alerts for controller disconnects
+        refreshFlashSignal(); // Enable flash signal in Elastic
     }
 }
