@@ -224,7 +224,8 @@ public class RobotContainer {
             SwerveModule br = new SwerveModule(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight);
 
             swerve = new Swerve(gyro, fl, fr, bl, br); // Initialize swerve subsystem
-            // Translation and rotation are separate subsystems to manage commands' control of movement and rotation separately
+            // Translation and rotation are separate subsystems to manage commands' control of movement and rotation
+            // separately
             swerveTranslation = new SwerveTranslation();
             swerveRotation = new SwerveRotation();
 
@@ -465,9 +466,9 @@ public class RobotContainer {
                                 () -> -operator.getLeftY(),
                                 () -> -operator.getLeftX(),
                                 () -> Swerve.Constants.swerveFieldCentric.get()));
-                
+
                 new Trigger(() -> Math.abs(operator.getRightX()) > Swerve.Constants.turnDeadband)
-                    .onTrue(swerveCommands.steer(() -> -operator.getRightX()));
+                        .onTrue(swerveCommands.steer(() -> -operator.getRightX()));
             }
 
             // Same controls for test controller
@@ -827,7 +828,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        if(autoChooser==null){
+        if (autoChooser == null) {
             return Commands.none();
         }
         return autoChooser.get();
