@@ -5,9 +5,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -69,7 +69,7 @@ public class RobotContainer {
     private Swerve swerve;
     private SwerveTranslation swerveTranslation;
     private SwerveRotation swerveRotation;
-    private Hang hang;
+    private Hang hang; // Currently the hang subsystem is not being use don the bot
     private Intake intake;
     private Shooter shooter;
     private LED led;
@@ -86,7 +86,7 @@ public class RobotContainer {
 
     private final GameController operator = new GameController(1, "Operator");
 
-    private final GameController otherController = new GameController(2, "Other");
+    private final GameController testController = new GameController(2, "Test");
 
     private LoggedNetworkBoolean testEnabled;
     private LoggedNetworkNumber testSpeed;
@@ -110,16 +110,14 @@ public class RobotContainer {
             configureTestBindings();
         }
 
-        // configureAuto(); // Set up the auto names commands and chooser
+        configureAuto(); // Set up the auto names commands and chooser
 
         configureBindings(); // Add drive controller bindings
         publisher = new RobotPublisher(swerve); // Initialize the 3D data publisher
     }
 
     private void initSubsystems() {
-        // Initialize subsystems in order: arm, elevator, wrist, intake, hang, swerve
-        // Each subsystem is created immediately after its motor/encoder initialization
-
+        // Initialize swerve
         if (Constants.swerveEnabled) {
             // Create variables for each
             MotorIO flDriveMotor, flAngleMotor, frDriveMotor, frAngleMotor;
@@ -226,6 +224,8 @@ public class RobotContainer {
             SwerveModule br = new SwerveModule(brDriveMotor, brAngleMotor, brEncoder, TunerConstants.BackRight);
 
             swerve = new Swerve(gyro, fl, fr, bl, br); // Initialize swerve subsystem
+            // Translation and rotation are separate subsystems to manage commands' control of movement and rotation
+            // separately
             swerveTranslation = new SwerveTranslation();
             swerveRotation = new SwerveRotation();
 
@@ -291,7 +291,7 @@ public class RobotContainer {
                 }
             }
         }
-
+        // Initialize shooter
         if (Constants.shooterEnabled) {
             MotorIO feedMotor, flyMotor, flyMotor2;
             switch (Constants.currentMode) {
@@ -328,7 +328,7 @@ public class RobotContainer {
                 }
             }
         }
-
+        // Initialize hang
         if (Constants.hangEnabled) {
             MotorIO hangMotor;
             EncoderIO hangEncoder;
@@ -347,7 +347,7 @@ public class RobotContainer {
             }
             hang = new Hang(hangMotor, hangEncoder);
         }
-
+        // Initialize intake
         if (Constants.intakeEnabled) {
             MotorIO rollerMotor;
             MotorIO hingeMotor;
@@ -381,7 +381,7 @@ public class RobotContainer {
                 }
             }
         }
-
+        // Initialize LEDs
         if (Constants.ledsEnabled) {
             LedIO backCandle;
             LedIO frontCandle;
@@ -417,9 +417,7 @@ public class RobotContainer {
         if (Constants.ledsEnabled) {
             ledCommands = new LEDCommands(led);
         }
-        if (Constants.shooterEnabled) {
-            multiCommands = new MultiCommands(shooterCommands, intakeCommands, swerveCommands, swerve);
-        }
+        multiCommands = new MultiCommands(shooterCommands, intakeCommands, swerveCommands, swerve);
     }
 
     private void configureBindings() {
@@ -435,20 +433,18 @@ public class RobotContainer {
         driveController
                 .touchpad()
                 .or(operator.touchpad())
-                .or(otherController.touchpad())
-                //        .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
-                .onTrue(Commands.runOnce(() -> driveController.setRumble(RumbleType.kBothRumble, 1))
-                        .andThen(Commands.print("rumble")));
+                .or(testController.touchpad())
+                .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
             driveController
                     .rightMenu()
-                    .or(otherController.rightMenu())
+                    .or(testController.rightMenu())
                     .or(operator.rightMenu())
                     .onTrue(swerveCommands.resetGyro());
             driveController
                     .rightTrigger()
-                    .or(otherController.leftMenu())
+                    .or(testController.leftMenu())
                     .or(operator.leftMenu())
                     .onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
@@ -463,39 +459,43 @@ public class RobotContainer {
             new Trigger(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
-            // Same controls for operator
+            // Same controls for operator when FMS isn't attached
             if (!DriverStation.isFMSAttached()) {
                 new Trigger(() -> Math.hypot(operator.getLeftX(), operator.getLeftY()) > Swerve.Constants.moveDeadband)
                         .onTrue(swerveCommands.drive(
                                 () -> -operator.getLeftY(),
                                 () -> -operator.getLeftX(),
                                 () -> Swerve.Constants.swerveFieldCentric.get()));
+
+                new Trigger(() -> Math.abs(operator.getRightX()) > Swerve.Constants.turnDeadband)
+                        .onTrue(swerveCommands.steer(() -> -operator.getRightX()));
             }
 
-            new Trigger(() -> Math.abs(operator.getRightX()) > Swerve.Constants.turnDeadband)
-                    .onTrue(swerveCommands.steer(() -> -operator.getRightX()));
-
-            // Same controls for other controller
-            new Trigger(() -> Math.hypot(otherController.getLeftX(), otherController.getLeftY())
+            // Same controls for test controller
+            new Trigger(() -> Math.hypot(testController.getLeftX(), testController.getLeftY())
                             > Swerve.Constants.moveDeadband)
                     .onTrue(swerveCommands.drive(
-                            () -> -otherController.getLeftY(),
-                            () -> -otherController.getLeftX(),
+                            () -> -testController.getLeftY(),
+                            () -> -testController.getLeftX(),
                             () -> Swerve.Constants.swerveFieldCentric.get()));
 
-            new Trigger(() -> Math.abs(otherController.getRightX()) > Swerve.Constants.turnDeadband)
-                    .onTrue(swerveCommands.steer(() -> -otherController.getRightX()));
+            new Trigger(() -> Math.abs(testController.getRightX()) > Swerve.Constants.turnDeadband)
+                    .onTrue(swerveCommands.steer(() -> -testController.getRightX()));
+
+            // Aim at hub: leftBumper on drive, east on test
+            testController.east().and(() -> !testEnabled.get()).onTrue(multiCommands.aimAtHub());
+            driveController.leftBumper().onTrue(multiCommands.aimAtHub());
 
             if (Constants.autoAlignEnabled) {
                 // Go to outpost: leftTrigger on drive, south on other
-                otherController
+                testController
                         .south()
                         .and(() -> !testEnabled.get())
                         .onTrue(swerveCommands.setPoseTarget(Field.outpostPosition));
                 driveController.leftTrigger().onTrue(swerveCommands.setPoseTarget(Field.outpostPosition));
 
                 // Go to hang: rightTrigger on drive, west on other
-                otherController
+                testController
                         .west()
                         .and(() -> !testEnabled.get())
                         .onTrue(swerveCommands.setPoseTarget(Field.hangPosition));
@@ -503,35 +503,29 @@ public class RobotContainer {
             }
         }
         if (Constants.intakeEnabled) {
-
-            otherController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
+            testController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
             operator.leftBumper().whileTrue(intakeCommands.switchHinge());
 
-            otherController.north().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUpShort());
+            testController.north().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUpShort());
             operator.east().whileTrue(intakeCommands.setHingeUpShort());
 
-            otherController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.intakeWithSpeed());
+            testController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.intakeWithSpeed());
             operator.leftTrigger().whileTrue(multiCommands.intakeWithSpeed());
 
-            otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
+            testController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
         }
         if (Constants.shooterEnabled) {
             operator.povLeft().whileTrue(shooterCommands.feedForward());
             operator.povRight().whileTrue(shooterCommands.feedReverse());
 
-            otherController.rightBumper().and(() -> !testEnabled.get()).whileTrue(shooterCommands.feedReverse());
+            testController.rightBumper().and(() -> !testEnabled.get()).whileTrue(shooterCommands.feedReverse());
             operator.rightBumper().whileTrue(shooterCommands.feedReverse());
-        }
-        if (multiCommands != null) {
-            otherController.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
-            otherController.south().and(() -> !testEnabled.get()).whileTrue(multiCommands.shootDefault());
+
+            testController.rightTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.shoot());
+            testController.south().and(() -> !testEnabled.get()).whileTrue(multiCommands.shootDefault());
             operator.rightTrigger().whileTrue(multiCommands.shoot());
             operator.south().whileTrue(multiCommands.shootDefault());
-
-            // Aim at hub: leftBumper on drive, east on other
-            otherController.east().and(() -> !testEnabled.get()).onTrue(multiCommands.aimAtHub());
-            driveController.leftBumper().onTrue(multiCommands.aimAtHub());
         }
         if (Constants.hangEnabled) {
             operator.povUp().whileTrue(hangCommands.setSpeed(() -> 0.2));
@@ -560,7 +554,7 @@ public class RobotContainer {
             testSubsystem.addOption("Swerve", "Swerve");
 
             // Manual duty cycle forward test
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -569,7 +563,7 @@ public class RobotContainer {
                     .onFalse(swerveCommands.stop());
 
             // Manual duty cycle backward test
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -578,7 +572,7 @@ public class RobotContainer {
                     .onFalse(swerveCommands.stop());
 
             // Manual pose reset
-            otherController
+            testController
                     .north()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -586,7 +580,7 @@ public class RobotContainer {
                     .onTrue(swerveCommands.resetPose(new Pose2d()));
 
             // PID to (1,1)
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
@@ -594,7 +588,7 @@ public class RobotContainer {
                     .onTrue(swerveCommands.setPoseTarget(new FieldPose2d(1, 1, new Rotation2d())));
 
             // PID to (0,0)
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
@@ -605,7 +599,7 @@ public class RobotContainer {
         if (Constants.hangEnabled) {
             testSubsystem.addOption("Hang", "Hang");
             // Hang move up test
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -613,7 +607,7 @@ public class RobotContainer {
                     .whileTrue(hangCommands.setSpeed(() -> testSpeed.get()));
 
             // Hang move down test
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -626,7 +620,7 @@ public class RobotContainer {
             testSubsystem.addOption("ShooterFly", "ShooterFly");
 
             // Flywheel forward test
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -634,7 +628,7 @@ public class RobotContainer {
                     .whileTrue(shooterCommands.setFlySpeed(() -> testSpeed.get()));
 
             // Flywheel shoot
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -642,7 +636,7 @@ public class RobotContainer {
                     .whileTrue(shooterCommands.shoot(() -> testSpeed.get()));
 
             // Feed forward test
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -650,7 +644,7 @@ public class RobotContainer {
                     .whileTrue(shooterCommands.setFeedSpeed(() -> testSpeed.get()));
 
             // Feed reverse test
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
@@ -662,70 +656,70 @@ public class RobotContainer {
             testSubsystem.addOption("Intake", "Intake");
             testSubsystem.addOption("IntakeHinge", "IntakeHinge");
 
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Intake"))
                     .whileTrue(intakeCommands.setRollerSpeed(() -> testSpeed.get()));
 
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("Intake"))
                     .whileTrue(intakeCommands.setRollerSpeed(() -> -testSpeed.get()));
 
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("Intake"))
                     .whileTrue(intakeCommands.setRollerTargetSpeed(() -> testSpeed.get()));
 
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("Intake"))
                     .whileTrue(intakeCommands.setRollerTargetSpeed(() -> -testSpeed.get()));
 
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .whileTrue(intakeCommands.setHingeSpeed(() -> testSpeed.get()));
 
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("Manual"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .whileTrue(intakeCommands.setHingeSpeed(() -> -testSpeed.get()));
 
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.setHingeUp());
 
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PID"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .onTrue(intakeCommands.setHingeDown());
 
-            otherController
+            testController
                     .south()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PIDChange"))
                     .and(() -> testSubsystem.get().equals("IntakeHinge"))
                     .whileTrue(intakeCommands.changeGoal(() -> testSpeed.get() / 10));
 
-            otherController
+            testController
                     .east()
                     .and(() -> testEnabled.get())
                     .and(() -> testType.get().equals("PIDChange"))
@@ -737,9 +731,9 @@ public class RobotContainer {
     // Refresh drive and operator disconnect alerts
     public void refreshControllerAlerts() {
         controllerDisconnected.set(
-                !driveController.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
+                !driveController.isConnected() && Constants.currentMode != Mode.SIM && !testController.isConnected());
         operatorDisconnected.set(
-                !operator.isConnected() && Constants.currentMode != Mode.SIM && !otherController.isConnected());
+                !operator.isConnected() && Constants.currentMode != Mode.SIM && !testController.isConnected());
     }
 
     // Initialize dashboard auto chooser
@@ -791,7 +785,7 @@ public class RobotContainer {
                 NamedCommands.registerCommand("IntakeStop", RobotUtils.schedule(intakeCommands.rollerStop()));
             }
 
-            if (multiCommands != null) {
+            if (Constants.shooterEnabled) {
                 NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
                 NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
             }
@@ -834,11 +828,10 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        if (autoChooser != null) {
-            return autoChooser.get();
-        } else {
+        if (autoChooser == null) {
             return Commands.none();
         }
+        return autoChooser.get();
     }
 
     // Flashes a color shortly before each shift change and end game so the driver gets a heads up in Elastic
@@ -882,7 +875,7 @@ public class RobotContainer {
     public void periodic() {
         driveController.detectType();
         operator.detectType();
-        otherController.detectType();
+        testController.detectType();
 
         if (Constants.swerveEnabled) {
             publisher.publish(); // Publish 3D robot data
