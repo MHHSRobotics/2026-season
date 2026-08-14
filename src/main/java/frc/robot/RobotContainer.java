@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -87,7 +88,10 @@ public class RobotContainer {
 
     private final GameController otherController = new GameController(2, "Other");
 
+    private final CommandGenericHID arcadeController = new CommandGenericHID(3);
+
     private LoggedNetworkBoolean testEnabled;
+    private boolean autoEnabled;
     private LoggedNetworkNumber testSpeed;
     private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
@@ -262,6 +266,7 @@ public class RobotContainer {
                 // Add cameras to swerve ododmetry
                 // swerve.addCameraSource(frontCam);
 
+                swerve.addCameraSource(frontCam);
                 swerve.addCameraSource(rightCam);
                 swerve.addCameraSource(leftCam);
                 swerve.addCameraSource(backCam);
@@ -438,11 +443,18 @@ public class RobotContainer {
          * Touchpad: cancel all commands
          */
         testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
+        
+
+        arcadeController
+                .button(2)
+                .onTrue(Commands.runOnce(() -> autoEnabled = !autoEnabled));                
+                
 
         driveController
                 .touchpad()
                 .or(operator.touchpad())
                 .or(otherController.touchpad())
+                .or(arcadeController.button(3))
                 .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
@@ -825,7 +837,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        if (autoChooser != null) {
+        if (autoChooser != null && autoEnabled == true) {
             return autoChooser.get();
         } else {
             return Commands.none();
