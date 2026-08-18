@@ -51,13 +51,33 @@ public final class Constants {
 
     public static final boolean ctreProLicensedWarning = true; // Whether to warn if a CTRE device isn't pro licensed
 
+    // Teleop match time (seconds remaining) at which each SHIFT boundary occurs, per the 2026 game manual:
+    // TRANSITION SHIFT 2:20-2:10, SHIFT 1 2:10-1:45, SHIFT 2 1:45-1:20, SHIFT 3 1:20-0:55, SHIFT 4 0:55-0:30,
+    // END GAME 0:30-0:00
+    public static final double[] shiftChangeTimes = {130, 105, 80, 55, 30};
+
+    public static final double teleopDuration = 140; // Length of the teleop period
+
+    public static final double[] shiftFlashWarningTimes = {10, 5
+    }; // How long before a shift change to flash the warning signal
+
+    // Color flashed for each entry in shiftFlashWarningTimes, as a parallel array
+    public static final String[] shiftFlashColors = {"#FFFF00", "#FF0000"};
+
+    public static final String shiftFlashOffColor = "#000000"; // Color shown between blinks and when no warning is
+    // active
+
+    public static final double shiftFlashDuration = 1.0; // How long each flash warning lasts
+
+    public static final double shiftFlashBlinkRate = 5.0; // How many times per second the flash signal blinks
+
     // Toggles for susbsytems
     public static final boolean swerveEnabled = true;
     public static final boolean visionEnabled = true;
     public static final boolean autoAlignEnabled = false;
     public static final boolean shooterVelocityCompensationEnabled = false;
-    public static final boolean shooterEnabled = true;
+    public static final boolean shooterEnabled = false;
     public static final boolean hangEnabled = false;
     public static final boolean intakeEnabled = true;
-    public static final boolean ledsEnabled = true;
+    public static final boolean ledsEnabled = false;
 }
