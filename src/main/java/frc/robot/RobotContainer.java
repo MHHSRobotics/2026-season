@@ -92,6 +92,8 @@ public class RobotContainer {
 
     private final CommandGenericHID arcadeController = new CommandGenericHID(3);
 
+    private final GameController tester = new GameController(4, "ReallyTest");
+
     private LoggedNetworkBoolean testEnabled;
     private boolean autoEnabled;
     private LoggedNetworkNumber testSpeed;
@@ -443,12 +445,8 @@ public class RobotContainer {
          * Touchpad: cancel all commands
          */
         testEnabled = new LoggedNetworkBoolean("SmartDashboard/Test/Enabled", false);
-        
 
-        arcadeController
-                .button(2)
-                .onTrue(Commands.runOnce(() -> autoEnabled = !autoEnabled));                
-                
+        arcadeController.button(2).onTrue(Commands.runOnce(() -> autoEnabled = !autoEnabled));
 
         driveController
                 .touchpad()
@@ -477,7 +475,7 @@ public class RobotContainer {
                             () -> Swerve.Constants.swerveFieldCentric.get()));
 
             // Rotation: right stick X controls omega
-            new Trigger(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband)
+            new Trigger(() -> Math.abs(tester.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
             // Same controls for operator when FMS isn't attached
