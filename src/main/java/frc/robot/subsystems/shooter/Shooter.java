@@ -127,7 +127,7 @@ public class Shooter extends SubsystemBase {
         fly.update();
         fly2.update();
         feed.update();
-
+        
         Logger.recordOutput("Shooter/TargetSpeed", targetSpeed);
         Logger.recordOutput("Shooter/AtTarget", atTargetSpeed());
     }

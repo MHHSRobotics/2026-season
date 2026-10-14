@@ -381,10 +381,10 @@ public class SwerveCommands {
     }
 
     // PID-controlled rotation to aim at a field position (rotates to face the target)
-    public Command aimAt(FieldPose2d target) {
+    public Command aimAt(Supplier<FieldPose2d> target) {
         return Commands.run(
                         () -> {
-                            Pose2d targetPose = target.get();
+                            Pose2d targetPose = target.get().get();
                             Pose2d currentPose = swerve.getPose();
                             double angleToTarget = Math.atan2(
                                     targetPose.getY() - currentPose.getY(), targetPose.getX() - currentPose.getX());

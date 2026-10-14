@@ -79,6 +79,8 @@ public class Swerve extends SubsystemBase {
         // Maximum angular speed of the robot
         public static final double maxAngularSpeedRadPerSec = maxLinearSpeedMetersPerSec / driveBaseRadius;
 
+        public static FieldPose2d hubTarget = Field.hubPosition;
+
         // Initial pose of the bot in simulation
         public static final FieldPose2d simInitialPose =
                 new FieldPose2d(new Pose2d(3.5, Field.fieldWidth / 2, Rotation2d.k180deg));
@@ -341,6 +343,29 @@ public class Swerve extends SubsystemBase {
         locked = true;
     }
 
+    public void setHubTarget() {
+        double leftDist =
+                Math.abs(Field.leftAllianceAimPosition.get().getY() - getPose().getY());
+        double rightDist =
+                Math.abs(Field.rightAllianceAimPosition.get().getY() - getPose().getY());
+
+        double invertedSwerve = RobotUtils.onRedAlliance()
+                ? Field.fieldLength - getPose().getX()
+                : getPose().getX();
+        double invertedAlliance = RobotUtils.onRedAlliance()
+                ? Field.fieldLength - Field.allianceEndVal.get().getX()
+                : Field.allianceEndVal.get().getX();
+
+        FieldPose2d distCalc = invertedSwerve > invertedAlliance
+                ? leftDist > rightDist ? Field.rightAllianceAimPosition : Field.leftAllianceAimPosition
+                : Field.hubPosition;
+
+        Constants.hubTarget = distCalc;
+
+        Logger.recordOutput("TEST/DistFromAll", Field.allianceEndVal.get().getX());
+        Logger.recordOutput("TEST/SwervePos", invertedSwerve);
+    }
+
     // Set translation output (m/s) — called by commands each loop
     public void setTranslation(double dx, double dy, boolean fieldCentric) {
         locked = false;
@@ -549,5 +574,7 @@ public class Swerve extends SubsystemBase {
 
         // Update field pose
         field.setRobotPose(getPose());
+
+        setHubTarget();
     }
 }

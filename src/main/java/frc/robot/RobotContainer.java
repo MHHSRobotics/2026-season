@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -456,6 +457,9 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> CommandScheduler.getInstance().cancelAll()));
 
         if (Constants.swerveEnabled) {
+
+            testController.rightTrigger().whileTrue(multiCommands.aimAtHub());
+
             driveController
                     .rightMenu()
                     .or(testController.rightMenu())
@@ -899,6 +903,9 @@ public class RobotContainer {
         if (Constants.swerveEnabled) {
             publisher.publish(); // Publish 3D robot data
         }
+
+        Logger.recordOutput("POSITIONS/TEST", new Pose3d(Field.leftAllianceAimPosition.get()));
+        Logger.recordOutput("POSITIONS/TEST2", new Pose3d(Field.rightAllianceAimPosition.get()));
 
         refreshControllerAlerts(); // Enable alerts for controller disconnects
         refreshFlashSignal(); // Enable flash signal in Elastic

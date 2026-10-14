@@ -28,4 +28,10 @@ public class Field {
 
     // Hang bot position in blue alliance coordinates (meters)
     public static final FieldPose2d hangPosition = new FieldPose2d(1.555, 3.29, Units.degreesToRadians(90));
+
+    public static final FieldPose2d leftAllianceAimPosition = new FieldPose2d(3, 6, Units.degreesToRadians(0));
+
+    public static final FieldPose2d rightAllianceAimPosition = new FieldPose2d(3, 2, Units.degreesToRadians(0));
+
+    public static final FieldPose2d allianceEndVal = new FieldPose2d(5.2, 0, 0);
 }

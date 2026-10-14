@@ -201,8 +201,8 @@ public class MultiCommands {
     }
 
     public boolean isAimedAndSpunUp() {
-        double targetAngle =
-                frc.robot.Constants.shooterVelocityCompensationEnabled ? getCompensatedAngleToHub() : getAngleToHub();
+        double targetAngle = getAngleToHub();
+        // frc.robot.Constants.shooterVelocityCompensationEnabled ? getCompensatedAngleToHub() : getAngleToHub();
         double angleError = Math.abs(MathUtil.angleModulus(swerve.getRotation().getRadians() - targetAngle));
         boolean ready = angleError < aimToleranceRad.get() && shooterCommands.atTargetSpeed();
 
@@ -217,10 +217,11 @@ public class MultiCommands {
         if (swerveCommands == null) {
             return Commands.none();
         }
-        if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
-            return swerveCommands.setRotationTarget(() -> getCompensatedAngleToHub(), () -> getAimFeedforward());
-        }
-        return swerveCommands.aimAt(Field.hubPosition);
+        // if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
+        //     return swerveCommands.setRotationTarget(() -> getCompensatedAngleToHub(), () -> getAimFeedforward());
+        // }
+
+        return swerveCommands.aimAt(() -> Swerve.Constants.hubTarget);
     }
 
     // Shoots with auto distance calibration and radial velocity compensation
@@ -228,9 +229,9 @@ public class MultiCommands {
         if (swerveCommands == null) {
             return shootDefault();
         }
-        if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
-            return shootAtSpeed(() -> getCompensatedShooterSpeed());
-        }
+        // if (frc.robot.Constants.shooterVelocityCompensationEnabled) {
+        //     return shootAtSpeed(() -> getCompensatedShooterSpeed());
+        // }
         return shootAtSpeed(() -> getShooterSpeed(swerve.getDistanceFromHub()));
     }
 

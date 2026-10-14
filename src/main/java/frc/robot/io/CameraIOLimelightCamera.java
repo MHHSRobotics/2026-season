@@ -8,11 +8,14 @@ import org.littletonrobotics.junction.Logger;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.util.RobotUtils;
 
 public class CameraIOLimelightCamera extends CameraIO {
     // NetworkTables name of the Limelight, e.g. "limelight" or "limelight-front".
     private final String limelightName;
     private final Transform3d robotToCamera;
+
+    private double currentHB = -1;
 
     public CameraIOLimelightCamera(
             String name, String logPath, String limelightName, Transform3d robotToCamera, int pipelineIndex) {
@@ -32,10 +35,24 @@ public class CameraIOLimelightCamera extends CameraIO {
                 Math.toDegrees(robotToCamera.getRotation().getZ()));
     }
 
+    public boolean isConnected() {
+        double HB = LimelightHelpers.getHeartbeat(limelightName);
+        boolean alive = HB != currentHB;
+
+        currentHB = HB;
+
+        return alive;
+    }
+
     @Override
     public void update() {
         // A tag count > 0 is our "connected + has data" signal.
-        PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
+
+        inputs.connected = isConnected();
+
+        PoseEstimate estimate = RobotUtils.onRedAlliance()
+                ? LimelightHelpers.getBotPoseEstimate_wpiRed(limelightName)
+                : LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
         boolean valid = estimate != null && estimate.tagCount > 0;
         inputs.connected = valid;
 
@@ -54,6 +71,7 @@ public class CameraIOLimelightCamera extends CameraIO {
         }
 
         super.update();
+
         Logger.recordOutput(getLogPath() + "/Transform", robotToCamera);
     }
 }
