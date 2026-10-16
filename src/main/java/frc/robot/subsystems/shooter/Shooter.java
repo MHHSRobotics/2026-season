@@ -14,11 +14,13 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkBoolean shooterLocked = new LoggedNetworkBoolean("Shooter/Locked", true);
         public static final LoggedNetworkBoolean shooterDisabled = new LoggedNetworkBoolean("Shooter/Disabled", false);
 
-        public static final LoggedNetworkNumber defaultSpeed =
-                new LoggedNetworkNumber("Shooter/DefaultSpeed", 1000); // Default shooter speed
+        public static LoggedNetworkNumber defaultSpeed =
+                new LoggedNetworkNumber("Shooter/DefaultSpeedREAL", 600); // Default shooter speed
 
         public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 2); // kP
         public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
+        public static final LoggedNetworkNumber flykS = new LoggedNetworkNumber("Shooter/FlykS", 0); // kS
+        public static final LoggedNetworkNumber flykV = new LoggedNetworkNumber("Shooter/FlykV", 0); // kV
 
         public static final double flywheelCurrentLimit = 150;
 
@@ -100,6 +102,10 @@ public class Shooter extends SubsystemBase {
         feed.setDutyCycle(speed);
     }
 
+    public void setShooterDutyCycle(double speed) {
+        fly.setDutyCycle(speed);
+    }
+
     public void feedShoot() {
         setFeedSpeed(Constants.feedSpeed);
     }
@@ -116,18 +122,20 @@ public class Shooter extends SubsystemBase {
     public void periodic() {
         setLocked(Constants.shooterLocked.get());
         setDisabled(Constants.shooterDisabled.get());
-        if (targetSpeed == 0) {
+        if (targetSpeed <= 0) {
             fly.coast();
         } else {
             fly.setVelocityWithCurrent(targetSpeed);
         }
         fly.setkP(Constants.flykP.get());
         fly.setkD(Constants.flykD.get());
+        fly.setkS(Constants.flykS.get());
+        fly.setkV(Constants.flykV.get());
 
         fly.update();
         fly2.update();
         feed.update();
-        
+
         Logger.recordOutput("Shooter/TargetSpeed", targetSpeed);
         Logger.recordOutput("Shooter/AtTarget", atTargetSpeed());
     }

@@ -204,7 +204,9 @@ public class MultiCommands {
         double targetAngle = getAngleToHub();
         // frc.robot.Constants.shooterVelocityCompensationEnabled ? getCompensatedAngleToHub() : getAngleToHub();
         double angleError = Math.abs(MathUtil.angleModulus(swerve.getRotation().getRadians() - targetAngle));
-        boolean ready = angleError < aimToleranceRad.get() && shooterCommands.atTargetSpeed();
+        boolean ready =
+                shooterCommands
+                        .atTargetSpeed(); // angleError < aimToleranceRad.get() && shooterCommands.atTargetSpeed();
 
         Logger.recordOutput("Shooter/AimErrorRad", angleError);
         Logger.recordOutput("Shooter/ReadyToShoot", ready);

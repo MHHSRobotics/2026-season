@@ -15,6 +15,8 @@ public class CameraIOLimelightCamera extends CameraIO {
     private final String limelightName;
     private final Transform3d robotToCamera;
 
+    private final int missedHBTolerance = 3;
+
     private double currentHB = -1;
 
     public CameraIOLimelightCamera(
@@ -37,7 +39,7 @@ public class CameraIOLimelightCamera extends CameraIO {
 
     public boolean isConnected() {
         double HB = LimelightHelpers.getHeartbeat(limelightName);
-        boolean alive = HB != currentHB;
+        boolean alive = (HB - currentHB) < missedHBTolerance;
 
         currentHB = HB;
 
@@ -54,7 +56,7 @@ public class CameraIOLimelightCamera extends CameraIO {
                 ? LimelightHelpers.getBotPoseEstimate_wpiRed(limelightName)
                 : LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
         boolean valid = estimate != null && estimate.tagCount > 0;
-        inputs.connected = valid;
+        // inputs.connected = valid;
 
         if (valid && estimate.tagCount <= Swerve.VisionConstants.maxMeasurements) {
             // Limelight already gives a field-relative robot pose (Pose2d).

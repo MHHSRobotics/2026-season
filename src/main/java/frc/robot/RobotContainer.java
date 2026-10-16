@@ -1,7 +1,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -239,7 +238,7 @@ public class RobotContainer {
 
             if (Constants.visionEnabled) {
                 // Create camera variables
-                CameraIO frontCam, rightCam, leftCam, backCam;
+                CameraIO frontCam, rightCam, leftCam;
                 switch (Constants.currentMode) {
                     case REAL:
                     case SIM:
@@ -250,8 +249,7 @@ public class RobotContainer {
                                 "RightCam", "Vision/RightCam", Swerve.VisionConstants.rightCamPose, 60);
                         leftCam = new CameraIOPhotonCamera(
                                 "LeftCam", "Vision/LeftCam", Swerve.VisionConstants.leftCamPose, 60);
-                        backCam = new CameraIOPhotonCamera(
-                                "BackCam", "Vision/BackCam", Swerve.VisionConstants.backCamPose, 60);
+
                         break;
                     default:
                         // If in replay use an empty CameraIO
@@ -265,7 +263,7 @@ public class RobotContainer {
 
                         rightCam = new CameraIO("RightCam", "Vision/RightCam");
                         leftCam = new CameraIO("LeftCam", "Vision/LeftCam");
-                        backCam = new CameraIO("BackCam", "Vision/BackCam");
+
                         break;
                 }
                 // Add cameras to swerve ododmetry
@@ -274,7 +272,6 @@ public class RobotContainer {
                 swerve.addCameraSource(frontCam);
                 swerve.addCameraSource(rightCam);
                 swerve.addCameraSource(leftCam);
-                swerve.addCameraSource(backCam);
             }
 
             // If mode is SIM, start the simulations for swerve modules and gyro
@@ -904,8 +901,7 @@ public class RobotContainer {
             publisher.publish(); // Publish 3D robot data
         }
 
-        Logger.recordOutput("POSITIONS/TEST", new Pose3d(Field.leftAllianceAimPosition.get()));
-        Logger.recordOutput("POSITIONS/TEST2", new Pose3d(Field.rightAllianceAimPosition.get()));
+        Logger.recordOutput("CONTROLLER/BUTTONCOUNT", testController.getButtonCount());
 
         refreshControllerAlerts(); // Enable alerts for controller disconnects
         refreshFlashSignal(); // Enable flash signal in Elastic

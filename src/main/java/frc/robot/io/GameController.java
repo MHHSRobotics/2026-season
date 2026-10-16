@@ -63,6 +63,10 @@ public class GameController extends CommandGenericHID {
         return type;
     }
 
+    public int getButtonCount() {
+        return getHID().getButtonCount();
+    }
+
     // --- Dynamic trigger helper ---
     // button() from CommandGenericHID binds to a fixed button number.
     // We need triggers that re-evaluate the button number each loop.

@@ -257,7 +257,7 @@
             "x": 768.0,
             "y": 0.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 768.0,
             "type": "List Layout",
             "properties": {
               "label_position": "TOP"
@@ -287,6 +287,118 @@
                   "topic": "Shooter/Locked",
                   "period": 0.06,
                   "data_type": "boolean"
+                }
+              },
+              {
+                "title": "kP",
+                "x": 1152.0,
+                "y": 768.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Shooter/FlykP",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              },
+              {
+                "title": "kD",
+                "x": 1152.0,
+                "y": 768.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Shooter/FlykD",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              },
+              {
+                "title": "FlykS",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Shooter/FlykS",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "FlykV",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Shooter/FlykV",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "DistanceFromHub",
+                "x": 768.0,
+                "y": 640.0,
+                "width": 384.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/Swerve/DistanceFromHub",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Current Flywheel Speed (Rads/sec)",
+                "x": 768.0,
+                "y": 640.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/Shooter/Flywheel/Velocity",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "TargetSpeed",
+                "x": 896.0,
+                "y": 640.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/AdvantageKit/RealOutputs/Shooter/TargetSpeed",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "DefaultSpeedREAL",
+                "x": 768.0,
+                "y": 640.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "Shooter/DefaultSpeedREAL",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
                 }
               }
             ]
@@ -735,89 +847,6 @@
                   "period": 0.06,
                   "data_type": "double",
                   "show_submit_button": true
-                }
-              }
-            ]
-          },
-          {
-            "title": "Shooter Settings",
-            "x": 768.0,
-            "y": 384.0,
-            "width": 384.0,
-            "height": 512.0,
-            "type": "List Layout",
-            "properties": {
-              "label_position": "TOP"
-            },
-            "children": [
-              {
-                "title": "Current Flywheel Speed (Rads/sec)",
-                "x": 768.0,
-                "y": 640.0,
-                "width": 256.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/Shooter/Flywheel/Velocity",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "kP",
-                "x": 1152.0,
-                "y": 768.0,
-                "width": 256.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Shooter/FlykP",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": true
-                }
-              },
-              {
-                "title": "kD",
-                "x": 1152.0,
-                "y": 768.0,
-                "width": 256.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "Shooter/FlykD",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": true
-                }
-              },
-              {
-                "title": "DistanceFromHub",
-                "x": 768.0,
-                "y": 640.0,
-                "width": 384.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealOutputs/Swerve/DistanceFromHub",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
-                }
-              },
-              {
-                "title": "TargetSpeed",
-                "x": 896.0,
-                "y": 640.0,
-                "width": 128.0,
-                "height": 128.0,
-                "type": "Text Display",
-                "properties": {
-                  "topic": "/AdvantageKit/RealOutputs/Shooter/TargetSpeed",
-                  "period": 0.06,
-                  "data_type": "double",
-                  "show_submit_button": false
                 }
               }
             ]
