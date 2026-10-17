@@ -17,9 +17,9 @@ public class Shooter extends SubsystemBase {
         public static LoggedNetworkNumber defaultSpeed =
                 new LoggedNetworkNumber("Shooter/DefaultSpeedREAL", 600); // Default shooter speed
 
-        public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 0); // kP
+        public static final LoggedNetworkNumber flykP = new LoggedNetworkNumber("Shooter/FlykP", 0.3); // kP
         public static final LoggedNetworkNumber flykD = new LoggedNetworkNumber("Shooter/FlykD", 0.03); // kD
-        public static final LoggedNetworkNumber flykS = new LoggedNetworkNumber("Shooter/FlykS", 0.02); // kS
+        public static final LoggedNetworkNumber flykS = new LoggedNetworkNumber("Shooter/FlykS", 2.35); // kS
         public static final LoggedNetworkNumber flykV = new LoggedNetworkNumber("Shooter/FlykV", 0); // kV
 
         public static final double flywheelCurrentLimit = 150;
