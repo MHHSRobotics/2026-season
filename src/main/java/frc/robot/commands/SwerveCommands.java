@@ -384,7 +384,8 @@ public class SwerveCommands {
     public Command aimAt(Supplier<FieldPose2d> target) {
         return Commands.run(
                         () -> {
-                            Pose2d targetPose = target.get().get();
+                            Swerve.Constants.aiming = true;
+                            Pose2d targetPose = target.get().getOnBlue(); // CHANGE
                             Pose2d currentPose = swerve.getPose();
                             double angleToTarget = Math.atan2(
                                     targetPose.getY() - currentPose.getY(), targetPose.getX() - currentPose.getX());
@@ -397,6 +398,7 @@ public class SwerveCommands {
                 .finallyDo(() -> {
                     swerve.setRotation(0);
                     swerve.setPIDRotation(false);
+                    Swerve.Constants.aiming = false;
                 })
                 .withName("swerve aim at");
     }

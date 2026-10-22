@@ -241,8 +241,21 @@ public class RobotContainer {
                 CameraIO frontCam, rightCam, leftCam;
                 switch (Constants.currentMode) {
                     case REAL:
+                        frontCam = new CameraIOLimelightCamera(
+                                "FrontCam",
+                                "Vision/FrontCam",
+                                "limelight-front",
+                                Swerve.VisionConstants.frontCamPose,
+                                0);
+
+                        rightCam = new CameraIOPhotonCamera(
+                                "RightCam", "Vision/RightCam", Swerve.VisionConstants.rightCamPose, 60);
+                        leftCam = new CameraIOPhotonCamera(
+                                "LeftCam", "Vision/LeftCam", Swerve.VisionConstants.leftCamPose, 60);
+                        break;
                     case SIM:
                         // If in real bot or sim, use CameraIOPhotonCamera
+
                         frontCam = new CameraIOPhotonCamera(
                                 "FrontCam", "Vision/FrontCam", Swerve.VisionConstants.frontCamPose, 60);
                         rightCam = new CameraIOPhotonCamera(
@@ -456,6 +469,7 @@ public class RobotContainer {
         if (Constants.swerveEnabled) {
 
             testController.rightTrigger().whileTrue(multiCommands.aimAtHub());
+            operator.rightTrigger().whileTrue(multiCommands.aimAtHub());
 
             driveController
                     .rightMenu()
@@ -476,7 +490,7 @@ public class RobotContainer {
                             () -> Swerve.Constants.swerveFieldCentric.get()));
 
             // Rotation: right stick X controls omega
-            new Trigger(() -> Math.abs(tester.getRightX()) > Swerve.Constants.turnDeadband)
+            new Trigger(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband)
                     .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
 
             // Same controls for operator when FMS isn't attached
@@ -808,6 +822,7 @@ public class RobotContainer {
             if (Constants.shooterEnabled) {
                 NamedCommands.registerCommand("Shoot", RobotUtils.schedule(multiCommands.shoot()));
                 NamedCommands.registerCommand("StopShoot", RobotUtils.schedule(multiCommands.shootStop()));
+                NamedCommands.registerCommand("AimHub", RobotUtils.schedule(multiCommands.aimAtHub()));
             }
 
             if (Constants.hangEnabled) {

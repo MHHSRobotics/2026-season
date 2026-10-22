@@ -84,7 +84,7 @@ public class MultiCommands {
     private double getShooterSpeed(double dist) {
         // Clamp equation from 1 to 7 meters
         dist = MathUtil.clamp(dist, 1, 7);
-        return 32.64 * dist + 219.9;
+        return 500 + (450 - 500) / (1 + Math.pow(dist / 2.518476, 115.0746));
     }
 
     private double getEstimatedLaunchSpeed(double shooterSpeed) {
@@ -223,7 +223,10 @@ public class MultiCommands {
         //     return swerveCommands.setRotationTarget(() -> getCompensatedAngleToHub(), () -> getAimFeedforward());
         // }
 
-        return swerveCommands.aimAt(() -> Swerve.Constants.hubTarget);
+        return swerveCommands.aimAt(() -> Swerve.Constants.hubTarget); // new FieldPose2d(
+        // Swerve.Constants.hubTarget.get().getX(), // - swerve.getChassisSpeeds().vxMetersPerSecond,
+        // Swerve.Constants.hubTarget.get().getY() - swerve.getChassisSpeeds().vyMetersPerSecond,
+        // Swerve.Constants.hubTarget.get().getRotation()));
     }
 
     // Shoots with auto distance calibration and radial velocity compensation
