@@ -3,6 +3,7 @@ package frc.robot.subsystems.swerve;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -56,6 +57,11 @@ public class Swerve extends SubsystemBase {
 
         public static final double turnDeadband =
                 0.1; // How far the stick must move from center before the robot starts turning (0 to 1 range)
+
+        public static final double aimSpeed = 0.3; // .3
+        public static double aimOffsetX = 0;
+        public static double aimOffsetY = 0;
+        public static boolean aiming = false;
 
         // Smart shortcut to make small moves easier: raise input to a power.
         // Example: stick = 0.5, movePow = 2 -> 0.5^2 = 0.25 (finer control near center)
@@ -143,8 +149,8 @@ public class Swerve extends SubsystemBase {
         public static final double visionXYStdDevDistanceMultiplier = 0.1; // multiplied by distance²
         public static final double visionThetaStdDevDistanceMultiplier = 0.2; // multiplied by distance
 
-        public static final Transform3d frontCamPose = new Transform3d(
-                new Translation3d(0.165, -0.318, 0.51), new Rotation3d(0, Units.degreesToRadians(-25), 0));
+        public static final Transform3d frontCamPose =
+                new Transform3d(new Translation3d(1.2, 0.279, 0.52), new Rotation3d(0, Units.degreesToRadians(-25), 0));
 
         public static final Transform3d rightCamPose = new Transform3d(
                 new Translation3d(-0.19, -0.286, 0.486),
@@ -344,33 +350,52 @@ public class Swerve extends SubsystemBase {
     }
 
     public void setHubTarget() {
+
+        Logger.recordOutput("TEST/ALLIANCE", RobotUtils.onRedAlliance());
+        // Logic for which side we're closer to in neutral zone
         double leftDist =
                 Math.abs(Field.leftAllianceAimPosition.get().getY() - getPose().getY());
         double rightDist =
                 Math.abs(Field.rightAllianceAimPosition.get().getY() - getPose().getY());
-
+        // If swerve should be inverted on respective side
         double invertedSwerve = RobotUtils.onRedAlliance()
                 ? Field.fieldLength - getPose().getX()
                 : getPose().getX();
+
+        Logger.recordOutput("TEST/invertSwerve", invertedSwerve);
+        // Same logic for swerve as for alliance
         double invertedAlliance = RobotUtils.onRedAlliance()
                 ? Field.fieldLength - Field.allianceEndVal.get().getX()
                 : Field.allianceEndVal.get().getX();
+
+        Logger.recordOutput("TEST/invertAlliance", invertedAlliance);
 
         FieldPose2d distCalc = invertedSwerve > invertedAlliance
                 ? leftDist > rightDist ? Field.rightAllianceAimPosition : Field.leftAllianceAimPosition
                 : Field.hubPosition;
 
-        Constants.hubTarget = distCalc;
+        Logger.recordOutput("TEST/aimGOAL", distCalc.get());
 
-        Logger.recordOutput("TEST/DistFromAll", Field.allianceEndVal.get().getX());
-        Logger.recordOutput("TEST/SwervePos", invertedSwerve);
+        // distCalc.addToPosition(-getChassisSpeeds().vxMetersPerSecond, -getChassisSpeeds().vyMetersPerSecond);
+
+        // Since we call .get() on distcalc in the parameters of the new fieldpose2d object, its already field relative,
+        // so we can call getonbluealliance for our relative pos in aimAt in multicommands
+        Constants.hubTarget = new FieldPose2d(
+                distCalc.get().getX() - getChassisSpeeds().vxMetersPerSecond,
+                distCalc.get().getY(), // - getChassisSpeeds().vyMetersPerSecond,
+                distCalc.get().getRotation()); // CHANGE
     }
 
     // Set translation output (m/s) — called by commands each loop
     public void setTranslation(double dx, double dy, boolean fieldCentric) {
         locked = false;
-        this.dx = dx;
-        this.dy = dy;
+        if (Constants.aiming) {
+            this.dx = MathUtil.clamp(dx, -Constants.aimSpeed, Constants.aimSpeed);
+            this.dy = MathUtil.clamp(dy, -Constants.aimSpeed, Constants.aimSpeed);
+        } else {
+            this.dx = dx;
+            this.dy = dy;
+        }
         this.fieldCentric = fieldCentric;
     }
 

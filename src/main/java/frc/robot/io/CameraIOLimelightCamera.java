@@ -15,7 +15,7 @@ public class CameraIOLimelightCamera extends CameraIO {
     private final String limelightName;
     private final Transform3d robotToCamera;
 
-    private final int missedHBTolerance = 3;
+    private final int missedHBTolerance = 10;
 
     private double currentHB = -1;
 
@@ -42,6 +42,7 @@ public class CameraIOLimelightCamera extends CameraIO {
         boolean alive = (HB - currentHB) < missedHBTolerance;
 
         currentHB = HB;
+        Logger.recordOutput("LIMELIGHT/HB", HB);
 
         return alive;
     }
@@ -53,8 +54,8 @@ public class CameraIOLimelightCamera extends CameraIO {
         inputs.connected = isConnected();
 
         PoseEstimate estimate = RobotUtils.onRedAlliance()
-                ? LimelightHelpers.getBotPoseEstimate_wpiRed(limelightName)
-                : LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
+                ? LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName)
+                : LimelightHelpers.getBotPoseEstimate_wpiRed(limelightName);
         boolean valid = estimate != null && estimate.tagCount > 0;
         // inputs.connected = valid;
 

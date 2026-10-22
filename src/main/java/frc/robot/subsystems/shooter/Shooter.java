@@ -138,5 +138,7 @@ public class Shooter extends SubsystemBase {
 
         Logger.recordOutput("Shooter/TargetSpeed", targetSpeed);
         Logger.recordOutput("Shooter/AtTarget", atTargetSpeed());
+        Logger.recordOutput(
+                "Shooter/CurrentThreshold", Math.abs(getFlyVelocity() - targetSpeed) / Math.abs(targetSpeed));
     }
 }
