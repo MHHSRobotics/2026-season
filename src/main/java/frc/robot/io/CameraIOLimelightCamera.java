@@ -8,7 +8,6 @@ import org.littletonrobotics.junction.Logger;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.subsystems.swerve.Swerve;
-import frc.robot.util.RobotUtils;
 
 public class CameraIOLimelightCamera extends CameraIO {
     // NetworkTables name of the Limelight, e.g. "limelight" or "limelight-front".
@@ -53,9 +52,7 @@ public class CameraIOLimelightCamera extends CameraIO {
 
         inputs.connected = isConnected();
 
-        PoseEstimate estimate = RobotUtils.onRedAlliance()
-                ? LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName)
-                : LimelightHelpers.getBotPoseEstimate_wpiRed(limelightName);
+        PoseEstimate estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
         boolean valid = estimate != null && estimate.tagCount > 0;
         // inputs.connected = valid;
 

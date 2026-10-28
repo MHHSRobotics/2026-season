@@ -1,6 +1,7 @@
 package frc.robot.io;
 
 import edu.wpi.first.wpilibj.DriverStation;
+
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -22,6 +23,7 @@ public class GameController extends CommandGenericHID {
     }
 
     private final String name;
+    
     private ControllerType type = ControllerType.UNKNOWN;
 
     public GameController(int port, String name) {
@@ -32,8 +34,12 @@ public class GameController extends CommandGenericHID {
     /** Detect controller type from button count. Call this every loop from periodic(). */
     public void detectType() {
         int buttonCount = getHID().getButtonCount();
+        
         ControllerType newType;
         switch (buttonCount) {
+            case 16:
+                newType = ControllerType.XBOX;
+                break;
             case 15:
                 newType = ControllerType.PS5;
                 break;
@@ -125,6 +131,7 @@ public class GameController extends CommandGenericHID {
     public Trigger leftTrigger() {
         return new Trigger(() -> {
             if (type == ControllerType.XBOX) {
+
                 return getHID().getRawAxis(2) > 0.5;
             }
             return getHID().getRawButton(7);
@@ -196,15 +203,23 @@ public class GameController extends CommandGenericHID {
     }
 
     private int rightYAxis() {
-        return type == ControllerType.XBOX ? 5 : 5;
+        return 5;
+    }
+
+    private int leftXAxis() {
+        return 0;
+    }
+
+    private int leftYAxis() {
+        return 1;
     }
 
     public double getLeftX() {
-        return getRawAxis(0);
+        return getRawAxis(leftXAxis());
     }
 
     public double getLeftY() {
-        return getRawAxis(1);
+        return getRawAxis(leftYAxis());
     }
 
     public double getRightX() {

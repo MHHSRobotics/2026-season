@@ -21,7 +21,9 @@ public class ShooterCommands {
     }
 
     public Command shoot(DoubleSupplier speed) {
-        return setFeedSpeed(() -> shooter.atTargetSpeed() ? Shooter.Constants.feedSpeed : 0)
+        return setFeedSpeed(() -> shooter.atTargetSpeed()
+                        ? Shooter.Constants.feedSpeed
+                        : unstuckFeed().getAsDouble())
                 .alongWith(setFlySpeed(speed))
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .withName("fly shoot");
@@ -39,6 +41,13 @@ public class ShooterCommands {
     public Command feedForward() {
         return Commands.startEnd(() -> shooter.feedShoot(), () -> shooter.feedStop())
                 .withName("feed shoot");
+    }
+
+    public DoubleSupplier unstuckFeed() {
+
+        return () -> {
+            return -Shooter.Constants.agitateSpeed; // = -Shooter.Constants.agitateSpeed;
+        };
     }
 
     public Command feedReverse() {

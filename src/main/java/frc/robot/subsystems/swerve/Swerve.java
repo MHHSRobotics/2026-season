@@ -131,7 +131,7 @@ public class Swerve extends SubsystemBase {
                 0; // Simulated error in swerve odometry, set to 0 for no error, 0.1 for some error
 
         public static final double steerSupplyCurrent = 30;
-        public static final double steerStatorCurrent = 120;
+        public static final double steerStatorCurrent = 80;
         public static final double driveSupplyCurrent = 60;
         public static final double driveStatorCurrent = 120;
     }

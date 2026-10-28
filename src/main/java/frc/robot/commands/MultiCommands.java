@@ -23,7 +23,7 @@ import frc.robot.util.RobotUtils;
 public class MultiCommands {
     public static class Constants {
         public static final double hingeTime = 0.75;
-        public static final double shootTime = 5;
+        public static final double shootTime = 3;
     }
 
     private static class ShotVector {

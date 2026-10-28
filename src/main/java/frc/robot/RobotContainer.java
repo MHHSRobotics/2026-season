@@ -470,6 +470,7 @@ public class RobotContainer {
 
             testController.rightTrigger().whileTrue(multiCommands.aimAtHub());
             operator.rightTrigger().whileTrue(multiCommands.aimAtHub());
+            driveController.rightTrigger().whileTrue(multiCommands.aimAtHub());
 
             driveController
                     .rightMenu()
@@ -539,12 +540,14 @@ public class RobotContainer {
         if (Constants.intakeEnabled) {
             testController.leftBumper().and(() -> !testEnabled.get()).onTrue(intakeCommands.switchHinge());
             operator.leftBumper().whileTrue(intakeCommands.switchHinge());
+            driveController.leftBumper().whileTrue(intakeCommands.switchHinge());
 
             testController.north().and(() -> !testEnabled.get()).whileTrue(intakeCommands.setHingeUpShort());
             operator.east().whileTrue(intakeCommands.setHingeUpShort());
 
             testController.leftTrigger().and(() -> !testEnabled.get()).whileTrue(multiCommands.intakeWithSpeed());
             operator.leftTrigger().whileTrue(multiCommands.intakeWithSpeed());
+            driveController.leftTrigger().whileTrue(multiCommands.intakeWithSpeed());
 
             testController.rightBumper().and(() -> !testEnabled.get()).whileTrue(intakeCommands.outtake());
             operator.rightBumper().whileTrue(intakeCommands.outtake());
@@ -560,6 +563,8 @@ public class RobotContainer {
             testController.south().and(() -> !testEnabled.get()).whileTrue(multiCommands.shootDefault());
             operator.rightTrigger().whileTrue(multiCommands.shoot());
             operator.south().whileTrue(multiCommands.shootDefault());
+            driveController.rightTrigger().whileTrue(multiCommands.shoot());
+            driveController.south().whileTrue(multiCommands.shootDefault());
         }
         if (Constants.hangEnabled) {
             operator.povUp().whileTrue(hangCommands.setSpeed(() -> 0.2));

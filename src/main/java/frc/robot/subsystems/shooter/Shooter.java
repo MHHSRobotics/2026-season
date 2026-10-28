@@ -24,6 +24,7 @@ public class Shooter extends SubsystemBase {
 
         public static final double flywheelCurrentLimit = 150;
 
+        public static double agitateSpeed = .1;
         public static final double feedSpeed = 1;
 
         public static final boolean flyInverted = false;
