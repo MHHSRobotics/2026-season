@@ -22,7 +22,10 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkNumber flykS = new LoggedNetworkNumber("Shooter/FlykS", 2.35); // kS
         public static final LoggedNetworkNumber flykV = new LoggedNetworkNumber("Shooter/FlykV", 0); // kV
 
-        public static final double flywheelCurrentLimit = 150;
+        public static final double flywheelStatorCurrentLimit = 150;
+        public static final double feedStatorCurrentLimit = 80;
+        public static final double feedSupplyCurrentLimit = 40;
+        public static final double feedSupplyCurrentLowerLimit = 25;
 
         public static double agitateSpeed = .1;
         public static final double feedSpeed = 1;
@@ -59,11 +62,14 @@ public class Shooter extends SubsystemBase {
 
         fly.setInverted(Constants.flyInverted);
         fly.connectInternalSensor(Constants.flyRatio);
-        fly.setStatorCurrentLimit(Constants.flywheelCurrentLimit);
+        fly.setStatorCurrentLimit(Constants.flywheelStatorCurrentLimit);
         fly2.follow(Constants.flyMotorId, Constants.flyInverted ^ Constants.flyInverted2);
-        fly2.setStatorCurrentLimit(Constants.flywheelCurrentLimit);
+        fly2.setStatorCurrentLimit(Constants.flywheelStatorCurrentLimit);
         feed.setInverted(Constants.feedInverted);
         feed.connectInternalSensor(Constants.feedRatio);
+        feed.setStatorCurrentLimit(Constants.feedStatorCurrentLimit);
+        feed.setSupplyCurrentLimit(Constants.feedSupplyCurrentLimit);
+        feed.setSupplyCurrentLowerLimit(Constants.feedSupplyCurrentLowerLimit);
     }
 
     public double getFlyVelocity() {

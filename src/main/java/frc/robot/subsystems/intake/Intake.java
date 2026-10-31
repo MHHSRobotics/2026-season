@@ -62,7 +62,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean(
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
-        public static final double rollerCurrentLimit = 70;
+        public static final double rollerStatorCurrentLimit = 70;
 
         public static final double hingeDown = Units.degreesToRadians(-10);
         public static final double hingeUp =
@@ -109,7 +109,7 @@ public class Intake extends SubsystemBase {
 
         rollerMotor.setInverted(Constants.rollerInverted);
         rollerMotor.connectInternalSensor(Constants.rollerRatio);
-        rollerMotor.setStatorCurrentLimit(Constants.rollerCurrentLimit);
+        rollerMotor.setStatorCurrentLimit(Constants.rollerStatorCurrentLimit);
     }
 
     private void setLocked(boolean brake) {

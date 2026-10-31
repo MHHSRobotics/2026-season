@@ -208,16 +208,13 @@ public class Robot extends LoggedRobot {
         boolean wonAuto = robotContainer.wonAuto.get();
 
         String returnValue = "DO NOTHING";
-
-        System.out.println(robotContainer.wonAuto.get());
-        System.out.println(robotContainer.wonAuto.getAsBoolean());
-
+        System.out.println(matchTime + " : " + matchTime / 25);
         if (wonAuto) {
 
-            returnValue = (int) ((matchTime / 25) + .5) % 2 == 0 ? "FEED/INTAKE" : "SCORE";
+            returnValue = (int) ((matchTime / 25)) % 2 == 1 ? "FEED/INTAKE" : "SCORE";
         } else {
 
-            returnValue = (int) ((matchTime / 25) + .5) % 2 == 1 ? "FEED/INTAKE" : "SCORE";
+            returnValue = (int) ((matchTime / 25)) % 2 == 0 ? "FEED/INTAKE" : "SCORE";
         }
         return returnValue;
     }

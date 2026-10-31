@@ -37,6 +37,7 @@ public class SwerveModule {
         driveMotor.connectInternalSensor(constants.DriveMotorGearRatio);
         driveMotor.setStatorCurrentLimit(Swerve.Constants.driveStatorCurrent);
         driveMotor.setSupplyCurrentLimit(Swerve.Constants.driveSupplyCurrent);
+        driveMotor.setSupplyCurrentLowerLimit(Swerve.Constants.driveSupplyLowercurrent);
         driveMotor.setInverted(constants.DriveMotorInverted);
 
         angleEncoder.setInverted(constants.EncoderInverted);
@@ -49,6 +50,7 @@ public class SwerveModule {
                 constants.EncoderOffset)); // Fix encoder zero position (convert from rotations to radians)
         angleMotor.setStatorCurrentLimit(Swerve.Constants.steerStatorCurrent);
         angleMotor.setSupplyCurrentLimit(Swerve.Constants.steerSupplyCurrent);
+        angleMotor.setSupplyCurrentLowerLimit(Swerve.Constants.steerSupplyLowerCurrent);
     }
 
     // Sets whether the drive and angle motors should brake
