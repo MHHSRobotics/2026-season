@@ -132,7 +132,7 @@ public class Swerve extends SubsystemBase {
 
         public static final double steerSupplyCurrent = 30;
         public static final double steerStatorCurrent = 80;
-        public static final double driveSupplyCurrent = 60;
+        public static final double driveSupplyCurrent = 45;
         public static final double driveStatorCurrent = 120;
     }
 

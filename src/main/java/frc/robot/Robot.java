@@ -205,15 +205,18 @@ public class Robot extends LoggedRobot {
 
     private String getDriverTask() {
         double matchTime = DriverStation.getMatchTime();
-        boolean wonAuto = robotContainer.wonAuto.getAsBoolean();
+        boolean wonAuto = robotContainer.wonAuto.get();
 
         String returnValue = "DO NOTHING";
 
+        System.out.println(robotContainer.wonAuto.get());
+        System.out.println(robotContainer.wonAuto.getAsBoolean());
+
         if (wonAuto) {
-            System.out.println("AHHHH");
+
             returnValue = (int) ((matchTime / 25) + .5) % 2 == 0 ? "FEED/INTAKE" : "SCORE";
         } else {
-            System.out.println("SMALL");
+
             returnValue = (int) ((matchTime / 25) + .5) % 2 == 1 ? "FEED/INTAKE" : "SCORE";
         }
         return returnValue;

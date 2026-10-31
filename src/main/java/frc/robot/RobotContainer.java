@@ -99,7 +99,7 @@ public class RobotContainer {
     private LoggedNetworkNumber testSpeed;
     private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
-    public LoggedNetworkBoolean wonAuto = new LoggedNetworkBoolean("DSHelp/WonAuto");
+    public LoggedNetworkBoolean wonAuto = new LoggedNetworkBoolean("DSHelp/WonAuto", true);
 
     private LoggedDashboardChooser<Command> autoChooser; // Choice of auto
 
