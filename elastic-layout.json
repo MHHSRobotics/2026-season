@@ -941,8 +941,8 @@
           },
           {
             "title": "AutoChooser",
-            "x": 512.0,
-            "y": 768.0,
+            "x": 1280.0,
+            "y": 512.0,
             "width": 384.0,
             "height": 128.0,
             "type": "ComboBox Chooser",
@@ -957,7 +957,7 @@
             "x": 0.0,
             "y": 512.0,
             "width": 512.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "Camera Stream",
             "properties": {
               "topic": "/CameraPublisher/limelight-front",
@@ -993,8 +993,8 @@
           },
           {
             "title": "WonAuto",
-            "x": 896.0,
-            "y": 768.0,
+            "x": 1280.0,
+            "y": 640.0,
             "width": 384.0,
             "height": 128.0,
             "type": "Toggle Button",
@@ -1002,24 +1002,6 @@
               "topic": "DSHelp/WonAuto",
               "period": 0.06,
               "data_type": "boolean"
-            }
-          },
-          {
-            "title": "BatteryVoltage",
-            "x": 1280.0,
-            "y": 512.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Voltage View",
-            "properties": {
-              "topic": "/AdvantageKit/SystemStats/BatteryVoltage",
-              "period": 0.06,
-              "data_type": "double",
-              "min_value": 4.0,
-              "max_value": 13.0,
-              "divisions": 5,
-              "inverted": false,
-              "orientation": "horizontal"
             }
           }
         ]
