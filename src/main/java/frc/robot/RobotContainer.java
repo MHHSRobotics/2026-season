@@ -99,6 +99,7 @@ public class RobotContainer {
     private LoggedNetworkNumber testSpeed;
     private LoggedDashboardChooser<String> testSubsystem; // Which subsystem the test controller is applied to
     private LoggedDashboardChooser<String> testType; // Whether to use manual or PID mode for the test controller
+    public LoggedNetworkBoolean wonAuto = new LoggedNetworkBoolean("DSHelp/WonAuto");
 
     private LoggedDashboardChooser<Command> autoChooser; // Choice of auto
 
@@ -256,8 +257,12 @@ public class RobotContainer {
                     case SIM:
                         // If in real bot or sim, use CameraIOPhotonCamera
 
-                        frontCam = new CameraIOPhotonCamera(
-                                "FrontCam", "Vision/FrontCam", Swerve.VisionConstants.frontCamPose, 60);
+                        frontCam = new CameraIOLimelightCamera(
+                                "FrontCam",
+                                "Vision/FrontCam",
+                                "limelight-front",
+                                Swerve.VisionConstants.frontCamPose,
+                                0);
                         rightCam = new CameraIOPhotonCamera(
                                 "RightCam", "Vision/RightCam", Swerve.VisionConstants.rightCamPose, 60);
                         leftCam = new CameraIOPhotonCamera(

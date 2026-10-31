@@ -1,7 +1,6 @@
 package frc.robot.io;
 
 import edu.wpi.first.wpilibj.DriverStation;
-
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -23,7 +22,7 @@ public class GameController extends CommandGenericHID {
     }
 
     private final String name;
-    
+
     private ControllerType type = ControllerType.UNKNOWN;
 
     public GameController(int port, String name) {
@@ -34,7 +33,7 @@ public class GameController extends CommandGenericHID {
     /** Detect controller type from button count. Call this every loop from periodic(). */
     public void detectType() {
         int buttonCount = getHID().getButtonCount();
-        
+
         ControllerType newType;
         switch (buttonCount) {
             case 16:

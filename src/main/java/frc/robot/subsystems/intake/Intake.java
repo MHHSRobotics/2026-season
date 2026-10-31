@@ -62,7 +62,7 @@ public class Intake extends SubsystemBase {
         public static final LoggedNetworkBoolean intakeDisabled = new LoggedNetworkBoolean(
                 "Intake/Disabled", false); // Toggle to completely disable all motors in the intake subsystem
 
-        public static final double rollerCurrentLimit = 150;
+        public static final double rollerCurrentLimit = 70;
 
         public static final double hingeDown = Units.degreesToRadians(-10);
         public static final double hingeUp =
@@ -76,7 +76,7 @@ public class Intake extends SubsystemBase {
         public static final boolean rollerInverted = false;
         public static final boolean encoderInverted = false;
 
-        public static final double hingeOffset = -0.5;
+        public static final double hingeOffset = .3;
 
         public static final LoggedNetworkNumber hingeDownTorque = new LoggedNetworkNumber("Intake/HingeDown", 20);
 

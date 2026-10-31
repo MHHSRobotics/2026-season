@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -65,6 +66,9 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
+
+        CameraServer.startAutomaticCapture();
+
         Logger.recordMetadata("Swerve", Constants.swerveEnabled ? "true" : "false");
         Logger.recordMetadata("Vision", Constants.visionEnabled ? "true" : "false");
         Logger.recordMetadata("Shooter", Constants.shooterEnabled ? "true" : "false");
@@ -176,6 +180,77 @@ public class Robot extends LoggedRobot {
         }
     }
 
+    private String getHubStatus() {
+        double matchTime = DriverStation.getMatchTime();
+        int[] timeIntervals = {130, 105, 80, 55, 30};
+
+        String returnValue = "WAITING";
+
+        if (matchTime > 0) {
+            for (int i : timeIntervals) {
+                if ((matchTime - i) < 10 && (matchTime - i) > 0) {
+                    returnValue = "HUB CHANGING";
+                    break;
+                }
+                returnValue = "NO CHANGE";
+            }
+        }
+
+        if (DriverStation.isAutonomous()) {
+            returnValue = "AUTONOMOUS";
+        }
+
+        return returnValue;
+    }
+
+    private String getDriverTask() {
+        double matchTime = DriverStation.getMatchTime();
+        boolean wonAuto = robotContainer.wonAuto.getAsBoolean();
+
+        String returnValue = "DO NOTHING";
+
+        if (wonAuto) {
+            System.out.println("AHHHH");
+            returnValue = (int) ((matchTime / 25) + .5) % 2 == 0 ? "FEED/INTAKE" : "SCORE";
+        } else {
+            System.out.println("SMALL");
+            returnValue = (int) ((matchTime / 25) + .5) % 2 == 1 ? "FEED/INTAKE" : "SCORE";
+        }
+        return returnValue;
+    }
+
+    private boolean getHubStatusLight() {
+        double matchTime = DriverStation.getMatchTime();
+        int[] timeIntervals = {130, 105, 80, 55, 30};
+        boolean returnValue = false;
+
+        for (int i : timeIntervals) {
+            if ((matchTime - i) < 10 && (matchTime - i) > 0) {
+                returnValue = (matchTime - i) < 10 && (matchTime - i) > 0;
+                break;
+            }
+        }
+        return returnValue;
+    }
+
+    private int timeUntilShift() {
+        double matchTime = DriverStation.getMatchTime();
+        int[] timeIntervals = {130, 105, 80, 55, 30};
+
+        double returnValue = 0;
+
+        if (matchTime > 0) {
+            for (int i : timeIntervals) {
+                if ((matchTime - i) < 25 && (matchTime - i) > 0) {
+                    returnValue = (matchTime - i);
+                    break;
+                }
+            }
+        }
+
+        return (int) returnValue;
+    }
+
     @Override
     public void robotPeriodic() {
         // Run all active commands and call periodic() on subsystems
@@ -197,6 +272,10 @@ public class Robot extends LoggedRobot {
 
         // RobotContainer periodic gets called _after_ the subsystems
         robotContainer.periodic();
+
+        Logger.recordOutput("DriverHelp/DriverStatus", getDriverTask());
+        Logger.recordOutput("DriverHelp/ShiftCountdown", timeUntilShift());
+        Logger.recordOutput("DriverHelp/ShiftStatus", getHubStatusLight());
 
         // Log alliance
         Logger.recordOutput("IsRedAlliance", RobotUtils.onRedAlliance());
