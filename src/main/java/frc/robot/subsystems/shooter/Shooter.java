@@ -23,11 +23,11 @@ public class Shooter extends SubsystemBase {
         public static final LoggedNetworkNumber flykV = new LoggedNetworkNumber("Shooter/FlykV", 0); // kV
 
         public static final double flywheelStatorCurrentLimit = 150;
-        public static final double feedStatorCurrentLimit = 80;
-        public static final double feedSupplyCurrentLimit = 40;
+        public static final double feedStatorCurrentLimit = 120;
+        public static final double feedSupplyCurrentLimit = 80;
         public static final double feedSupplyCurrentLowerLimit = 25;
 
-        public static double agitateSpeed = .1;
+        public static double agitateSpeed = .4;
         public static final double feedSpeed = 1;
 
         public static final boolean flyInverted = false;

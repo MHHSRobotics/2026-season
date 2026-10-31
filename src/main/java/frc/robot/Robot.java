@@ -182,12 +182,15 @@ public class Robot extends LoggedRobot {
         boolean wonAuto = robotContainer.wonAuto.get();
 
         String returnValue = "SCORE";
-        if (matchTime < 130 && matchTime > 30) {
+        if (matchTime > 30 && DriverStation.isTeleop()) {
             if (wonAuto) {
                 returnValue = (int) (((matchTime - 30) / 25)) % 2 == 1 ? "FEED/INTAKE" : "SCORE";
             } else {
                 returnValue = (int) (((matchTime - 30) / 25)) % 2 == 0 ? "FEED/INTAKE" : "SCORE";
             }
+
+        } else if (DriverStation.isAutonomous()) {
+            returnValue = "DO NOTHING";
         }
         return returnValue;
     }
