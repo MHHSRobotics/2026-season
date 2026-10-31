@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -66,8 +65,6 @@ public class Robot extends LoggedRobot {
                 Logger.recordMetadata("GitDirty", "Unknown");
                 break;
         }
-
-        CameraServer.startAutomaticCapture();
 
         Logger.recordMetadata("Swerve", Constants.swerveEnabled ? "true" : "false");
         Logger.recordMetadata("Vision", Constants.visionEnabled ? "true" : "false");
@@ -180,41 +177,17 @@ public class Robot extends LoggedRobot {
         }
     }
 
-    private String getHubStatus() {
-        double matchTime = DriverStation.getMatchTime();
-        int[] timeIntervals = {130, 105, 80, 55, 30};
-
-        String returnValue = "WAITING";
-
-        if (matchTime > 0) {
-            for (int i : timeIntervals) {
-                if ((matchTime - i) < 10 && (matchTime - i) > 0) {
-                    returnValue = "HUB CHANGING";
-                    break;
-                }
-                returnValue = "NO CHANGE";
-            }
-        }
-
-        if (DriverStation.isAutonomous()) {
-            returnValue = "AUTONOMOUS";
-        }
-
-        return returnValue;
-    }
-
     private String getDriverTask() {
         double matchTime = DriverStation.getMatchTime();
         boolean wonAuto = robotContainer.wonAuto.get();
 
-        String returnValue = "DO NOTHING";
-        System.out.println(matchTime + " : " + matchTime / 25);
-        if (wonAuto) {
-
-            returnValue = (int) ((matchTime / 25)) % 2 == 1 ? "FEED/INTAKE" : "SCORE";
-        } else {
-
-            returnValue = (int) ((matchTime / 25)) % 2 == 0 ? "FEED/INTAKE" : "SCORE";
+        String returnValue = "SCORE";
+        if (matchTime < 130 && matchTime > 30) {
+            if (wonAuto) {
+                returnValue = (int) (((matchTime - 30) / 25)) % 2 == 1 ? "FEED/INTAKE" : "SCORE";
+            } else {
+                returnValue = (int) (((matchTime - 30) / 25)) % 2 == 0 ? "FEED/INTAKE" : "SCORE";
+            }
         }
         return returnValue;
     }
