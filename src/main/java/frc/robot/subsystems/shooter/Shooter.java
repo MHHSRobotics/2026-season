@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
         public static final double flyRatio = 1;
 
         // Flywheel speed tolerance as a relative factor of speed
-        public static final double lowTol = 0.25;
+        public static final double lowTol = 0.16;
         public static final double highTol = .05;
         public static double currentTol = lowTol;
 
@@ -99,11 +99,11 @@ public class Shooter extends SubsystemBase {
 
         boolean crossed = Math.abs(getFlyVelocity() - targetSpeed) / Math.abs(targetSpeed) < Constants.currentTol;
 
-        if (crossed && Constants.currentTol == Constants.highTol) {
-            Constants.currentTol = Constants.lowTol;
-        } else if (crossed && Constants.currentTol == Constants.lowTol) {
-            Constants.currentTol = Constants.highTol;
-        }
+        // if (crossed && Constants.currentTol == Constants.highTol) {
+        //     Constants.currentTol = Constants.lowTol;
+        // } else if (crossed && Constants.currentTol == Constants.lowTol) {
+        //     Constants.currentTol = Constants.highTol;
+        // }
 
         return crossed;
     }
