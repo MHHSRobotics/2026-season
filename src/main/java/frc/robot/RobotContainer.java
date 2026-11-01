@@ -75,6 +75,9 @@ public class RobotContainer {
     private Intake intake;
     private Shooter shooter;
     private LED led;
+    private CameraIO mainLimelightCamera;
+
+    public CameraIO limeCam;
 
     private SwerveCommands swerveCommands;
     private HangCommands hangCommands;
@@ -248,7 +251,7 @@ public class RobotContainer {
                                 "limelight-front",
                                 Swerve.VisionConstants.frontCamPose,
                                 0);
-
+                        mainLimelightCamera = frontCam;
                         rightCam = new CameraIOPhotonCamera(
                                 "RightCam", "Vision/RightCam", Swerve.VisionConstants.rightCamPose, 60);
                         leftCam = new CameraIOPhotonCamera(
@@ -450,6 +453,10 @@ public class RobotContainer {
             ledCommands = new LEDCommands(led);
         }
         multiCommands = new MultiCommands(shooterCommands, intakeCommands, swerveCommands, swerve);
+    }
+
+    public CameraIO getMainLimelightCamera() {
+        return mainLimelightCamera;
     }
 
     private void configureBindings() {

@@ -2,6 +2,7 @@ package frc.robot.io;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.DriverStation;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -13,7 +14,7 @@ public class CameraIOLimelightCamera extends CameraIO {
     // NetworkTables name of the Limelight, e.g. "limelight" or "limelight-front".
     private final String limelightName;
     private final Transform3d robotToCamera;
-
+    private boolean limelightRecorded = false;
     private final int missedHBTolerance = 10;
 
     private double currentHB = -1;
@@ -44,6 +45,20 @@ public class CameraIOLimelightCamera extends CameraIO {
         Logger.recordOutput("LIMELIGHT/HB", HB);
 
         return alive;
+    }
+
+    private void logLimelightRecording() {
+
+        if (!limelightRecorded && DriverStation.getMatchTime() < 1) {
+            limelightRecorded = true;
+
+            LimelightHelpers.setRewindEnabled(limelightName, true);
+            LimelightHelpers.triggerRewindCapture(limelightName, 165);
+        }
+    }
+
+    public String getLimelightName() {
+        return limelightName;
     }
 
     @Override

@@ -33,6 +33,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.revrobotics.util.StatusLogger;
 import frc.robot.Constants.Mode;
+import frc.robot.io.CameraIO;
 import frc.robot.util.Alerts;
 import frc.robot.util.RobotUtils;
 
@@ -258,7 +259,13 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void disabledInit() {}
+    public void disabledInit() {
+        CameraIO limeCam = robotContainer.getMainLimelightCamera();
+        if (limeCam != null) {
+            LimelightHelpers.setRewindEnabled(limeCam.getName(), true);
+            LimelightHelpers.triggerRewindCapture(limeCam.getName(), 165);
+        }
+    }
 
     @Override
     public void disabledPeriodic() {}
