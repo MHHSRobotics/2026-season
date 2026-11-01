@@ -42,7 +42,9 @@ public class Shooter extends SubsystemBase {
         public static final double flyRatio = 1;
 
         // Flywheel speed tolerance as a relative factor of speed
-        public static final double tol = 0.16;
+        public static final double lowTol = 0.25;
+        public static final double highTol = .05;
+        public static double currentTol = lowTol;
 
         // Used for simulation only
         public static final double feedInertia = 0.000066; // Inertia of feed wheels in kg m^2
@@ -94,7 +96,16 @@ public class Shooter extends SubsystemBase {
         if (Math.abs(targetSpeed) < 1e-6) {
             return false;
         }
-        return Math.abs(getFlyVelocity() - targetSpeed) / Math.abs(targetSpeed) < Constants.tol;
+
+        boolean crossed = Math.abs(getFlyVelocity() - targetSpeed) / Math.abs(targetSpeed) < Constants.currentTol;
+
+        if (crossed && Constants.currentTol == Constants.highTol) {
+            Constants.currentTol = Constants.lowTol;
+        } else if (crossed && Constants.currentTol == Constants.lowTol) {
+            Constants.currentTol = Constants.highTol;
+        }
+
+        return crossed;
     }
 
     public void defaultShoot() {

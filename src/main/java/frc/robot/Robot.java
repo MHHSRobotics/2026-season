@@ -261,6 +261,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledInit() {
         CameraIO limeCam = robotContainer.getMainLimelightCamera();
+
         if (limeCam != null) {
             LimelightHelpers.setRewindEnabled(limeCam.getName(), true);
             LimelightHelpers.triggerRewindCapture(limeCam.getName(), 165);

@@ -495,16 +495,22 @@ public class RobotContainer {
                     .or(operator.leftMenu())
                     .onTrue(swerveCommands.lock());
             // Translation: left stick controls dx/dy
-            new Trigger(() -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
-                            > Swerve.Constants.moveDeadband)
-                    .onTrue(swerveCommands.drive(
-                            () -> -driveController.getLeftY(),
-                            () -> -driveController.getLeftX(),
-                            () -> Swerve.Constants.swerveFieldCentric.get()));
 
+            swerveTranslation.setDefaultCommand(swerveCommands.drive(
+                    () -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
+                                    > Swerve.Constants.moveDeadband
+                            ? -driveController.getLeftY()
+                            : 0,
+                    () -> Math.hypot(driveController.getLeftX(), driveController.getLeftY())
+                                    > Swerve.Constants.moveDeadband
+                            ? -driveController.getLeftX()
+                            : 0,
+                    () -> Swerve.Constants.swerveFieldCentric.get()));
             // Rotation: right stick X controls omega
-            new Trigger(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband)
-                    .onTrue(swerveCommands.steer(() -> -driveController.getRightX()));
+            swerveRotation.setDefaultCommand(
+                    swerveCommands.steer(() -> Math.abs(driveController.getRightX()) > Swerve.Constants.turnDeadband
+                            ? -driveController.getRightX()
+                            : 0));
 
             // Same controls for operator when FMS isn't attached
             if (!DriverStation.isFMSAttached()) {
